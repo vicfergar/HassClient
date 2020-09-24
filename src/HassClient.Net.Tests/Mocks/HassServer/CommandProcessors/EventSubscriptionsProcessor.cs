@@ -1,0 +1,68 @@
+﻿using HassClient.Net.Models;
+using HassClient.Net.Serialization;
+using HassClient.Net.WSMessages;
+using System.Collections.Generic;
+
+namespace HassClient.Net.Tests.Mocks.HassServer
+{
+    public class EventSubscriptionsProcessor : BaseCommandProcessor
+    {
+        private readonly Dictionary<string, List<uint>> subscribersByEventType = new Dictionary<string, List<uint>>();
+
+        public override bool CanProcess(BaseIdentifiableMessage receivedCommand)
+        {
+            return receivedCommand is SubscribeEventsMessage || receivedCommand is UnsubscribeEventsMessage;
+        }
+
+        public override BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
+        {
+            if (receivedCommand is SubscribeEventsMessage subscribeMessage)
+            {
+                var eventType = subscribeMessage.EventType ?? KnownEventTypes.Any.ToSnakeCase();
+                if (!this.subscribersByEventType.TryGetValue(eventType, out var subcribers))
+                {
+                    subcribers = new List<uint>();
+                    this.subscribersByEventType.Add(eventType, subcribers);
+
+                }
+                subcribers.Add(subscribeMessage.Id);
+                return this.CreateResultMessageWithResult(null);
+            }
+            else if (receivedCommand is UnsubscribeEventsMessage unsubscribeMessage)
+            {
+                foreach (var item in this.subscribersByEventType.Values)
+                {
+                    if (item.Remove(unsubscribeMessage.SubscriptionId))
+                    {
+                        //success = true;
+                        break;
+                    }
+                }
+            }
+
+            return this.CreateResultMessageWithResult(null);
+        }
+
+        public bool TryGetSubscribers(KnownEventTypes eventType, out List<uint> subscribers)
+        {
+            subscribers = new List<uint>();
+            if (eventType != KnownEventTypes.Any &&
+                this.subscribersByEventType.TryGetValue(KnownEventTypes.Any.ToSnakeCase(), out var anySubscribers))
+            {
+                subscribers.AddRange(anySubscribers);
+            }
+
+            if (this.subscribersByEventType.TryGetValue(eventType.ToSnakeCase(), out var typeSubscribers))
+            {
+                subscribers.AddRange(typeSubscribers);
+            }
+
+            return subscribers.Count > 0;
+        }
+
+        public void ClearSubscriptions()
+        {
+            this.subscribersByEventType.Clear();
+        }
+    }
+}

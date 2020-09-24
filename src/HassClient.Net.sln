@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HassClient.Net", "HassClient.Net\HassClient.Net.csproj", "{73D7C0A0-57BC-4BB0-8F21-FB284B20D13A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HassClient.Net.Tests", "HassClient.Net.Tests\HassClient.Net.Tests.csproj", "{52D7F8F4-2F99-49BB-BF74-2143E645F5B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73D7C0A0-57BC-4BB0-8F21-FB284B20D13A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73D7C0A0-57BC-4BB0-8F21-FB284B20D13A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73D7C0A0-57BC-4BB0-8F21-FB284B20D13A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73D7C0A0-57BC-4BB0-8F21-FB284B20D13A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52D7F8F4-2F99-49BB-BF74-2143E645F5B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D7F8F4-2F99-49BB-BF74-2143E645F5B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52D7F8F4-2F99-49BB-BF74-2143E645F5B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52D7F8F4-2F99-49BB-BF74-2143E645F5B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {735208C8-7A8C-4CBE-8670-836AE8053CF5}
+	EndGlobalSection
+EndGlobal
