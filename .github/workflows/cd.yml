@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: build, pack & publish
+    name: Build, Pack & Publish HassClient.Core
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,7 +22,28 @@ jobs:
         uses: rohith/publish-nuget@v2
         with:
           # Filepath of the project to be packaged, relative to root of repository
-          PROJECT_FILE_PATH: ./src/HassClient.Net/HassClient.Net.csproj
+          PROJECT_FILE_PATH: ./src/HassClient.Core/HassClient.Core.csproj
+
+          # API key to authenticate with NuGet server
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
+  publish:
+    name: Build, Pack & Publish HassClient.WS
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup .NET 5.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: publish on version change
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          # Filepath of the project to be packaged, relative to root of repository
+          PROJECT_FILE_PATH: ./src/HassClient.WS/HassClient.WS.csproj
 
           # API key to authenticate with NuGet server
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
