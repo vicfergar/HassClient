@@ -6,7 +6,7 @@ on:
     - main
 
 jobs:
-  publish:
+  publish-core:
     name: Build, Pack & Publish HassClient.Core
     runs-on: windows-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
           # API key to authenticate with NuGet server
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
 
-  publish:
+  publish-ws:
     name: Build, Pack & Publish HassClient.WS
     runs-on: windows-latest
     steps:
