@@ -19,7 +19,7 @@ To start we should connect with the Home Assistant instance:
 var hassWSApi = new HassWSApi();
 await hassWSApi.ConnectAsClientAsync("http://localhost:8123", HASS_TOKEN);
 ```
-- From Addon: Connects to a Home Assistant instance using the [add-ons internal proxy] https://developers.home-assistant.io/docs/add-ons/communication#home-assistant-core.
+- From Addon: Connects to a Home Assistant instance using the [add-ons internal proxy](https://developers.home-assistant.io/docs/add-ons/communication#home-assistant-core).
 ```csharp
 var hassWSApi = new HassWSApi();
 await hassWSApi.ConnectFromAddonAsync();
@@ -46,7 +46,7 @@ await hassWSApi.CallServiceForEntitiesAsync("light", "turn_on", "light.my_light1
 IEnumerable<StateModel> states = await hassWSApi.GetStatesAsync();
 ```
 
-An event is produced by the Home Assistant instance every time a `change_state` occurred. To simplify the subscription to these events the `StateChagedEventListener` can be used:
+An event is produced by the Home Assistant instance every time a `change_state` occurs. To simplify the subscription to these events the `StateChagedEventListener` can be used:
 
 ```csharp
 // Subscribe to changes of specific entity.
@@ -111,7 +111,9 @@ string result = await hassWSApi.RenderTemplateAsync("Paulus is at {{ states('sun
 ```
 
 ### Storage Collections
-Home Assistant defines a `Storage Collections` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
+Home Assistant defines a `Storage Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
+
+At the momment only `Area`, `InputBoolean`, `RegistryEntry` and `User` items are exposed.
 
 ```csharp
 // List
