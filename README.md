@@ -4,7 +4,7 @@
 [![HassClient.Core](https://img.shields.io/nuget/v/HassClient.Core?style=flat&label=HassClient.Core)](https://www.nuget.org/packages/HassClient.Core)
 [![HassClient.WS](https://img.shields.io/nuget/v/HassClient.WS?style=flat&label=HassClient.WS)](https://www.nuget.org/packages/HassClient.WS)
 
-A Home Assistant client using [Web Sockect API](https://developers.home-assistant.io/docs/api/websocket).
+A Home Assistant .NET client using [Web Sockect API](https://developers.home-assistant.io/docs/api/websocket).
 
 ---
 
