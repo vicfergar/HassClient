@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HassClient.WS", "HassClient
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HassClient.WS.Tests", "HassClient.WS.Tests\HassClient.WS.Tests.csproj", "{4D15C578-FA32-485F-A9A4-05F20D4BEF86}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HassClient.Entities", "HassClient.Entities\HassClient.Entities.csproj", "{6EEAE03D-8BE2-4A74-9012-933DE425289B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HassClient.Entities.Tests", "HassClient.Entities.Tests\HassClient.Entities.Tests.csproj", "{CBE025F9-A9DF-40AF-91CF-FCFD8FBD91DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{4D15C578-FA32-485F-A9A4-05F20D4BEF86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D15C578-FA32-485F-A9A4-05F20D4BEF86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D15C578-FA32-485F-A9A4-05F20D4BEF86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EEAE03D-8BE2-4A74-9012-933DE425289B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EEAE03D-8BE2-4A74-9012-933DE425289B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EEAE03D-8BE2-4A74-9012-933DE425289B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EEAE03D-8BE2-4A74-9012-933DE425289B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBE025F9-A9DF-40AF-91CF-FCFD8FBD91DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE025F9-A9DF-40AF-91CF-FCFD8FBD91DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBE025F9-A9DF-40AF-91CF-FCFD8FBD91DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBE025F9-A9DF-40AF-91CF-FCFD8FBD91DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
