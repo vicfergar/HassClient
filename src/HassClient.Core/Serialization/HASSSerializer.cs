@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using HassClient.Helpers;
+using HassClient.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -92,7 +94,7 @@ namespace HassClient.Serialization
         /// </summary>
         /// <param name="value">The object that will be used to create the <see cref="JObject"/>.</param>
         /// <param name="selectedProperties">White-list containing the name of the properties to be included in the <see cref="JObject"/>.
-        /// When <c>null</c>, no filter will be applied.</param>
+        /// When <see langword="null"/>, no filter will be applied.</param>
         /// <returns>A <see cref="JObject"/> with the values of the specified object.</returns>
         public static JObject CreateJObject(object value, IEnumerable<string> selectedProperties = null)
         {
@@ -115,12 +117,25 @@ namespace HassClient.Serialization
         }
 
         /// <summary>
-        /// Convert an <see cref="Enum"/> value to a snake case <see cref="string"/>.
+        /// Converts a <see cref="Enum"/> value to a snake case <see cref="string"/>.
         /// </summary>
         /// <typeparam name="TEnum">The enumeration type of value.</typeparam>
         /// <param name="value">The <typeparamref name="TEnum"/> value to be converted.</param>
         /// <returns>The value name converted to snake case.</returns>
         public static string ToSnakeCase<TEnum>(this TEnum value)
+            where TEnum : Enum
+        {
+            if (value is KnownDomains ||
+                value is KnownServices ||
+                value is KnownEventTypes)
+            {
+                throw new InvalidOperationException($"For known enums use {nameof(KnownEnumHelpers)} extension methods.");
+            }
+
+            return ToSnakeCaseUnchecked(value);
+        }
+
+        internal static string ToSnakeCaseUnchecked<TEnum>(this TEnum value)
             where TEnum : Enum
         {
             return SerializeObject(value).Trim('"');
@@ -135,7 +150,7 @@ namespace HassClient.Serialization
         /// is represented by value if the parse operation succeeds. If the parse operation fails, result contains the default value
         /// of the underlying type of <typeparamref name="TEnum"/>. Note that this value need not be a member of the
         /// <typeparamref name="TEnum"/> enumeration. This parameter is passed uninitialized.</param>
-        /// <returns><c>true</c> if the value parameter was converted successfully; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the value parameter was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryGetEnumFromSnakeCase<TEnum>(string value, out TEnum result)
             where TEnum : Enum
         {

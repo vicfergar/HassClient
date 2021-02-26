@@ -92,7 +92,7 @@ namespace HassClient.Models
         /// Gets the domain of the entity.
         /// </summary>
         [JsonIgnore]
-        public string Domain => HassHelpers.GetDomain(this.EntityId);
+        public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
         // Needed for serialization.
         internal RegistryEntry()

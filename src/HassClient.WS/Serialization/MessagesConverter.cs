@@ -29,7 +29,6 @@ namespace HassClient.WS.Serialization
             this.factoriesByType = Assembly.GetAssembly(this.baseMessageType)
                                  .GetTypes()
                                  .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(this.baseMessageType) && x.GetConstructor(Type.EmptyTypes) != null)
-                                 ////.Select(x => new Func<BaseMessage>(() => (BaseMessage)Activator.CreateInstance(x)))
                                  .Select(x => Expression.Lambda<Func<BaseMessage>>(Expression.New(x)).Compile())
                                  .ToDictionary(x => x().Type);
         }

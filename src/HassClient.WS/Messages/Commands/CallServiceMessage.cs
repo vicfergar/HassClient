@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using HassClient.Helpers;
+using HassClient.Models;
+using Newtonsoft.Json;
 
 namespace HassClient.WS.Messages
 {
@@ -15,6 +17,19 @@ namespace HassClient.WS.Messages
 
         public CallServiceMessage()
             : base("call_service")
+        {
+        }
+
+        public CallServiceMessage(string domain, string service, object serviceData)
+            : this()
+        {
+            this.Domain = domain;
+            this.Service = service;
+            this.ServiceData = serviceData;
+        }
+
+        public CallServiceMessage(KnownDomains domain, KnownServices service, object serviceData)
+            : this(domain.ToDomainString(), service.ToServiceString(), serviceData)
         {
         }
     }

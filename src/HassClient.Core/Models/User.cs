@@ -112,7 +112,7 @@ namespace HassClient.Models
         /// <summary>
         /// Method used by the serializer to determine if the <see cref="GroupIds"/> property should be serialized.
         /// </summary>
-        /// <returns><c>true</c> if the property should be serialized; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/> if the property should be serialized; otherwise, <see langword="false"/>.</returns>
         protected bool ShouldSerializeGroupIds() => this.GroupIds?.Count > 0;
 
         /// <inheritdoc />

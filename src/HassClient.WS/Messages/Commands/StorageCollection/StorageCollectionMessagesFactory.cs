@@ -73,7 +73,7 @@ namespace HassClient.WS.Messages.Commands
         /// </summary>
         /// <param name="model">The object model to be added.</param>
         /// <param name="selectedProperties">White-list containing the name of the properties to extract from the <paramref name="model"/> object.
-        /// When <c>null</c>, no filter will be applied.</param>
+        /// When <see langword="null"/>, no filter will be applied.</param>
         /// <returns>A <see cref="BaseOutgoingMessage"/> used to add a new item in the collection registry.</returns>
         protected BaseOutgoingMessage CreateCreateMessage(object model, IEnumerable<string> selectedProperties = null)
         {
@@ -87,7 +87,7 @@ namespace HassClient.WS.Messages.Commands
         /// <param name="modelId">The unique identifier of the collection registry item to update.</param>
         /// <param name="model">The object model to be updated.</param>
         /// <param name="selectedProperties">White-list containing the name of the properties to extract from the <paramref name="model"/> object.
-        /// When <c>null</c>, no filter will be applied.</param>
+        /// When <see langword="null"/>, no filter will be applied.</param>
         /// <returns>A <see cref="BaseOutgoingMessage"/> used to update an existing item from the collection registry.</returns>
         protected BaseOutgoingMessage CreateUpdateMessage(string modelId, object model, IEnumerable<string> selectedProperties = null)
         {
@@ -115,7 +115,7 @@ namespace HassClient.WS.Messages.Commands
         /// <param name="modelId">The unique identifier of the collection registry item.</param>
         /// <param name="model">The object model involved in the operation, if any.</param>
         /// <param name="selectedProperties">White-list containing the name of the properties to extract from the <paramref name="model"/> object.
-        /// When <c>null</c>, no filter will be applied.</param>
+        /// When <see langword="null"/>, no filter will be applied.</param>
         /// <returns>A <see cref="BaseOutgoingMessage"/> used in specific operations for certain collection registry items.</returns>
         protected BaseOutgoingMessage CreateCustomOperationMessage(string customOpName, string modelId, object model = null, IEnumerable<string> selectedProperties = null)
         {

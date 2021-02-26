@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using HassClient.WS.Serialization;
@@ -567,12 +568,12 @@ namespace HassClient.WS
 
         internal Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType, CancellationToken cancellationToken)
         {
-            return this.AddEventHandlerSubscriptionAsync(value, eventType.ToSnakeCase(), cancellationToken);
+            return this.AddEventHandlerSubscriptionAsync(value, eventType.ToEventTypeString(), cancellationToken);
         }
 
         internal Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType, CancellationToken cancellationToken)
         {
-            return this.RemoveEventHandlerSubscriptionAsync(value, eventType.ToSnakeCase(), cancellationToken);
+            return this.RemoveEventHandlerSubscriptionAsync(value, eventType.ToEventTypeString(), cancellationToken);
         }
 
         internal Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using HassClient.Models;
+using NUnit.Framework;
 using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
@@ -35,6 +36,22 @@ namespace HassClient.WS.Tests
             var result = await this.hassWSApi.CallServiceForEntitiesAsync("homeassistant", "update_entity", "sun.sun");
 
             Assert.NotNull(result);
+        }
+
+        [Test]
+        public async Task CallServiceWithKnwonDomain()
+        {
+            var result = await this.hassWSApi.CallServiceAsync(KnownDomains.Homeassistant, KnownServices.CheckConfig);
+
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        public async Task CallServiceForEntitiesWithKnwonDomain()
+        {
+            var result = await this.hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Homeassistant, KnownServices.UpdateEntity, "sun.sun");
+
+            Assert.IsTrue(result);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace HassClient.Models
         /// Gets or sets the entity domain of the entity.
         /// </summary>
         [JsonIgnore]
-        public string Domain => HassHelpers.GetDomain(this.EntityId);
+        public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
         /// <summary>
         /// Gets or sets the old state.

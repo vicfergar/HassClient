@@ -1,4 +1,5 @@
-﻿using HassClient.Serialization;
+﻿using HassClient.Models;
+using HassClient.Serialization;
 using NUnit.Framework;
 using System;
 using System.Reflection;
@@ -50,6 +51,12 @@ namespace HassClient.Core.Tests
 
             Assert.NotNull(result);
             Assert.AreEqual(attribValue, result);
+        }
+
+        [Test]
+        public void EnumToSnakeCaseWithKnownEnumThrows()
+        {
+            Assert.Throws<InvalidOperationException>(() => KnownServices.AddonRestart.ToSnakeCase());
         }
 
         [Test]

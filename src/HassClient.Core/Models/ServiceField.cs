@@ -13,7 +13,7 @@ namespace HassClient.Models
         public string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the example text for this field (may be <see langword="null" />).
+        /// Gets or sets the example text for this field (may be <see langword="null"/>).
         /// </summary>
         public JRaw Example { get; set; }
     }

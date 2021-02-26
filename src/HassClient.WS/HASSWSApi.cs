@@ -290,9 +290,29 @@ namespace HassClient.WS
         /// </returns>
         public async Task<Context> CallServiceAsync(string domain, string service, object data = null, CancellationToken cancellationToken = default)
         {
-            var commandMessage = new CallServiceMessage() { Domain = domain, Service = service, ServiceData = data };
+            var commandMessage = new CallServiceMessage(domain, service, data);
             var state = await this.hassClientWebSocket.SendCommandWithResultAsync<StateModel>(commandMessage, cancellationToken);
             return state?.Context;
+        }
+
+        /// <summary>
+        /// Calls a service within a specific domain.
+        /// </summary>
+        /// <param name="domain">The service domain.</param>
+        /// <param name="service">The service to call.</param>
+        /// <param name="data">The optional data to use in the service invocation.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
+        /// </returns>
+        public async Task<bool> CallServiceAsync(KnownDomains domain, KnownServices service, object data = null, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new CallServiceMessage(domain, service, data);
+            var state = await this.hassClientWebSocket.SendCommandWithResultAsync<StateModel>(commandMessage, cancellationToken);
+            return state?.Context != null;
         }
 
         /// <summary>
@@ -335,6 +355,45 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Calls a service within a specific domain and entities.
+        /// <para>
+        /// This overload is useful when only entity_id is needed in service invocation.
+        /// </para>
+        /// </summary>
+        /// <param name="domain">The service domain.</param>
+        /// <param name="service">The service to call.</param>
+        /// <param name="entityIds">The ids of the target entities affected by the service call.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
+        /// </returns>
+        public Task<bool> CallServiceForEntitiesAsync(KnownDomains domain, KnownServices service, params string[] entityIds)
+        {
+            return this.CallServiceForEntitiesAsync(domain, service, CancellationToken.None, entityIds);
+        }
+
+        /// <summary>
+        /// Calls a service within a specific domain and entities.
+        /// <para>
+        /// This overload is useful when only entity_id is needed in service invocation.
+        /// </para>
+        /// </summary>
+        /// <param name="domain">The service domain.</param>
+        /// <param name="service">The service to call.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <param name="entityIds">The ids of the target entities affected by the service call.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
+        /// </returns>
+        public Task<bool> CallServiceForEntitiesAsync(KnownDomains domain, KnownServices service, CancellationToken cancellationToken = default, params string[] entityIds)
+        {
+            return this.CallServiceAsync(domain, service, new { entity_id = entityIds }, cancellationToken);
+        }
+
+        /// <summary>
         /// Renders a string using the template feature of Home Assistant.
         /// <para>
         /// More information at <see href="https://www.home-assistant.io/docs/configuration/templating/"/>.
@@ -369,7 +428,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a <see cref="IntegrationManifest"/>
         /// containing basic information about the specified integration.
         /// </returns>
-        public Task<IntegrationManifest> GetIntegratationManifestAsync(string integrationName, CancellationToken cancellationToken = default)
+        public Task<IntegrationManifest> GetIntegrationManifestAsync(string integrationName, CancellationToken cancellationToken = default)
         {
             var commandMessage = new GetManifestMessage { Integration = integrationName };
             return this.hassClientWebSocket.SendCommandWithResultAsync<IntegrationManifest>(commandMessage, cancellationToken);
@@ -490,8 +549,8 @@ namespace HassClient.WS
         /// Updates an existing <see cref="RegistryEntry"/> with the specified data.
         /// </summary>
         /// <param name="entity">The <see cref="RegistryEntry"/> with the new values.</param>
-        /// <param name="newEntityId">If not <c>null</c>, it will update the current entity id.</param>
-        /// <param name="disable">If not <c>null</c>, it will enable or disable the entity.</param>
+        /// <param name="newEntityId">If not <see langword="null"/>, it will update the current entity id.</param>
+        /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>

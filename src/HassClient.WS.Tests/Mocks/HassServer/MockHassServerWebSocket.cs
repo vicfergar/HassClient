@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
@@ -38,7 +39,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
             var eventResult = new EventResultInfo()
             {
-                EventType = KnownEventTypes.StateChanged.ToSnakeCase(),
+                EventType = KnownEventTypes.StateChanged.ToEventTypeString(),
                 Origin = "mock_server",
                 TimeFired = DateTimeOffset.Now,
                 Data = new JRaw(HassSerializer.SerializeObject(data)),

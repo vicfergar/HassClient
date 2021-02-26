@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
             if (receivedCommand is SubscribeEventsMessage subscribeMessage)
             {
-                var eventType = subscribeMessage.EventType ?? KnownEventTypes.Any.ToSnakeCase();
+                var eventType = subscribeMessage.EventType ?? KnownEventTypes.Any.ToEventTypeString();
                 if (!this.subscribersByEventType.TryGetValue(eventType, out var subcribers))
                 {
                     subcribers = new List<uint>();
@@ -47,12 +48,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
             subscribers = new List<uint>();
             if (eventType != KnownEventTypes.Any &&
-                this.subscribersByEventType.TryGetValue(KnownEventTypes.Any.ToSnakeCase(), out var anySubscribers))
+                this.subscribersByEventType.TryGetValue(KnownEventTypes.Any.ToEventTypeString(), out var anySubscribers))
             {
                 subscribers.AddRange(anySubscribers);
             }
 
-            if (this.subscribersByEventType.TryGetValue(eventType.ToSnakeCase(), out var typeSubscribers))
+            if (this.subscribersByEventType.TryGetValue(eventType.ToEventTypeString(), out var typeSubscribers))
             {
                 subscribers.AddRange(typeSubscribers);
             }
