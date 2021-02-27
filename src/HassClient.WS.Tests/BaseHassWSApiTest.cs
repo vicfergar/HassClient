@@ -17,8 +17,6 @@ namespace HassClient.WS.Tests
 
         private readonly string accessToken;
 
-        private readonly Task serverInitializationTask;
-
         protected MockHassServerWebSocket hassServer;
 
         protected HassWSApi hassWSApi;
@@ -28,17 +26,13 @@ namespace HassClient.WS.Tests
             if (useFakeHassServer)
             {
                 this.hassServer = new MockHassServerWebSocket();
-                this.hassServer.Start();
                 this.instanceBaseUrl = this.hassServer.InstanceBaseUrl;
                 this.accessToken = this.hassServer.AccessToken;
-
-                this.serverInitializationTask = this.hassServer.StartTask;
             }
             else
             {
                 this.instanceBaseUrl = Environment.GetEnvironmentVariable(TestsInstanceBaseUrlVar);
                 this.accessToken = Environment.GetEnvironmentVariable(TestsAccessTokenVar);
-                this.serverInitializationTask = Task.CompletedTask;
 
                 if (this.instanceBaseUrl == null)
                 {
@@ -54,7 +48,10 @@ namespace HassClient.WS.Tests
         [OneTimeSetUp]
         protected virtual async Task OneTimeSetUp()
         {
-            await this.serverInitializationTask;
+            if (this.hassServer != null)
+            {
+                await this.hassServer.StartAsync();
+            }
 
             this.hassWSApi = new HassWSApi();
             await this.hassWSApi.ConnectAsClientAsync(this.instanceBaseUrl, this.accessToken);
