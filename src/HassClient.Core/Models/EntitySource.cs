@@ -9,28 +9,28 @@ namespace HassClient.Models
     public class EntitySource
     {
         /// <summary>
-        /// Gets or sets the entity unique identifier.
+        /// Gets the entity unique identifier.
         /// </summary>
         [JsonIgnore]
-        public string EntityId { get; set; }
+        public string EntityId { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the entity domain.
+        /// Gets the entity domain.
         /// </summary>
         [JsonProperty(Required = Required.Always)]
-        public string Domain { get; set; }
+        public string Domain { get; private set; }
 
         /// <summary>
-        /// Gets or sets the source from which the entity comes from. Usually <c>platform_config</c> or <c>config_entry</c>.
+        /// Gets the source from which the entity comes from. Usually <c>platform_config</c> or <c>config_entry</c>.
         /// </summary>
         [JsonProperty(Required = Required.Always)]
-        public string Source { get; set; }
+        public string Source { get; private set; }
 
         /// <summary>
-        /// Gets or sets the configuration entry id associated with this entity.
+        /// Gets the configuration entry id associated with this entity.
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string ConfigEntry { get; set; }
+        public string ConfigEntry { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => $"Id: {this.EntityId} Domain: {this.Domain} Source: {this.Source} ";

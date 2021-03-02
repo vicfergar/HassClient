@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace HassClient.Models
@@ -9,34 +10,40 @@ namespace HassClient.Models
     public class StateModel
     {
         /// <summary>
-        /// Gets or sets the Entity ID that this state represents.
+        /// Gets the Entity ID that this state represents.
         /// </summary>
-        public string EntityId { get; set; }
+        [JsonProperty]
+        public string EntityId { get; private set; }
 
         /// <summary>
-        /// Gets or sets the string representation of the state that this entity is currently in.
+        /// Gets the string representation of the state that this entity is currently in.
         /// </summary>
-        public string State { get; set; }
+        [JsonProperty]
+        public string State { get; private set; }
 
         /// <summary>
-        /// Gets or sets the entity's current attributes and values.
+        /// Gets the entity's current attributes and values.
         /// </summary>
-        public Dictionary<string, object> Attributes { get; set; }
+        [JsonProperty]
+        public Dictionary<string, object> Attributes { get; private set; }
 
         /// <summary>
-        /// Gets or sets the context for this entity's state.
+        /// Gets the context for this entity's state.
         /// </summary>
-        public Context Context { get; set; }
+        [JsonProperty]
+        public Context Context { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the UTC date and time that this state was last changed.
+        /// Gets the UTC date and time that this state was last changed.
         /// </summary>
-        public DateTimeOffset LastChanged { get; set; }
+        [JsonProperty]
+        public DateTimeOffset LastChanged { get; private set; }
 
         /// <summary>
-        /// Gets or sets the UTC date and time that this state was last updated.
+        /// Gets the UTC date and time that this state was last updated.
         /// </summary>
-        public DateTimeOffset LastUpdated { get; set; }
+        [JsonProperty]
+        public DateTimeOffset LastUpdated { get; private set; }
 
         /// <summary>
         /// Attempts to get the value of the specified attribute by <paramref name="name" />, and cast the value to type <typeparamref name="T" />.

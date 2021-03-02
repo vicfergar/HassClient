@@ -1,4 +1,5 @@
 ﻿using HassClient.Models;
+using HassClient.Serialization;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -15,6 +16,26 @@ namespace HassClient.WS.Tests
         public AreaRegistryTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
+        }
+
+        [Test]
+        public void NewAreaHasNoPendingChanges()
+        {
+            var testArea = HassSerializer.DeserializeObject<Area>("{}");
+            Assert.IsFalse(testArea.HasPendingChanges);
+        }
+
+        [Test]
+        public void SetNewNameMakesHasPendingChangesTrue()
+        {
+            var initialName = $"TestArea_{DateTime.Now.Ticks}";
+            var testArea = new Area(initialName);
+
+            testArea.Name = $"TestArea_{DateTime.Now.Ticks}";
+            Assert.IsTrue(testArea.HasPendingChanges);
+
+            testArea.Name = initialName;
+            Assert.False(testArea.HasPendingChanges);
         }
 
         [OneTimeSetUp]
@@ -49,6 +70,7 @@ namespace HassClient.WS.Tests
             var result = await this.hassWSApi.UpdateAreaAsync(this.testArea);
 
             Assert.IsTrue(result);
+            Assert.False(this.testArea.HasPendingChanges);
         }
 
         [OneTimeTearDown]

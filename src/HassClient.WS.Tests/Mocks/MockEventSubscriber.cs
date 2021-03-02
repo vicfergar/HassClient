@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace HassClient.WS.Tests.Mocks
 {
     public class MockEventSubscriber
     {
-        private List<object> receivedEventArgs = new List<object>();
+        private ConcurrentQueue<object> receivedEventArgs = new ConcurrentQueue<object>();
 
         public int HitCount { get; private set; }
 
@@ -36,7 +37,7 @@ namespace HassClient.WS.Tests.Mocks
 
         public void Handle<T, U>(T _, U u)
         {
-            this.receivedEventArgs.Add(u);
+            this.receivedEventArgs.Enqueue(u);
             this.Handle();
         }
 
@@ -75,26 +76,48 @@ namespace HassClient.WS.Tests.Mocks
 
         public Task<bool> WaitEventArgAsync(object eventArg)
         {
-            return this.WaitConditionAsync(() => this.receivedEventArgs.Contains(eventArg));
+            return this.WaitConditionAsync(() => this.ReceivedEventArgs.Contains(eventArg));
         }
 
         public Task<bool> WaitEventArgWithTimeoutAsync(object eventArg, int millisecondsTimeout)
         {
-            return this.WaitConditionWithTimeoutAsync(() => this.receivedEventArgs.Contains(eventArg), millisecondsTimeout);
+            return this.WaitConditionWithTimeoutAsync(() => this.ReceivedEventArgs.Contains(eventArg), millisecondsTimeout);
         }
 
-        public async Task<T> WaitFirstEventArgAsync<T>()
+        public async Task<T> WaitFirstEventArgAsync<T>(Func<T, bool> predicate)
+            where T : class
         {
             T result = default;
-            await this.WaitConditionAsync(() => this.receivedEventArgs.FirstOrDefault(x => x is T result) != null);
+            var aa = await this.WaitConditionAsync(() =>
+            {
+                result = this.ReceivedEventArgs.FirstOrDefault(x => x is T y && predicate(y)) as T;
+                return result != null;
+            });
             return result;
         }
 
-        public async Task<T> WaitFirstEventArgWithTimeoutAsync<T>(int millisecondsTimeout)
+        public async Task<T> WaitFirstEventArgWithTimeoutAsync<T>(Func<T, bool> predicate, int millisecondsTimeout)
+            where T : class
         {
             T result = default;
-            await this.WaitConditionWithTimeoutAsync(() => this.receivedEventArgs.FirstOrDefault(x => x is T result) != null, millisecondsTimeout);
+            var aa = await this.WaitConditionWithTimeoutAsync(() =>
+            {
+                result = this.ReceivedEventArgs.FirstOrDefault(x => x is T y && predicate(y)) as T;
+                return result != null;
+            }, millisecondsTimeout);
             return result;
+        }
+
+        public Task<T> WaitFirstEventArgAsync<T>()
+            where T : class
+        {
+            return WaitFirstEventArgAsync<T>(x => true);
+        }
+
+        public Task<T> WaitFirstEventArgWithTimeoutAsync<T>(int millisecondsTimeout)
+            where T : class
+        {
+            return WaitFirstEventArgWithTimeoutAsync<T>(x => true, millisecondsTimeout);
         }
     }
 }

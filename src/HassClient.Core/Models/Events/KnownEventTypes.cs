@@ -14,6 +14,11 @@ namespace HassClient.Models
         Any = 0,
 
         /// <summary>
+        /// Fired when area registry have been updated and might have changed.
+        /// </summary>
+        AreaRegistryUpdated,
+
+        /// <summary>
         /// Fired when automations have been reloaded and thus might have changed.
         /// </summary>
         AutomationReloaded,

@@ -16,13 +16,15 @@ namespace HassClient.Models
         public const string SYSADMIN_GROUP_ID = "system-admin";
 
         /// <summary>
-        /// Gets or sets the ID of this user.
+        /// Gets the ID of this user.
         /// </summary>
-        public string Id { get; set; }
+        [JsonProperty]
+        public string Id { get; private set; }
 
         /// <summary>
         /// Gets or sets the name of this user.
         /// </summary>
+        [JsonProperty]
         public string Name { get; set; }
 
         /// <summary>
@@ -58,19 +60,22 @@ namespace HassClient.Models
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the user has been generated automatically by the system.
+        /// Gets a value indicating whether the user has been generated automatically by the system.
         /// </summary>
-        public bool SystemGenerated { get; set; }
+        [JsonProperty]
+        public bool SystemGenerated { get; private set; }
 
         /// <summary>
-        /// Gets or sets a set of group ids where the user is included.
+        /// Gets a set of group ids where the user is included.
         /// </summary>
-        public HashSet<string> GroupIds { get; set; }
+        [JsonProperty]
+        public HashSet<string> GroupIds { get; private set; }
 
         /// <summary>
-        /// The credentials of this user.
+        /// Gets the credentials of this user.
         /// </summary>
-        public JRaw Credentials { get; set; }
+        [JsonProperty]
+        public JRaw Credentials { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class.

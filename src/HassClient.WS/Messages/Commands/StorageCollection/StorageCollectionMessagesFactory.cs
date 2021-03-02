@@ -1,5 +1,4 @@
 ﻿using HassClient.Serialization;
-using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 

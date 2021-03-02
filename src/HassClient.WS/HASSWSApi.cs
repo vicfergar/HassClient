@@ -638,10 +638,18 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public Task<bool> UpdateAreaAsync(Area area, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAreaAsync(Area area, CancellationToken cancellationToken = default)
         {
             var commandMessage = AreaRegistryMessagesFactory.Instance.CreateUpdateMessage(area);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                area.Update(result.DeserializeResult<Area>());
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -659,6 +667,48 @@ namespace HassClient.WS
         {
             var commandMessage = AreaRegistryMessagesFactory.Instance.CreateDeleteMessage(area);
             return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Gets a collection with every registered <see cref="Device"/> in the Home Assistant instance.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <see cref="Device"/> in the Home Assistant instance.
+        /// </returns>
+        public Task<IEnumerable<Device>> GetDevicesAsync(CancellationToken cancellationToken = default)
+        {
+            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateListMessage();
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Device>>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Updates an existing <see cref="Device"/>.
+        /// </summary>
+        /// <param name="device">The <see cref="Device"/> with the new values.</param>
+        /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateDeviceAsync(Device device, bool? disable = null, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateUpdateMessage(device, disable);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<Device>(commandMessage, cancellationToken);
+            if (result == null)
+            {
+                return false;
+            }
+
+            device.Update(result);
+
+            return true;
         }
 
         /// <summary>

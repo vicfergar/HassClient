@@ -1,4 +1,5 @@
-﻿using HassClient.WS.Messages.Commands;
+﻿using HassClient.Models;
+using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
@@ -16,12 +17,13 @@ namespace HassClient.WS.Messages
             return this.CreateCreateMessage(new { Name = name }, null);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(Models.Area area)
+        public BaseOutgoingMessage CreateUpdateMessage(Area area)
         {
-            return this.CreateUpdateMessage(area.Id, area, new[] { nameof(area.Name) });
+            var selectedProperties = new[] { nameof(Area.Name) };
+            return this.CreateUpdateMessage(area.Id, area, selectedProperties);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(Models.Area area)
+        public BaseOutgoingMessage CreateDeleteMessage(Area area)
         {
             return this.CreateDeleteMessage(area.Id);
         }

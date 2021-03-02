@@ -9,9 +9,10 @@ namespace HassClient.Models
     public class StateChangedEvent
     {
         /// <summary>
-        /// Gets or sets the entity id of the entity.
+        /// Gets the entity id of the entity.
         /// </summary>
-        public string EntityId { get; set; }
+        [JsonProperty]
+        public string EntityId { get; private set; }
 
         /// <summary>
         /// Gets or sets the entity domain of the entity.
@@ -20,13 +21,15 @@ namespace HassClient.Models
         public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
         /// <summary>
-        /// Gets or sets the old state.
+        /// Gets the old state.
         /// </summary>
-        public StateModel OldState { get; set; }
+        [JsonProperty]
+        public StateModel OldState { get; private set; }
 
         /// <summary>
-        /// Gets or sets the new state.
+        /// Gets the new state.
         /// </summary>
-        public StateModel NewState { get; set; }
+        [JsonProperty]
+        public StateModel NewState { get; private set; }
     }
 }

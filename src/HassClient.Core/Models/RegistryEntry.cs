@@ -34,24 +34,28 @@ namespace HassClient.Models
         public string OriginalIcon { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the platform associated with this entity registry.
+        /// Gets the platform associated with this entity registry.
         /// </summary>
-        public string Platform { get; set; }
+        [JsonProperty]
+        public string Platform { get; private set; }
 
         /// <summary>
-        /// Gets or sets the device id associated with this entity registry.
+        /// Gets the device id associated with this entity registry.
         /// </summary>
-        public string DeviceId { get; set; }
+        [JsonProperty]
+        public string DeviceId { get; private set; }
 
         /// <summary>
-        /// Gets or sets the area id associated with this entity registry.
+        /// Gets the area id associated with this entity registry.
         /// </summary>
-        public string AreaId { get; set; }
+        [JsonProperty]
+        public string AreaId { get; private set; }
 
         /// <summary>
-        /// Gets or sets the configuration entry id associated with this entity registry.
+        /// Gets the configuration entry id associated with this entity registry.
         /// </summary>
-        public string ConfigEntryId { get; set; }
+        [JsonProperty]
+        public string ConfigEntryId { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating the disabling source, if any.
@@ -66,27 +70,31 @@ namespace HassClient.Models
         public bool IsDisabled => this.DisabledBy != DisabledByEnum.None;
 
         /// <summary>
-        /// Gets or sets the capabilities of the entity.
+        /// Gets the capabilities of the entity.
         /// </summary>
-        public Dictionary<string, JRaw> Capabilities { get; set; }
+        [JsonProperty]
+        public Dictionary<string, JRaw> Capabilities { get; private set; }
 
         /// <summary>
-        /// Gets or sets a the supported features of this entity, if any.
+        /// Gets a the supported features of this entity, if any.
         /// </summary>
-        public int SupportedFeatures { get; set; }
+        [JsonProperty]
+        public int SupportedFeatures { get; private set; }
 
         /// <summary>
-        /// Gets or sets the class of the device. This affects the state and default icon representation
+        /// Gets the class of the device. This affects the state and default icon representation
         /// of the entity.
         /// </summary>
-        public string DeviceClass { get; set; }
+        [JsonProperty]
+        public string DeviceClass { get; private set; }
 
         /// <summary>
         /// Gets the units of measurement, if any. This will also influence the graphical presentation
         /// in the history visualization as continuous value.
         /// Sensors with missing <see cref="UnitOfMeasurement"/> are showing as discrete values.
         /// </summary>
-        public string UnitOfMeasurement { get; set; }
+        [JsonProperty]
+        public string UnitOfMeasurement { get; private set; }
 
         /// <summary>
         /// Gets the domain of the entity.
@@ -95,27 +103,26 @@ namespace HassClient.Models
         public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
         // Needed for serialization.
-        internal RegistryEntry()
+        private RegistryEntry()
+            : base(null, null)
         {
         }
 
         // Used for testing purposes.
-        internal RegistryEntry(string entityId, DisabledByEnum disabledBy = DisabledByEnum.None)
-            : this()
+        internal RegistryEntry(string entityId, string name, string icon, DisabledByEnum disabledBy = DisabledByEnum.None)
+            : base(name, icon)
         {
             this.entityId = entityId;
             this.Platform = entityId.GetDomain();
             this.disabledBy = disabledBy;
+
+            this.ClearPendingChanges();
         }
 
         // Used for testing purposes.
         internal static RegistryEntry CreateFromEntry(RegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
         {
-            return new RegistryEntry(entry.EntityId, disabledBy)
-            {
-                OriginalName = entry.Name,
-                OriginalIcon = entry.Icon,
-            };
+            return new RegistryEntry(entry.EntityId, entry.Name, entry.Icon, disabledBy);
         }
 
         /// <inheritdoc />
@@ -128,10 +135,9 @@ namespace HassClient.Models
                 this.entityId = newEntityId;
             }
 
-            this.Name = updatedEntity.Name;
-            this.Icon = updatedEntity.Icon;
-            this.AreaId = updatedEntity.AreaId;
             this.disabledBy = updatedEntity.disabledBy;
+
+            this.Update(updatedEntity);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace HassClient.Models
+﻿using Newtonsoft.Json;
+
+namespace HassClient.Models
 {
     /// <summary>
     /// Represents a container for units of measure.
@@ -6,28 +8,33 @@
     public class UnitSystemModel
     {
         /// <summary>
-        /// Gets or sets the length unit (usually "km" or "mi").
+        /// Gets the length unit (usually "km" or "mi").
         /// </summary>
-        public string Length { get; set; }
+        [JsonProperty]
+        public string Length { get; private set; }
 
         /// <summary>
-        /// Gets or sets the mass unit (usually "g" or "lb").
+        /// Gets the mass unit (usually "g" or "lb").
         /// </summary>
-        public string Mass { get; set; }
+        [JsonProperty]
+        public string Mass { get; private set; }
 
         /// <summary>
-        /// Gets or sets the pressure unit (usually "Pa" or "psi").
+        /// Gets the pressure unit (usually "Pa" or "psi").
         /// </summary>
-        public string Pressure { get; set; }
+        [JsonProperty]
+        public string Pressure { get; private set; }
 
         /// <summary>
-        /// Gets or sets the temperature unit including degree symbol (usually "°C" or "°F").
+        /// Gets the temperature unit including degree symbol (usually "°C" or "°F").
         /// </summary>
-        public string Temperature { get; set; }
+        [JsonProperty]
+        public string Temperature { get; private set; }
 
         /// <summary>
-        /// Gets or sets the volume unit (usually "L" or "gal").
+        /// Gets the volume unit (usually "L" or "gal").
         /// </summary>
-        public string Volume { get; set; }
+        [JsonProperty]
+        public string Volume { get; private set; }
     }
 }

@@ -4,7 +4,6 @@ using HassClient.Serialization;
 using HassClient.WS.Tests.Mocks;
 using HassClient.WS.Messages;
 using NUnit.Framework;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
@@ -34,21 +33,14 @@ namespace HassClient.WS.Tests
                 Assert.NotNull(update, "SetUp failed");
             }
 
-            var result = await subscriber.WaitHitWithTimeoutAsync(500);
+            var eventResultInfo = await subscriber.WaitFirstEventArgWithTimeoutAsync<EventResultInfo>(
+                                            (x) => HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(x.EventType, out var knownEventType) &&
+                                                   knownEventType == KnownEventTypes.StateChanged,
+                                            500);
 
-            if (!result)
-            {
-                return null;
-            }
+            Assert.NotNull(eventResultInfo, "SetUp failed");
 
-            var eventInfo = subscriber.ReceivedEventArgs.FirstOrDefault(
-                x => x is EventResultInfo erv &&
-                HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(erv.EventType, out var knownEventType) &&
-                knownEventType == KnownEventTypes.StateChanged) as EventResultInfo;
-
-            Assert.NotNull(eventInfo, "SetUp failed");
-
-            return eventInfo.DeserializeData<StateChangedEvent>();
+            return eventResultInfo.DeserializeData<StateChangedEvent>();
         }
 
         [Test]

@@ -20,11 +20,7 @@ namespace HassClient.WS.Messages
 
         public BaseOutgoingMessage CreateUpdateMessage(RegistryEntry entity, string newEntityId, bool? disable)
         {
-            var selectedProperties = new[]
-            {
-                nameof(entity.Name),
-                nameof(entity.Icon),
-            };
+            var selectedProperties = new[] { nameof(RegistryEntry.Name), nameof(RegistryEntry.Icon) };
 
             var model = HassSerializer.CreateJObject(entity, selectedProperties);
 

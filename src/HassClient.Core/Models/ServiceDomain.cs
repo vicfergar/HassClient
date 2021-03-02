@@ -10,14 +10,16 @@ namespace HassClient.Models
     public class ServiceDomain
     {
         /// <summary>
-        /// Gets or sets the service domain's name.
+        /// Gets the service domain's name.
         /// </summary>
-        public string Domain { get; set; }
+        [JsonProperty]
+        public string Domain { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the list of services in this domain.
+        /// Gets the list of services in this domain.
         /// </summary>
-        public Dictionary<string, Service> Services { get; set; }
+        [JsonProperty]
+        public IReadOnlyDictionary<string, Service> Services { get; internal set; }
 
         /// <summary>
         /// Gets a flat, fully-qualified list of services in this service domain.

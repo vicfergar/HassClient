@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             public RegistryEntryBase Entry;
 
             public MockRegistryEntity(string entityId, string originalName, string originalIcon = null, DisabledByEnum disabledBy = DisabledByEnum.None)
-            : base(entityId, disabledBy)
+            : base(entityId, null, null, disabledBy)
             {
                 this.OriginalName = originalName;
                 this.OriginalIcon = originalIcon;

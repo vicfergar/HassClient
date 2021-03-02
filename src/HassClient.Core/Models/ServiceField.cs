@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace HassClient.Models
 {
@@ -8,13 +9,15 @@ namespace HassClient.Models
     public class ServiceField
     {
         /// <summary>
-        /// Gets or sets the description of this field.
+        /// Gets the description of this field.
         /// </summary>
-        public string Description { get; set; }
+        [JsonProperty]
+        public string Description { get; private set; }
 
         /// <summary>
-        /// Gets or sets the example text for this field (may be <see langword="null"/>).
+        /// Gets the example text for this field (may be <see langword="null"/>).
         /// </summary>
-        public JRaw Example { get; set; }
+        [JsonProperty]
+        public JRaw Example { get; private set; }
     }
 }

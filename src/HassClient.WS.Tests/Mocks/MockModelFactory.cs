@@ -9,6 +9,19 @@ namespace HassClient.WS.Tests.Mocks
 {
     public static class MockHassModelFactory
     {
+        public static readonly Faker<Device> DeviceFaker =
+            new Faker<Device>()
+            .CustomInstantiator((f) => new Device(f.RandomUUID(), f.Commerce.ProductName(), f.RandomUUID(), f.Random.Enum<DisabledByEnum>()))
+            .RuleFor(x => x.ConfigurationEntries, f => new[] { f.RandomUUID() })
+            .RuleFor(x => x.Connections, f => new Dictionary<string, string>() { { "zigbee", f.Internet.Mac() } })
+            .RuleFor(x => x.Manufacturer, f => f.Company.CompanyName())
+            .RuleFor(x => x.Model, f => f.Commerce.Product())
+            .RuleFor(x => x.Name, f => f.Random.Bool() ? f.Commerce.ProductName() : null)
+            .RuleFor(x => x.SWVersion, f => f.Random.Hexadecimal(8))
+            .RuleFor(x => x.Identifiers, f => new Dictionary<string, string>() { { "zha", string.Empty } })
+            .RuleFor(x => x.ViaDeviceId, f => f.RandomUUID())
+            .FinishWith((f, x) => x.Identifiers["zha"] = x.Connections["zigbee"]);
+
         public static readonly Faker<PanelInfo> PanelInfoFaker =
             new Faker<PanelInfo>()
             .RuleFor(x => x.ComponentName, f => f.Commerce.Product())
@@ -89,31 +102,11 @@ namespace HassClient.WS.Tests.Mocks
             faker.RuleFor(x => x.EntityId, f => entityId ?? f.RandomEntityId())
                  .Generate();
 
-        public static string RandomUUID(this Faker faker) => faker.Random.AlphaNumeric(32);
+        public static string RandomUUID(this Faker faker) => faker.Random.Hexadecimal(32, string.Empty);
 
-        public static string RandomDomain(this Faker faker) => faker.PickRandom(
-            "alarm_control_panel",
-            "alert",
-            "alexa",
-            "automation",
-            "binary_sensor",
-            "camera",
-            "climate",
-            "device_tracker",
-            "fan",
-            "group",
-            "image_processing",
-            "input_boolean",
-            "input_select",
-            "light",
-            "media_player",
-            "person",
-            "remote",
-            "script",
-            "sensor",
-            "sun",
-            "switch",
-            "timer");
+        public static string RandomDomain(this Faker faker) => faker.RandomKnownDomain().ToDomainString();
+
+        public static KnownDomains RandomKnownDomain(this Faker faker) => faker.Random.Enum<KnownDomains>();
 
         public static string RandomEntityId(this Faker faker) => $"{faker.RandomDomain()}.{faker.Commerce.Product()}";
 

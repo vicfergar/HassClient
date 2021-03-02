@@ -25,90 +25,103 @@ namespace HassClient.Models
         }
 
         /// <summary>
-        /// Gets or sets the latitude of the current location.
+        /// Gets the latitude of the current location.
         /// </summary>
-        public float Latitude { get; set; }
+        [JsonProperty]
+        public float Latitude { get; private set; }
 
         /// <summary>
-        /// Gets or sets the longitude of the current location.
+        /// Gets the longitude of the current location.
         /// </summary>
-        public float Longitude { get; set; }
+        [JsonProperty]
+        public float Longitude { get; private set; }
 
         /// <summary>
-        /// Gets or sets the altitude above sea level in meters of the current location.
+        /// Gets the altitude above sea level in meters of the current location.
         /// </summary>
-        public int Elevation { get; set; }
+        [JsonProperty]
+        public int Elevation { get; private set; }
 
         /// <summary>
-        /// Gets or sets a container for units of measure.
+        /// Gets a container for units of measure.
         /// </summary>
-        public UnitSystemModel UnitSystem { get; set; }
+        [JsonProperty]
+        public UnitSystemModel UnitSystem { get; private set; }
 
         /// <summary>
-        /// Gets or sets the location's friendly name.
+        /// Gets the location's friendly name.
         /// </summary>
-        public string LocationName { get; set; }
+        [JsonProperty]
+        public string LocationName { get; private set; }
 
         /// <summary>
-        /// Gets or sets the time zone name (column "TZ" from <see href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"/>).
+        /// Gets the time zone name (column "TZ" from <see href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"/>).
         /// </summary>
-        public string TimeZone { get; set; }
+        [JsonProperty]
+        public string TimeZone { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of components loaded, in the [domain] or [domain].[component] format.
+        /// Gets the list of components loaded, in the [domain] or [domain].[component] format.
         /// </summary>
-        public List<string> Components { get; set; }
+        [JsonProperty]
+        public List<string> Components { get; private set; }
 
         /// <summary>
-        /// Gets or sets the relative path to the configuration directory (usually "/config").
+        /// Gets the relative path to the configuration directory (usually "/config").
         /// </summary>
         [JsonProperty("config_dir")]
-        public string ConfigDirectory { get; set; }
+        public string ConfigDirectory { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of folders that can be used as sources for sending files. (e.g. /config/www).
+        /// Gets the list of folders that can be used as sources for sending files. (e.g. /config/www).
         /// </summary>
         [JsonIgnore]
-        public List<string> AllowedExternalDirs { get; set; }
+        public List<string> AllowedExternalDirs { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of external URLs that can be fetched.
+        /// Gets the list of external URLs that can be fetched.
         /// <para>URLs can match specific resources (e.g., "http://10.10.10.12/images/image1.jpg") or a relative path that allows
         /// access to resources within it (e.g., "http://10.10.10.12/images" would allow access to anything under that path).
         /// </para>
         /// </summary>
         [JsonProperty("allowlist_external_urls")]
-        public List<string> AllowedExternalUrls { get; set; }
+        public List<string> AllowedExternalUrls { get; private set; }
 
         /// <summary>
-        /// Gets or sets the version of Home Assistant that is currently running (e.g. "0.115.3").
+        /// Gets the version of Home Assistant that is currently running (e.g. "0.115.3").
         /// </summary>
-        public Version Version { get; set; }
+        [JsonProperty]
+        public Version Version { get; private set; }
 
         /// <summary>
-        /// Gets or sets the configuration source, or type of configuration file (usually "storage").
+        /// Gets the configuration source, or type of configuration file (usually "storage").
         /// </summary>
-        public string ConfigSource { get; set; }
+        [JsonProperty]
+        public string ConfigSource { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether Home Assistant is running in safe mode.
+        /// Gets a value indicating whether Home Assistant is running in safe mode.
         /// </summary>
-        public bool SafeMode { get; set; }
+        [JsonProperty]
+        public bool SafeMode { get; private set; }
 
         /// <summary>
-        /// Gets or sets the current state of Home Assistant (usually "RUNNING").
+        /// Gets the current state of Home Assistant (usually "RUNNING").
         /// </summary>
-        public string State { get; set; }
+        [JsonProperty]
+        public string State { get; private set; }
 
         /// <summary>
-        /// Gets or sets the URL that Home Assistant is available on from the Internet (e.g. "https://example.duckdns.org:8123").
+        /// Gets the URL that Home Assistant is available on from the Internet (e.g. "https://example.duckdns.org:8123").
         /// </summary>
-        public string ExternalUrl { get; set; }
+        [JsonProperty]
+        public string ExternalUrl { get; private set; }
 
         /// <summary>
-        /// Gets or sets the URL that Home Assistant is available on from the local network (e.g. "http://homeassistant.local:8123").
+        /// Gets the URL that Home Assistant is available on from the local network (e.g. "http://homeassistant.local:8123").
         /// </summary>
-        public string InternalUrl { get; set; }
+        [JsonProperty]
+        public string InternalUrl { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => this.LocationName;

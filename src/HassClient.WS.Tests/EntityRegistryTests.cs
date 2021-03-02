@@ -22,10 +22,7 @@ namespace HassClient.WS.Tests
         protected override async Task OneTimeSetUp()
         {
             await base.OneTimeSetUp();
-            this.testInputBoolean = new InputBoolean()
-            {
-                Name = $"{nameof(EntityRegistryTests)}_{DateTime.Now.Ticks}"
-            };
+            this.testInputBoolean = new InputBoolean($"{nameof(EntityRegistryTests)}_{DateTime.Now.Ticks}");
             var result = await this.hassWSApi.CreateInputBooleanAsync(this.testInputBoolean);
             this.testEntityId = this.testInputBoolean.EntityId;
 
@@ -71,7 +68,7 @@ namespace HassClient.WS.Tests
         [Test]
         public void UpdateEntityWithSameEntityIdThrows()
         {
-            var testEntity = new RegistryEntry("switch.TestEntity");
+            var testEntity = new RegistryEntry("switch.TestEntity", null, null);
 
             Assert.ThrowsAsync<ArgumentException>(() => this.hassWSApi.UpdateEntityAsync(testEntity, testEntity.EntityId));
         }

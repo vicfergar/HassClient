@@ -24,17 +24,29 @@ namespace HassClient.Models
         /// <inheritdoc />
         public override string ToString() => $"{nameof(InputBoolean)}: {this.Name}";
 
-        /// <inheritdoc />
-        public override bool Equals(object obj)
+        private InputBoolean()
+            : base(null, null)
         {
-            return obj is InputBoolean inputBoolean &&
-                   this.UniqueId == inputBoolean.UniqueId;
+        }
+
+        internal InputBoolean(string name, string icon = null, bool initial = false)
+            : base(name, icon)
+        {
+            this.Initial = initial;
+            this.ClearPendingChanges();
         }
 
         /// <inheritdoc />
-        public override int GetHashCode()
+        protected override int GetModificationHash()
         {
-            return HashCode.Combine(this.UniqueId);
+            return HashCode.Combine(this.Initial, base.GetModificationHash());
+        }
+
+        /// <inheritdoc />
+        protected internal override void Update(RegistryEntryBase updatedModel)
+        {
+            this.Initial = ((InputBoolean)updatedModel).Initial;
+            base.Update(updatedModel);
         }
     }
 }

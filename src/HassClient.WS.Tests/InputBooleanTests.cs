@@ -1,4 +1,5 @@
 ﻿using HassClient.Models;
+using HassClient.Serialization;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -17,18 +18,32 @@ namespace HassClient.WS.Tests
         {
         }
 
+        [Test]
+        public void NewInputBooleanHasNoPendingChanges()
+        {
+            var testInputBoolean = HassSerializer.DeserializeObject<InputBoolean>("{}");
+            Assert.IsFalse(testInputBoolean.HasPendingChanges);
+        }
+
+        [Test]
+        public void SetNewInitialMakesHasPendingChangesTrue()
+        {
+            var testInputBoolean = new InputBoolean(null);
+
+            testInputBoolean.Initial = true;
+            Assert.IsTrue(testInputBoolean.HasPendingChanges);
+
+            testInputBoolean.Initial = false;
+            Assert.False(testInputBoolean.HasPendingChanges);
+        }
+
         [OneTimeSetUp]
         [Test, Order(1)]
         public async Task CreateInputBoolean()
         {
             if (this.testInputBoolean == null)
             {
-                this.testInputBoolean = new InputBoolean() 
-                { 
-                    Name = $"{nameof(InputBooleanTests)}_{DateTime.Now.Ticks}",
-                    Initial = true,
-                    Icon = "mdi:fan",
-                };
+                this.testInputBoolean = new InputBoolean($"{nameof(InputBooleanTests)}_{DateTime.Now.Ticks}", "mdi:fan", true);
                 var result = await this.hassWSApi.CreateInputBooleanAsync(this.testInputBoolean);
 
                 Assert.IsTrue(result, "SetUp failed");

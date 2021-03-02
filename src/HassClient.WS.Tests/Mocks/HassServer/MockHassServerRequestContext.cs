@@ -53,6 +53,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 new GetStatesCommandProcessor(),
                 new StorageCollectionCommandProcessor<InputBooleanMessagesFactory, InputBoolean>(),
                 new StorageCollectionCommandProcessor<AreaRegistryMessagesFactory, Area>(),
+                new DeviceStorageCollectionCommandProcessor(),
                 new UserStorageCollectionCommandProcessor(),
                 new EntityRegistryStorageCollectionCommandProcessor(),
             };

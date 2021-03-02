@@ -20,7 +20,11 @@ namespace HassClient.Serialization
         internal static JsonSerializerSettings DefaultSettings = new JsonSerializerSettings
         {
             ContractResolver = CreateContractResolver<DefaultContractResolver>(),
-            Converters = new List<JsonConverter> { new StringEnumConverter(namingStrategy) },
+            Converters = new List<JsonConverter>
+            {
+                new StringEnumConverter(namingStrategy),
+                new TupleSetToDictionaryConverter(),
+            },
         };
 
         private readonly static JsonSerializer serializer = CreateSerializer();

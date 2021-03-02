@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace HassClient.Models
 {
@@ -8,13 +9,15 @@ namespace HassClient.Models
     public class Service
     {
         /// <summary>
-        /// Gets or sets the description of the service object.
+        /// Gets the description of the service object.
         /// </summary>
-        public string Description { get; set; }
+        [JsonProperty]
+        public string Description { get; private set; }
 
         /// <summary>
-        /// Gets or sets the fields/parameters that the service supports.
+        /// Gets the fields/parameters that the service supports.
         /// </summary>
-        public Dictionary<string, ServiceField> Fields { get; set; }
+        [JsonProperty]
+        public Dictionary<string, ServiceField> Fields { get; private set; }
     }
 }

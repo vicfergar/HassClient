@@ -10,35 +10,40 @@ namespace HassClient.Models
     public class PanelInfo
     {
         /// <summary>
-        /// Gets or sets the panel component name. Typical values are <c>config</c>, <c>lovelace</c>, <c>custom</c>, etc.
+        /// Gets the panel component name. Typical values are <c>config</c>, <c>lovelace</c>, <c>custom</c>, etc.
         /// </summary>
-        public string ComponentName { get; set; }
+        [JsonProperty]
+        public string ComponentName { get; private set; }
 
         /// <summary>
-        /// Gets or sets the icon to display in the front-end.
+        /// Gets the icon to display in the front-end.
         /// </summary>
-        public string Icon { get; set; }
+        [JsonProperty]
+        public string Icon { get; private set; }
 
         /// <summary>
-        /// Gets or sets the title to display in the front-end.
+        /// Gets the title to display in the front-end.
         /// </summary>
-        public string Title { get; set; }
+        [JsonProperty]
+        public string Title { get; private set; }
 
         /// <summary>
-        /// Gets or sets an object that contains specific configuration parameters of the panel.
+        /// Gets an object that contains specific configuration parameters of the panel.
         /// </summary>
         [JsonProperty("config")]
-        public JRaw Configuration { get; set; }
+        public JRaw Configuration { get; private set; }
 
         /// <summary>
-        /// Gets or sets the URL path of the panel from which it can be accessed.
+        /// Gets the URL path of the panel from which it can be accessed.
         /// </summary>
-        public string UrlPath { get; set; }
+        [JsonProperty]
+        public string UrlPath { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a user needs administrator rights to access the panel.
+        /// Gets a value indicating whether a user needs administrator rights to access the panel.
         /// </summary>
-        public bool RequireAdmin { get; set; }
+        [JsonProperty]
+        public bool RequireAdmin { get; private set; }
 
         /// <summary>
         /// Deserializes the <see cref="Configuration"/> object with the specified type.

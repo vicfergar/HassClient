@@ -9,69 +9,80 @@ namespace HassClient.Models
     public class IntegrationManifest
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the integration is maintained by Home Assistant Core.
+        /// Gets a value indicating whether the integration is maintained by Home Assistant Core.
         /// </summary>
-        public bool IsBuiltIn { get; set; }
+        [JsonProperty]
+        public bool IsBuiltIn { get; private set; }
 
         /// <summary>
-        /// Gets or sets an unique short name consisting of characters and underscores (e.g. "mobile_app").
+        /// Gets an unique short name consisting of characters and underscores (e.g. "mobile_app").
         /// </summary>
-        public string Domain { get; set; }
+        [JsonProperty]
+        public string Domain { get; private set; }
 
         /// <summary>
-        /// Gets or sets a friendly name for the integration.
+        /// Gets a friendly name for the integration.
         /// </summary>
-        public string Name { get; set; }
+        [JsonProperty]
+        public string Name { get; private set; }
 
         /// <summary>
-        /// Gets or sets the website containing documentation on how to use the integration.
+        /// Gets the website containing documentation on how to use the integration.
         /// </summary>
-        public string Documentation { get; set; }
+        [JsonProperty]
+        public string Documentation { get; private set; }
 
         /// <summary>
-        /// Gets or sets the issue tracker where users reports issues if they run into one. This is only defined for not
+        /// Gets the issue tracker where users reports issues if they run into one. This is only defined for not
         /// <see cref="IsBuiltIn"/> integrations.
         /// </summary>
-        public string IssueTracker { get; set; }
+        [JsonProperty]
+        public string IssueTracker { get; private set; }
 
         /// <summary>
-        /// Gets or sets a list of other integrations that need to set up successfully prior to the integration being loaded.
+        /// Gets a list of other integrations that need to set up successfully prior to the integration being loaded.
         /// </summary>
-        public string[] Dependencies { get; set; }
+        [JsonProperty]
+        public string[] Dependencies { get; private set; }
 
         /// <summary>
-        /// Gets or sets a list of optional dependencies that might be used by this integration.
+        /// Gets a list of optional dependencies that might be used by this integration.
         /// </summary>
-        public string[] AfterDependencies { get; set; }
+        [JsonProperty]
+        public string[] AfterDependencies { get; private set; }
 
         /// <summary>
-        /// Gets or sets a list of GitHub usernames or team names of people that are responsible for this integration.
+        /// Gets a list of GitHub usernames or team names of people that are responsible for this integration.
         /// </summary>
-        public string[] Codeowners { get; set; }
+        [JsonProperty]
+        public string[] Codeowners { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the integration has a configuration flow to create a config entry.
+        /// Gets a value indicating whether the integration has a configuration flow to create a config entry.
         /// </summary>
-        public bool ConfigFlow { get; set; }
+        [JsonProperty]
+        public bool ConfigFlow { get; private set; }
 
         /// <summary>
-        /// Gets or sets a list of Python libraries or modules needed by this integration.
+        /// Gets a list of Python libraries or modules needed by this integration.
         /// </summary>
-        public string[] Requirements { get; set; }
+        [JsonProperty]
+        public string[] Requirements { get; private set; }
 
         /// <summary>
-        /// Gets or sets an value that scores an integration on the code quality and user experience.
+        /// Gets an value that scores an integration on the code quality and user experience.
         /// <para>
         /// More info at <see href="https://developers.home-assistant.io/docs/integration_quality_scale_index"/>.
         /// </para>
         /// </summary>
-        public string QualityScale { get; set; }
+        [JsonProperty]
+        public string QualityScale { get; private set; }
 
         /// <summary>
-        /// Gets or sets the version number from which this integration is available or compatible.
+        /// Gets the version number from which this integration is available or compatible.
         /// </summary>
         [JsonProperty("homeassistant")]
-        public Version SinceHassVersion { get; set; }
+        public Version SinceHassVersion { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => this.Name;
