@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
@@ -310,9 +311,8 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> CallServiceAsync(KnownDomains domain, KnownServices service, object data = null, CancellationToken cancellationToken = default)
         {
-            var commandMessage = new CallServiceMessage(domain, service, data);
-            var state = await this.hassClientWebSocket.SendCommandWithResultAsync<StateModel>(commandMessage, cancellationToken);
-            return state?.Context != null;
+            var context = await this.CallServiceAsync(domain.ToDomainString(), service.ToServiceString(), data, cancellationToken);
+            return context != null;
         }
 
         /// <summary>
@@ -325,10 +325,10 @@ namespace HassClient.WS
         /// <param name="service">The service to call.</param>
         /// <param name="entityIds">The ids of the target entities affected by the service call.</param>
         /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a <see cref="Context"/>
-        /// associated with the result of the service invocation.
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
         /// </returns>
-        public Task<Context> CallServiceForEntitiesAsync(string domain, string service, params string[] entityIds)
+        public Task<bool> CallServiceForEntitiesAsync(string domain, string service, params string[] entityIds)
         {
             return this.CallServiceForEntitiesAsync(domain, service, CancellationToken.None, entityIds);
         }
@@ -346,12 +346,13 @@ namespace HassClient.WS
         /// </param>
         /// <param name="entityIds">The ids of the target entities affected by the service call.</param>
         /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a <see cref="Context"/>
-        /// associated with the result of the service invocation.
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
         /// </returns>
-        public Task<Context> CallServiceForEntitiesAsync(string domain, string service, CancellationToken cancellationToken = default, params string[] entityIds)
+        public async Task<bool> CallServiceForEntitiesAsync(string domain, string service, CancellationToken cancellationToken = default, params string[] entityIds)
         {
-            return this.CallServiceAsync(domain, service, new { entity_id = entityIds }, cancellationToken);
+            var context = await this.CallServiceAsync(domain, service, new { entity_id = entityIds }, cancellationToken);
+            return context != null;
         }
 
         /// <summary>
