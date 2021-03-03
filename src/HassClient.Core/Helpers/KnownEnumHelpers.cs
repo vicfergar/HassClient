@@ -26,7 +26,7 @@ namespace HassClient.Helpers
         public static KnownDomains AsKnownDomain(this string domain)
         {
             if (!knownDomainsCache.Forward.TryGetValue(domain, out var result) &&
-                Enum.TryParse(domain, ignoreCase: true, out result))
+                HassSerializer.TryGetEnumFromSnakeCase(domain, out result))
             {
                 knownDomainsCache.Add(domain, result);
             }

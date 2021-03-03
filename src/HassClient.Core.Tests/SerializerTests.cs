@@ -54,9 +54,13 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void EnumToSnakeCaseWithKnownEnumThrows()
+        [TestCase(KnownDomains.Automation)]
+        [TestCase(KnownEventTypes.AreaRegistryUpdated)]
+        [TestCase(KnownServices.AddonRestart)]
+        public void EnumToSnakeCaseWithKnownEnumThrows<T>(T value)
+            where T : Enum
         {
-            Assert.Throws<InvalidOperationException>(() => KnownServices.AddonRestart.ToSnakeCase());
+            Assert.Throws<InvalidOperationException>(() => value.ToSnakeCase());
         }
 
         [Test]

@@ -26,7 +26,7 @@ namespace HassClient.Models
         /// <summary>
         /// Fired every time a service is called.
         /// </summary>
-        CallCervice,
+        CallService,
 
         /// <summary>
         /// Fired when a new integration has been loaded and initialized.
@@ -71,6 +71,11 @@ namespace HassClient.Models
         /// </summary>
         [EnumMember(Value = "homeassistant_stop")]
         HomeAssistantStop,
+
+        /// <summary>
+        /// Fired when Logbook entry is registered.
+        /// </summary>
+        LogbookEntry,
 
         /// <summary>
         /// Fired when Lovelace UI have been reloaded and thus might have changed.
@@ -118,7 +123,7 @@ namespace HassClient.Models
         StateChanged,
 
         /// <summary>
-        /// Fired when themes have been reloaded and thus might have changed.
+        /// Fired when themes have been updated and thus might have changed.
         /// </summary>
         ThemesUpdated,
 
@@ -126,5 +131,10 @@ namespace HassClient.Models
         /// Fired every second by the timer and contains the current time.
         /// </summary>
         TimeChanged,
+
+        /// <summary>
+        /// Fired when Home Assistant timer gets out of sync.
+        /// </summary>
+        TimerOutOfSync,
     }
 }
