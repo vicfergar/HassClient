@@ -58,7 +58,7 @@ hassWSApi.StateChagedEventListener.SubscribeEntityStatusChanged("light.my_light1
 
 [...]
 
-private static void my_light1_StateChanged(object sender, StateChangedEvent stateChangedArgs)
+private void my_light1_StateChanged(object sender, StateChangedEvent stateChangedArgs)
 {
     Debug.WriteLine($"my_light1_StateChanged {stateChangedArgs.EntityId} is now {stateChangedArgs.NewState.State}");
 }
@@ -70,7 +70,7 @@ hassWSApi.StateChagedEventListener.SubscribeDomainStatusChanged("switch", this.S
 
 [...]
 
-private static void Switch_StateChanged(object sender, StateChangedEvent stateChangedArgs)
+private void Switch_StateChanged(object sender, StateChangedEvent stateChangedArgs)
 {
     Debug.WriteLine($"Switch_StateChanged {stateChangedArgs.EntityId} is now {stateChangedArgs.NewState.State}");
 }
@@ -102,7 +102,7 @@ await hassWSApi.RemoveEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventT
 
 [...]
 
-private static void WS_OnEvent(object sender, EventResultInfo eventResultInfo)
+private void WS_OnEvent(object sender, EventResultInfo eventResultInfo)
 {
     Debug.WriteLine($"WS_OnEvent {eventResultInfo} => {eventResultInfo.Data}");
 }
