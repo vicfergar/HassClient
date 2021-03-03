@@ -29,18 +29,19 @@ await hassWSApi.ConnectFromAddonAsync();
 ```
 
 ### Services
+The `KnownDomains` and `KnownServices` enums are available to reduce the use of strings.
 ```csharp
 // Fetch all available services in the Home Assistant instance.
-IEnumerable<ServiceDomain> serviceDomains = await hassWSApi.GetServicesAsync("homeassistant", "check_config");
+IEnumerable<ServiceDomain> serviceDomains = await hassWSApi.GetServicesAsync();
 
 // This will call a service from the Home Assistant instance.
 await hassWSApi.CallServiceAsync("homeassistant", "check_config");
 
 // Optional data can be passed to the call operation.
-await hassWSApi.CallServiceAsync("light", "turn_on", data: new { entity_id = "light.my_light", brightness_pct = 20});
+await hassWSApi.CallServiceAsync(KnownDomains.Light, KnownServices.TurnOn, data: new { entity_id = "light.my_light", brightness_pct = 20});
 
 // When only entity_id is needed for the invocation this overload can be used.
-await hassWSApi.CallServiceForEntitiesAsync("light", "turn_on", "light.my_light1", "light.my_light2");
+await hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Light, KnownServices.Toggle, "light.my_light1", "light.my_light2");
 ```
 
  ### Fetching states
@@ -116,14 +117,14 @@ string result = await hassWSApi.RenderTemplateAsync("Paulus is at {{ states('sun
 ### Storage Collections
 Home Assistant defines a `Storage Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
 
-At the momment only `Area`, `InputBoolean`, `RegistryEntry` and `User` items are exposed.
+At the momment only `Area`, `Device`, `InputBoolean`, `RegistryEntry` and `User` items are exposed.
 
 ```csharp
 // List
 IEnumerable<Area> areas = await hassWSApi.GetAreasAsync();
 
 // Create
-Area hallArea = await this.hassWSApi.CreateAreaAsync($"Hall");
+Area hallArea = await this.hassWSApi.CreateAreaAsync("Hall");
 
 // Update
 hallArea.Name = "Hall1";
