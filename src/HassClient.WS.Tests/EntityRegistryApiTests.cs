@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Core.Tests;
+using HassClient.Models;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -6,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(EntityRegistryTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(EntityRegistryTests) + "WithRealServer")]
-    public class EntityRegistryTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(EntityRegistryApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(EntityRegistryApiTests) + "WithRealServer")]
+    public class EntityRegistryApiTests : BaseHassWSApiTest
     {
         private InputBoolean testInputBoolean;
 
         private string testEntityId;
 
-        public EntityRegistryTests(bool useFakeHassServer)
+        public EntityRegistryApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }
@@ -22,7 +23,7 @@ namespace HassClient.WS.Tests
         protected override async Task OneTimeSetUp()
         {
             await base.OneTimeSetUp();
-            this.testInputBoolean = new InputBoolean($"{nameof(EntityRegistryTests)}_{DateTime.Now.Ticks}");
+            this.testInputBoolean = new InputBoolean(MockHelpers.GetRandomTestName());
             var result = await this.hassWSApi.CreateInputBooleanAsync(this.testInputBoolean);
             this.testEntityId = this.testInputBoolean.EntityId;
 
@@ -43,7 +44,7 @@ namespace HassClient.WS.Tests
             Assert.IsNotNull(entities);
             Assert.IsNotEmpty(entities);
             Assert.IsTrue(entities.All(e => e.EntityId != null));
-            Assert.IsTrue(entities.All(e => e.Platform != null));
+            Assert.IsTrue(entities.All(e => e.Platform != null), entities.FirstOrDefault(e => e.Platform == null)?.EntityId);
             Assert.IsTrue(entities.Any(e => e.ConfigEntryId != null));
             Assert.IsTrue(entities.Any(e => e.DisabledBy != DisabledByEnum.None));
         }
@@ -68,7 +69,7 @@ namespace HassClient.WS.Tests
         [Test]
         public void UpdateEntityWithSameEntityIdThrows()
         {
-            var testEntity = new RegistryEntry("switch.TestEntity", null, null);
+            var testEntity = new EntityRegistryEntry("switch.TestEntity", null, null);
 
             Assert.ThrowsAsync<ArgumentException>(() => this.hassWSApi.UpdateEntityAsync(testEntity, testEntity.EntityId));
         }
@@ -90,7 +91,7 @@ namespace HassClient.WS.Tests
         [Test, Order(1), NonParallelizable]
         public async Task UpdateEntityName()
         {
-            var newName = $"Test_{DateTime.Now.Ticks}";
+            var newName = MockHelpers.GetRandomTestName();
             var testEntity = await this.hassWSApi.GetEntityAsync(this.testEntityId);
 
             testEntity.Name = newName;
@@ -129,7 +130,7 @@ namespace HassClient.WS.Tests
             Assert.AreEqual(newEntityId, testEntity.EntityId);
             Assert.AreNotEqual(this.testEntityId, newEntityId);
 
-            this.testEntityId = newEntityId; // This is needed to DeleteEntityTest
+            this.testEntityId = newEntityId; // This is needed for DeleteEntityTest
         }
 
         [Test, Order(2), NonParallelizable]
@@ -141,6 +142,7 @@ namespace HassClient.WS.Tests
 
             Assert.IsTrue(result);
             Assert.IsNull(testEntity1);
+            Assert.IsFalse(testEntity.IsTracked);
         }
     }
 }

@@ -4,7 +4,7 @@ using HassClient.Serialization;
 
 namespace HassClient.WS.Messages
 {
-    internal class EntityRegistryMessagesFactory : StorageCollectionMessagesFactory
+    internal class EntityRegistryMessagesFactory : StorageCollectionMessagesFactory<EntityRegistryEntry>
     {
         public static EntityRegistryMessagesFactory Instance = new EntityRegistryMessagesFactory();
 
@@ -18,11 +18,9 @@ namespace HassClient.WS.Messages
             return this.CreateCustomOperationMessage("get", entityId);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(RegistryEntry entity, string newEntityId, bool? disable)
+        public BaseOutgoingMessage CreateUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable)
         {
-            var selectedProperties = new[] { nameof(RegistryEntry.Name), nameof(RegistryEntry.Icon) };
-
-            var model = HassSerializer.CreateJObject(entity, selectedProperties);
+            var model = this.CreateDefaultUpdateObject(entity);
 
             if (newEntityId != null)
             {
@@ -39,7 +37,7 @@ namespace HassClient.WS.Messages
             return this.CreateUpdateMessage(entity.EntityId, model);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(RegistryEntry entity)
+        public new BaseOutgoingMessage CreateDeleteMessage(EntityRegistryEntry entity)
         {
             return this.CreateCustomOperationMessage("remove", entity.EntityId);
         }

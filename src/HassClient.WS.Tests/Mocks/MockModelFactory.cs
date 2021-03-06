@@ -11,7 +11,7 @@ namespace HassClient.WS.Tests.Mocks
     {
         public static readonly Faker<Device> DeviceFaker =
             new Faker<Device>()
-            .CustomInstantiator((f) => new Device(f.RandomUUID(), f.Commerce.ProductName(), f.RandomUUID(), f.Random.Enum<DisabledByEnum>()))
+            .CustomInstantiator((f) => Device.CreateUnmodified(f.RandomUUID(), f.Commerce.ProductName(), f.RandomUUID(), f.Random.Enum<DisabledByEnum>()))
             .RuleFor(x => x.ConfigurationEntries, f => new[] { f.RandomUUID() })
             .RuleFor(x => x.Connections, f => new Dictionary<string, string>() { { "zigbee", f.Internet.Mac() } })
             .RuleFor(x => x.Manufacturer, f => f.Company.CompanyName())

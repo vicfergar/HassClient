@@ -3,7 +3,7 @@ using HassClient.Models;
 
 namespace HassClient.WS.Messages
 {
-    internal class UserMessagesFactory : StorageCollectionMessagesFactory
+    internal class UserMessagesFactory : StorageCollectionMessagesFactory<User>
     {
         public static UserMessagesFactory Instance = new UserMessagesFactory();
 
@@ -12,21 +12,19 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateCreateMessage(User user)
+        public new BaseOutgoingMessage CreateCreateMessage(User user)
         {
-            var selectedProperties = new[] { nameof(User.Name), nameof(User.GroupIds) };
-            return this.CreateCreateMessage(user, selectedProperties);
+            return base.CreateCreateMessage(user);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(User user)
+        public new BaseOutgoingMessage CreateUpdateMessage(User user)
         {
-            var selectedProperties = new[] { nameof(User.Name), nameof(User.GroupIds) };
-            return this.CreateUpdateMessage(user.Id, user, selectedProperties);
+            return base.CreateUpdateMessage(user);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(User user)
+        public new BaseOutgoingMessage CreateDeleteMessage(User user)
         {
-            return this.CreateDeleteMessage(user.Id);
+            return base.CreateDeleteMessage(user);
         }
     }
 }

@@ -3,7 +3,7 @@ using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
-    internal class AreaRegistryMessagesFactory : StorageCollectionMessagesFactory
+    internal class AreaRegistryMessagesFactory : StorageCollectionMessagesFactory<Area>
     {
         public static AreaRegistryMessagesFactory Instance = new AreaRegistryMessagesFactory();
 
@@ -12,20 +12,19 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateCreateMessage(string name)
+        public new BaseOutgoingMessage CreateCreateMessage(Area area)
         {
-            return this.CreateCreateMessage(new { Name = name }, null);
+            return base.CreateCreateMessage(area);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(Area area)
+        public new BaseOutgoingMessage CreateUpdateMessage(Area area)
         {
-            var selectedProperties = new[] { nameof(Area.Name) };
-            return this.CreateUpdateMessage(area.Id, area, selectedProperties);
+            return base.CreateUpdateMessage(area);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(Area area)
+        public new BaseOutgoingMessage CreateDeleteMessage(Area area)
         {
-            return this.CreateDeleteMessage(area.Id);
+            return base.CreateDeleteMessage(area);
         }
     }
 }

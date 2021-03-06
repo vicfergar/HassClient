@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(EntitySourcesTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(EntitySourcesTests) + "WithRealServer")]
-    public class EntitySourcesTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(EntitySourcesApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(EntitySourcesApiTests) + "WithRealServer")]
+    public class EntitySourcesApiTests : BaseHassWSApiTest
     {
-        public EntitySourcesTests(bool useFakeHassServer)
+        public EntitySourcesApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }

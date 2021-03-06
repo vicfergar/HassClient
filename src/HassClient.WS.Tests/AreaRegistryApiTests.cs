@@ -1,5 +1,5 @@
-﻿using HassClient.Models;
-using HassClient.Serialization;
+﻿using HassClient.Core.Tests;
+using HassClient.Models;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -7,35 +7,15 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(AreaRegistryTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(AreaRegistryTests) + "WithRealServer")]
-    public class AreaRegistryTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(AreaRegistryApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(AreaRegistryApiTests) + "WithRealServer")]
+    public class AreaRegistryApiTests : BaseHassWSApiTest
     {
         private Area testArea;
-        
-        public AreaRegistryTests(bool useFakeHassServer)
+
+        public AreaRegistryApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
-        }
-
-        [Test]
-        public void NewAreaHasNoPendingChanges()
-        {
-            var testArea = HassSerializer.DeserializeObject<Area>("{}");
-            Assert.IsFalse(testArea.HasPendingChanges);
-        }
-
-        [Test]
-        public void SetNewNameMakesHasPendingChangesTrue()
-        {
-            var initialName = $"TestArea_{DateTime.Now.Ticks}";
-            var testArea = new Area(initialName);
-
-            testArea.Name = $"TestArea_{DateTime.Now.Ticks}";
-            Assert.IsTrue(testArea.HasPendingChanges);
-
-            testArea.Name = initialName;
-            Assert.False(testArea.HasPendingChanges);
         }
 
         [OneTimeSetUp]
@@ -44,13 +24,16 @@ namespace HassClient.WS.Tests
         {
             if (this.testArea == null)
             {
-                this.testArea = await this.hassWSApi.CreateAreaAsync($"TestArea_{DateTime.Now.Ticks}");
-                Assert.NotNull(this.testArea, "SetUp failed");
+                this.testArea = new Area(MockHelpers.GetRandomTestName());
+                var result = await this.hassWSApi.CreateAreaAsync(testArea);
+                Assert.IsTrue(result, "SetUp failed");
                 return;
             }
 
             Assert.NotNull(this.testArea.Id);
             Assert.NotNull(this.testArea.Name);
+            Assert.IsFalse(this.testArea.HasPendingChanges);
+            Assert.IsTrue(this.testArea.IsTracked);
         }
 
         [Test, Order(2)]
@@ -83,9 +66,11 @@ namespace HassClient.WS.Tests
             }
 
             var result = await this.hassWSApi.DeleteAreaAsync(this.testArea);
+            var deletedArea = this.testArea;
             this.testArea = null;
 
             Assert.IsTrue(result);
+            Assert.IsFalse(deletedArea.IsTracked);
         }
     }
 }

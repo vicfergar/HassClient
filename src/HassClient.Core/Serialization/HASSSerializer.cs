@@ -24,6 +24,7 @@ namespace HassClient.Serialization
             {
                 new StringEnumConverter(namingStrategy),
                 new TupleSetToDictionaryConverter(),
+                new ModifiablePropertyConverter(),
             },
         };
 
@@ -51,9 +52,9 @@ namespace HassClient.Serialization
         }
 
         /// <summary>
-        /// Deserializes the JSON to the specified .NET type using default <see cref="HassSerializer"/> settings.
+        /// Deserializes the JSON string to the specified .NET type using default <see cref="HassSerializer"/> settings.
         /// </summary>
-        /// <param name="value">The JSON to deserialize.</param>
+        /// <param name="value">The JSON string to deserialize.</param>
         /// <typeparam name="T">The type of the object to deserialize to.</typeparam>
         /// <returns>The deserialized object from the JSON string.</returns>
         public static T DeserializeObject<T>(string value)
@@ -73,14 +74,38 @@ namespace HassClient.Serialization
         }
 
         /// <summary>
-        /// Deserializes the JSON to the specified .NET type using default <see cref="HassSerializer"/> settings.
+        /// Deserializes the JSON string to the specified .NET type using default <see cref="HassSerializer"/> settings.
         /// </summary>
-        /// <param name="value">The JSON to deserialize.</param>
+        /// <param name="value">The JSON string to deserialize.</param>
         /// <param name="type">The type of the object to deserialize to.</param>
         /// <returns>The deserialized object from the JSON string.</returns>
         public static object DeserializeObject(string value, Type type)
         {
             return JsonConvert.DeserializeObject(value, type, DefaultSettings);
+        }
+
+        /// <summary>
+        /// Populates the object with values from the <see cref="JRaw"/> object
+        /// using default <see cref="HassSerializer"/> settings.
+        /// </summary>
+        /// <param name="value">The <see cref="JRaw"/> object to deserialize.</param>
+        /// <param name="target">The target object to populate values onto.</param>
+        public static void PopulateObject(JRaw value, object target)
+        {
+            if (value != null)
+            {
+                JsonConvert.PopulateObject((string)value.Value, target, DefaultSettings);
+            }
+        }
+
+        /// <summary>
+        /// Populates the object with values from the JSON string using default <see cref="HassSerializer"/> settings.
+        /// </summary>
+        /// <param name="value">The JSON string to deserialize.</param>
+        /// <param name="target">The target object to populate values onto.</param>
+        public static void PopulateObject(string value, object target)
+        {
+            JsonConvert.PopulateObject(value, target, DefaultSettings);
         }
 
         /// <summary>

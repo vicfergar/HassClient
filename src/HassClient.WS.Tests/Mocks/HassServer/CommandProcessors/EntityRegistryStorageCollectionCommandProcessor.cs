@@ -4,18 +4,18 @@ using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Collections.Generic;
-using System;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace HassClient.WS.Tests.Mocks.HassServer
 {
     internal class EntityRegistryStorageCollectionCommandProcessor
-        : StorageCollectionCommandProcessor<EntityRegistryMessagesFactory, RegistryEntry>
+        : StorageCollectionCommandProcessor<EntityRegistryMessagesFactory, EntityRegistryEntry>
     {
-        private class MockRegistryEntity : RegistryEntry
+        private class MockRegistryEntity : EntityRegistryEntry
         {
             [JsonIgnore]
-            public RegistryEntryBase Entry;
+            public EntityRegistryEntryBase Entry;
 
             public MockRegistryEntity(string entityId, string originalName, string originalIcon = null, DisabledByEnum disabledBy = DisabledByEnum.None)
             : base(entityId, null, null, disabledBy)
@@ -24,7 +24,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 this.OriginalIcon = originalIcon;
             }
 
-            public MockRegistryEntity(RegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+            public MockRegistryEntity(EntityRegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
             : this(entry.EntityId, entry.Name, entry.Icon, disabledBy)
             {
                 this.Entry = entry;
@@ -33,12 +33,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 this.Icon = entry.Icon;
             }
 
-            public new void Update(RegistryEntry updatedEntry, string newEntityId)
+            [OnDeserialized]
+            private void OnDeserializedMock(StreamingContext context)
             {
-                base.Update(updatedEntry, newEntityId);
                 this.Entry.Name = this.Name;
                 this.Entry.Icon = this.Icon;
-                this.Entry.UniqueId = this.EntityId.SplitEntityId()[1];
+                //this.Entry.UniqueId = this.EntityId.SplitEntityId()[1];
             }
         }
 
@@ -55,27 +55,29 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                    commandType.EndsWith("remove");
         }
 
-        protected override IEnumerable<RegistryEntry> ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected override IEnumerable<EntityRegistryEntry> ProccessListCommand(MockHassServerRequestContext context, JToken merged)
         {
-            return context.HassDB.GetAllEntityEntries().Select(x => x as RegistryEntry ?? RegistryEntry.CreateFromEntry(x));
+            return context.HassDB.GetAllEntityEntries().Select(x => x as EntityRegistryEntry ?? EntityRegistryEntry.CreateFromEntry(x));
         }
 
-        protected override RegistryEntry ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
         {
             var newEntityIdProperty = merged.FirstOrDefault(x => (x is JProperty property) && property.Name == "new_entity_id");
             var newEntityId = (string)newEntityIdProperty;
             newEntityIdProperty?.Remove();
 
-            var updatedModel = this.DeserializeModel(merged);
-            var result = this.FindRegistryEntry(context, updatedModel.EntityId, createIfNotFound: true);
+            var entityIdProperty = merged.FirstOrDefault(x => (x is JProperty property) && property.Name == "entity_id");
+            var entityId = (string)entityIdProperty;
+            var result = this.FindRegistryEntry(context, entityId, createIfNotFound: true);
             if (result != null)
             {
                 if (newEntityId != null)
                 {
                     context.HassDB.DeleteObject(result.Entry);
+                    ((JProperty)entityIdProperty).Value = newEntityId;
                 }
 
-                result.Update(updatedModel, newEntityId);
+                this.PopulateModel(merged, result);
 
                 if (newEntityId != null)
                 {

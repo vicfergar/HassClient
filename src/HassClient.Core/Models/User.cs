@@ -8,12 +8,23 @@ namespace HassClient.Models
     /// <summary>
     /// Represents a Home Assistant user.
     /// </summary>
-    public class User
+    public class User : RegistryEntryBase
     {
+        private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
+
+        private readonly ModifiablePropertyCollection<HashSet<string>, string> groupIds = new ModifiablePropertyCollection<HashSet<string>, string>(nameof(GroupIds));
+
         /// <summary>
         /// The System Administrator group id constant.
         /// </summary>
         public const string SYSADMIN_GROUP_ID = "system-admin";
+
+        /// <inheritdoc />
+        internal protected override string UniqueId
+        {
+            get => this.Id;
+            set => this.Id = value;
+        }
 
         /// <summary>
         /// Gets the ID of this user.
@@ -25,7 +36,19 @@ namespace HassClient.Models
         /// Gets or sets the name of this user.
         /// </summary>
         [JsonProperty]
-        public string Name { get; set; }
+        public string Name
+        {
+            get => this.name.Value;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    throw new InvalidOperationException($"'{nameof(this.Name)}' cannot be null or whitespace.");
+                }
+
+                this.name.Value = value;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the user is owner of the system. In this case, the user will have full access to everything.
@@ -69,7 +92,10 @@ namespace HassClient.Models
         /// Gets a set of group ids where the user is included.
         /// </summary>
         [JsonProperty]
-        public HashSet<string> GroupIds { get; private set; }
+        public HashSet<string> GroupIds
+        {
+            get => this.groupIds.Value;
+        }
 
         /// <summary>
         /// Gets the credentials of this user.
@@ -77,36 +103,61 @@ namespace HassClient.Models
         [JsonProperty]
         public JRaw Credentials { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="User"/> class.
-        /// </summary>
-        public User()
+        [JsonConstructor]
+        private User()
         {
-            this.GroupIds = new HashSet<string>();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class.
         /// </summary>
         /// <param name="name">The name of the user.</param>
-        public User(string name)
-            : this()
+        /// <param name="groupIds">The group ids where the user is included.</param>
+        public User(string name, IEnumerable<string> groupIds = null)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace", nameof(name));
+            }
+
             this.Name = name;
+            if (groupIds != null)
+            {
+                foreach (var item in groupIds)
+                {
+                    this.groupIds.Value.Add(item);
+                }
+            }
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="User"/> class.
-        /// This constructor is used for testing purposes only.
         /// </summary>
         /// <param name="name">The name of the user.</param>
-        /// <param name="isOwner">A value indicating whether the new user isOwner.</param>
-        internal User(string name, bool isOwner)
-           : this(name)
+        /// <param name="isAdministrator">A value indicating is the user will be included in the <see cref="SYSADMIN_GROUP_ID"/>.</param>
+        public User(string name, bool isAdministrator)
+            : this(name)
         {
-            this.IsActive = true;
-            this.IsOwner = isOwner;
-            this.IsAdministrator = isOwner;
+            this.IsAdministrator = isAdministrator;
+        }
+
+        // Used for testing purposes.
+        internal static User CreateUnmodified(string name, bool isOwner)
+        {
+            var result = new User(name, isOwner)
+            {
+                IsOwner = isOwner,
+            };
+            result.SaveChanges();
+
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
+        {
+            yield return this.name;
+            yield return this.groupIds;
         }
 
         internal void SetIsActive(bool value)

@@ -510,32 +510,32 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Gets a collection with the <see cref="RegistryEntry"/> of every registered entity in the Home Assistant instance.
+        /// Gets a collection with the <see cref="EntityRegistryEntry"/> of every registered entity in the Home Assistant instance.
         /// </summary>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
         /// <returns>
         /// A task representing the asynchronous operation. The result of the task is a collection of
-        /// <see cref="RegistryEntry"/> of every registered entity in the Home Assistant instance.
+        /// <see cref="EntityRegistryEntry"/> of every registered entity in the Home Assistant instance.
         /// </returns>
-        public Task<IEnumerable<RegistryEntry>> GetEntitiesAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<EntityRegistryEntry>> GetEntitiesAsync(CancellationToken cancellationToken = default)
         {
             var commandMessage = EntityRegistryMessagesFactory.Instance.CreateListMessage();
-            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<RegistryEntry>>(commandMessage, cancellationToken);
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<EntityRegistryEntry>>(commandMessage, cancellationToken);
         }
 
         /// <summary>
-        /// Gets the <see cref="RegistryEntry"/> of a specified entity.
+        /// Gets the <see cref="EntityRegistryEntry"/> of a specified entity.
         /// </summary>
         /// <param name="entityId">The entity id.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
         /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is the <see cref="RegistryEntry"/>.
+        /// A task representing the asynchronous operation. The result of the task is the <see cref="EntityRegistryEntry"/>.
         /// </returns>
-        public Task<RegistryEntry> GetEntityAsync(string entityId, CancellationToken cancellationToken = default)
+        public Task<EntityRegistryEntry> GetEntityAsync(string entityId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(entityId))
             {
@@ -543,13 +543,13 @@ namespace HassClient.WS
             }
 
             var commandMessage = EntityRegistryMessagesFactory.Instance.CreateGetMessage(entityId);
-            return this.hassClientWebSocket.SendCommandWithResultAsync<RegistryEntry>(commandMessage, cancellationToken);
+            return this.hassClientWebSocket.SendCommandWithResultAsync<EntityRegistryEntry>(commandMessage, cancellationToken);
         }
 
         /// <summary>
-        /// Updates an existing <see cref="RegistryEntry"/> with the specified data.
+        /// Updates an existing <see cref="EntityRegistryEntry"/> with the specified data.
         /// </summary>
-        /// <param name="entity">The <see cref="RegistryEntry"/> with the new values.</param>
+        /// <param name="entity">The <see cref="EntityRegistryEntry"/> with the new values.</param>
         /// <param name="newEntityId">If not <see langword="null"/>, it will update the current entity id.</param>
         /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
         /// <param name="cancellationToken">
@@ -559,7 +559,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateEntityAsync(RegistryEntry entity, string newEntityId = null, bool? disable = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateEntityAsync(EntityRegistryEntry entity, string newEntityId = null, bool? disable = null, CancellationToken cancellationToken = default)
         {
             if (newEntityId == entity.EntityId)
             {
@@ -567,21 +567,19 @@ namespace HassClient.WS
             }
 
             var commandMessage = EntityRegistryMessagesFactory.Instance.CreateUpdateMessage(entity, newEntityId, disable);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<RegistryEntry>(commandMessage, cancellationToken);
-            if (result == null)
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
             {
-                return false;
+                result.PopulateResult(entity);
             }
 
-            entity.Update(result, newEntityId);
-
-            return true;
+            return result.Success;
         }
 
         /// <summary>
-        /// Deletes an existing <see cref="RegistryEntry"/>.
+        /// Deletes an existing <see cref="EntityRegistryEntry"/>.
         /// </summary>
-        /// <param name="entity">The <see cref="RegistryEntry"/> to delete.</param>
+        /// <param name="entity">The <see cref="EntityRegistryEntry"/> to delete.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -589,10 +587,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// delete operation was successfully done.
         /// </returns>
-        public Task<bool> DeleteEntityAsync(RegistryEntry entity, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteEntityAsync(EntityRegistryEntry entity, CancellationToken cancellationToken = default)
         {
             var commandMessage = EntityRegistryMessagesFactory.Instance.CreateDeleteMessage(entity);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                entity.Untrack();
+            }
+
+            return success;
         }
 
         /// <summary>
@@ -612,9 +616,9 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Creates a new <see cref="Area"/> with the specified name.
+        /// Creates a new <see cref="Area"/>.
         /// </summary>
-        /// <param name="name">The name of the new <see cref="Area"/>.</param>
+        /// <param name="area">The <see cref="Area"/> with the new values.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -622,10 +626,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// create operation was successfully done.
         /// </returns>
-        public Task<Area> CreateAreaAsync(string name, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateAreaAsync(Area area, CancellationToken cancellationToken = default)
         {
-            var commandMessage = AreaRegistryMessagesFactory.Instance.CreateCreateMessage(name);
-            return this.hassClientWebSocket.SendCommandWithResultAsync<Area>(commandMessage, cancellationToken);
+            var commandMessage = AreaRegistryMessagesFactory.Instance.CreateCreateMessage(area);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(area);
+            }
+
+            return result.Success;
         }
 
         /// <summary>
@@ -646,11 +656,10 @@ namespace HassClient.WS
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
-                area.Update(result.DeserializeResult<Area>());
-                return true;
+                result.PopulateResult(area);
             }
 
-            return false;
+            return result.Success;
         }
 
         /// <summary>
@@ -664,10 +673,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// delete operation was successfully done.
         /// </returns>
-        public Task<bool> DeleteAreaAsync(Area area, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAreaAsync(Area area, CancellationToken cancellationToken = default)
         {
             var commandMessage = AreaRegistryMessagesFactory.Instance.CreateDeleteMessage(area);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                area.Untrack();
+            }
+
+            return success;
         }
 
         /// <summary>
@@ -701,15 +716,13 @@ namespace HassClient.WS
         public async Task<bool> UpdateDeviceAsync(Device device, bool? disable = null, CancellationToken cancellationToken = default)
         {
             var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateUpdateMessage(device, disable);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<Device>(commandMessage, cancellationToken);
-            if (result == null)
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
             {
-                return false;
+                result.PopulateResult(device);
             }
 
-            device.Update(result);
-
-            return true;
+            return result.Success;
         }
 
         /// <summary>
@@ -742,16 +755,13 @@ namespace HassClient.WS
         public async Task<bool> CreateInputBooleanAsync(InputBoolean value, CancellationToken cancellationToken = default)
         {
             var commandMessage = InputBooleanMessagesFactory.Instance.CreateCreateMessage(value);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<InputBoolean>(commandMessage, cancellationToken);
-
-            if (result == null)
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
             {
-                return false;
+                result.PopulateResult(value);
             }
 
-            value.UniqueId = result.UniqueId;
-
-            return true;
+            return result.Success;
         }
 
         /// <summary>
@@ -765,10 +775,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public Task<bool> UpdateInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
         {
             var commandMessage = InputBooleanMessagesFactory.Instance.CreateUpdateMessage(inputBoolean);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(inputBoolean);
+            }
+
+            return result.Success;
         }
 
         /// <summary>
@@ -782,10 +798,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// delete operation was successfully done.
         /// </returns>
-        public Task<bool> DeleteInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
         {
             var commandMessage = InputBooleanMessagesFactory.Instance.CreateDeleteMessage(inputBoolean);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                inputBoolean.Untrack();
+            }
+
+            return success;
         }
 
         /// <summary>
@@ -815,11 +837,17 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// create operation was successfully done.
         /// </returns>
-        public async Task<User> CreateUserAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<bool> CreateUserAsync(User user, CancellationToken cancellationToken = default)
         {
             var commandMessage = UserMessagesFactory.Instance.CreateCreateMessage(user);
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync<UserResponse>(commandMessage, cancellationToken);
-            return result?.User;
+            if (result == null)
+            {
+                return false;
+            }
+
+            HassSerializer.PopulateObject(result.UserRaw, user);
+            return true;
         }
 
         /// <summary>
@@ -833,10 +861,17 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken = default)
         {
             var commandMessage = UserMessagesFactory.Instance.CreateUpdateMessage(user);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<UserResponse>(commandMessage, cancellationToken);
+            if (result == null)
+            {
+                return false;
+            }
+
+            HassSerializer.PopulateObject(result.UserRaw, user);
+            return true;
         }
 
         /// <summary>
@@ -850,10 +885,16 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// delete operation was successfully done.
         /// </returns>
-        public Task<bool> DeleteUserAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteUserAsync(User user, CancellationToken cancellationToken = default)
         {
             var commandMessage = UserMessagesFactory.Instance.CreateDeleteMessage(user);
-            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                user.Untrack();
+            }
+
+            return success;
         }
 
         /// <summary>

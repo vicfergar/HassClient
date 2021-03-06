@@ -1,5 +1,7 @@
 ﻿using HassClient.Helpers;
 using HassClient.Models;
+using HassClient.Serialization;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +23,16 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             return collection.Add(value);
         }
 
-        private bool UpdateObject(Type key, object value)
+        private object UpdateObject(Type key, object target, JRaw value)
         {
-            return this.collectionsByType.TryGetValue(key, out var collection) &&
-                                        collection.Remove(value) &&
-                                        collection.Add(value);
+            if (this.collectionsByType.TryGetValue(key, out var collection) &&
+                collection.TryGetValue(target, out var actual))
+            {
+                HassSerializer.PopulateObject(value, actual);
+                return actual;
+            }
+
+            return default;
         }
 
         private bool DeleteObject(Type key, object value)
@@ -43,22 +50,22 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             var key = typeof(T);
             return CreateObject(key, value);
         }
-        public bool CreateObject(RegistryEntryBase value)
+        public bool CreateObject(EntityRegistryEntryBase value)
         {
             var key = value.GetType();
             return CreateObject(key, value);
         }
 
-        public bool UpdateObject<T>(T value)
+        public T UpdateObject<T>(T target, JRaw value)
         {
             var key = typeof(T);
-            return UpdateObject(key, value);
+            return (T)UpdateObject(key, target, value);
         }
 
-        public bool UpdateObject(RegistryEntryBase value)
+        public EntityRegistryEntryBase UpdateObject(EntityRegistryEntryBase target, JRaw value)
         {
             var key = value.GetType();
-            return UpdateObject(key, value);
+            return (EntityRegistryEntryBase)UpdateObject(key, target, value);
         }
 
         public IEnumerable<T> GetObjects<T>()
@@ -88,27 +95,27 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             return this.DeleteObject(key, value);
         }
 
-        public bool DeleteObject(RegistryEntryBase value)
+        public bool DeleteObject(EntityRegistryEntryBase value)
         {
             var key = value.GetType();
             return this.DeleteObject(key, value);
         }
 
-        public IEnumerable<RegistryEntryBase> GetAllEntityEntries()
+        public IEnumerable<EntityRegistryEntryBase> GetAllEntityEntries()
         {
-            return this.collectionsByType.Values.Where(x => x.FirstOrDefault() is RegistryEntryBase)
-                                                .SelectMany(x => x.Cast<RegistryEntryBase>());
+            return this.collectionsByType.Values.Where(x => x.FirstOrDefault() is EntityRegistryEntryBase)
+                                                .SelectMany(x => x.Cast<EntityRegistryEntryBase>());
         }
 
-        public IEnumerable<RegistryEntryBase> GetAllEntityEntries(string domain)
+        public IEnumerable<EntityRegistryEntryBase> GetAllEntityEntries(string domain)
         {
-            var domainCollection = this.collectionsByType.Values.FirstOrDefault(x => (x.FirstOrDefault() is RegistryEntryBase entry) &&
+            var domainCollection = this.collectionsByType.Values.FirstOrDefault(x => (x.FirstOrDefault() is EntityRegistryEntryBase entry) &&
                                                                                      entry.EntityId.GetDomain() == domain)?
-                                         .Cast<RegistryEntryBase>();
-            return domainCollection ?? Enumerable.Empty<RegistryEntryBase>();
+                                         .Cast<EntityRegistryEntryBase>();
+            return domainCollection ?? Enumerable.Empty<EntityRegistryEntryBase>();
         }
 
-        public RegistryEntryBase FindEntityEntry(string entityId)
+        public EntityRegistryEntryBase FindEntityEntry(string entityId)
         {
             var domainCollection = this.GetAllEntityEntries(entityId.GetDomain());
             return domainCollection?.FirstOrDefault(x => x.EntityId == entityId);

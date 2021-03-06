@@ -21,7 +21,6 @@ namespace HassClient.Serialization
         /// <inheritdoc />
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var argTypes = objectType.GetGenericArguments();
             var array = serializer.Deserialize<string[][]>(reader);
 
             if (array == null ||

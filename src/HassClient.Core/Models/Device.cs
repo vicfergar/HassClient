@@ -10,16 +10,25 @@ namespace HassClient.Models
     /// More information at <see href="https://developers.home-assistant.io/docs/device_registry_index/"/>.
     /// </para>
     /// </summary>
-    public class Device : ModifiableModelBase<Device>
+    public class Device : RegistryEntryBase
     {
-        [JsonProperty("disabled_by")]
-        private DisabledByEnum? disabledBy;
+        private readonly ModifiableProperty<string> areaId = new ModifiableProperty<string>(nameof(AreaId));
+
+        [JsonProperty]
+        private readonly ModifiableProperty<DisabledByEnum?> disabledBy = new ModifiableProperty<DisabledByEnum?>(nameof(disabledBy));
+
+        [JsonProperty]
+        private readonly ModifiableProperty<string> nameByUser = new ModifiableProperty<string>(nameof(nameByUser));
 
         [JsonProperty("name")]
         private string originalName;
 
-        [JsonProperty]
-        internal string nameByUser;
+        /// <inheritdoc />
+        internal protected override string UniqueId
+        {
+            get => this.Id;
+            set => this.Id = value;
+        }
 
         /// <summary>
         /// Gets the ID of this device.
@@ -42,8 +51,8 @@ namespace HassClient.Models
         [JsonIgnore]
         public string Name
         {
-            get => this.nameByUser ?? this.originalName;
-            set => this.nameByUser = value;
+            get => this.nameByUser.Value ?? this.originalName;
+            set => this.nameByUser.Value = value == this.originalName ? null : value;
         }
 
         /// <summary>
@@ -101,7 +110,11 @@ namespace HassClient.Models
         /// <summary>
         /// Gets the area id which the device is placed in.
         /// </summary>
-        public string AreaId { get; set; }
+        public string AreaId
+        {
+            get => this.areaId.Value;
+            set => this.areaId.Value = value;
+        }
 
         /// <summary>
         /// Gets the suggested name for the area where the device is located.
@@ -113,7 +126,7 @@ namespace HassClient.Models
         /// Gets a value indicating the disabling source, if any.
         /// </summary>
         [JsonIgnore]
-        public DisabledByEnum DisabledBy => this.disabledBy ?? DisabledByEnum.None;
+        public DisabledByEnum DisabledBy => this.disabledBy.Value ?? DisabledByEnum.None;
 
         /// <summary>
         /// Gets a value indicating whether the device is disabled.
@@ -121,22 +134,33 @@ namespace HassClient.Models
         [JsonIgnore]
         public bool IsDisabled => this.DisabledBy != DisabledByEnum.None;
 
-        // Needed for serialization.
+        [JsonConstructor]
         private Device()
         {
-            this.ClearPendingChanges();
         }
 
         // Used for testing purposes.
-        internal Device(string id, string name, string areaId = null, DisabledByEnum disabledBy = DisabledByEnum.None)
-            : this()
+        internal static Device CreateUnmodified(string id, string name, string areaId = null, DisabledByEnum disabledBy = DisabledByEnum.None)
         {
-            this.Id = id;
-            this.originalName = name;
-            this.AreaId = areaId;
-            this.disabledBy = disabledBy;
+            var result = new Device()
+            {
+                Id = id,
+                originalName = name,
+                AreaId = areaId,
+            };
 
-            this.ClearPendingChanges();
+            result.disabledBy.Value = disabledBy;
+            result.SaveChanges();
+
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
+        {
+            yield return this.areaId;
+            yield return this.disabledBy;
+            yield return this.nameByUser;
         }
 
         /// <inheritdoc />
@@ -153,22 +177,6 @@ namespace HassClient.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(this.Id);
-        }
-
-        /// <inheritdoc />
-        protected override int GetModificationHash()
-        {
-            return HashCode.Combine(this.AreaId, this.nameByUser, this.disabledBy);
-        }
-
-        /// <inheritdoc />
-        protected internal override void Update(Device updatedModel)
-        {
-            this.AreaId = updatedModel.AreaId;
-            this.nameByUser = updatedModel.nameByUser;
-            this.disabledBy = updatedModel.disabledBy;
-
-            base.Update(updatedModel);
         }
     }
 }

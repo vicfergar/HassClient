@@ -24,5 +24,10 @@ namespace HassClient.WS.Messages
         {
             return HassSerializer.DeserializeObject<T>(this.Result);
         }
+
+        public void PopulateResult(object target)
+        {
+            HassSerializer.PopulateObject(this.Result, target);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HassClient.Models
 {
@@ -9,16 +10,20 @@ namespace HassClient.Models
     /// The Entity Registry keeps a registry of entities. Entities are uniquely identified by their domain, platform and
     /// an unique id provided by that platform.
     /// </summary>
-    public class RegistryEntry : RegistryEntryBase
+    public class EntityRegistryEntry : EntityRegistryEntryBase
     {
-        [JsonProperty("disabled_by")]
-        private DisabledByEnum? disabledBy;
+        [JsonProperty]
+        private readonly ModifiableProperty<DisabledByEnum?> disabledBy = new ModifiableProperty<DisabledByEnum?>(nameof(disabledBy));
 
         [JsonProperty(Required = Required.Always)]
         private string entityId;
 
         /// <inheritdoc />
-        public override string UniqueId { get; internal set; }
+        [JsonProperty]
+        internal protected override string UniqueId { get; set; }
+
+        /// <inheritdoc />
+        protected override bool AcceptsNullOrWhiteSpaceName => true;
 
         /// <inheritdoc />
         public override string EntityId => this.entityId;
@@ -61,7 +66,7 @@ namespace HassClient.Models
         /// Gets a value indicating the disabling source, if any.
         /// </summary>
         [JsonIgnore]
-        public DisabledByEnum DisabledBy => this.disabledBy ?? DisabledByEnum.None;
+        public DisabledByEnum DisabledBy => this.disabledBy.Value ?? DisabledByEnum.None;
 
         /// <summary>
         /// Gets a value indicating whether the entity is disabled.
@@ -102,42 +107,50 @@ namespace HassClient.Models
         [JsonIgnore]
         public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
-        // Needed for serialization.
-        private RegistryEntry()
-            : base(null, null)
+        [JsonConstructor]
+        private EntityRegistryEntry()
         {
         }
 
-        // Used for testing purposes.
-        internal RegistryEntry(string entityId, string name, string icon, DisabledByEnum disabledBy = DisabledByEnum.None)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityRegistryEntry"/> class.
+        /// <para>
+        /// Used for testing purposes.
+        /// </para>
+        /// </summary>
+        /// <param name="entityId">The entity id.</param>
+        /// <param name="name">The original name.</param>
+        /// <param name="icon">The original icon.</param>
+        /// <param name="disabledBy">The original disable.</param>
+        internal protected EntityRegistryEntry(string entityId, string name, string icon, DisabledByEnum disabledBy = DisabledByEnum.None)
             : base(name, icon)
         {
             this.entityId = entityId;
             this.Platform = entityId.GetDomain();
-            this.disabledBy = disabledBy;
+            this.disabledBy.Value = disabledBy;
 
-            this.ClearPendingChanges();
+            this.SaveChanges();
         }
 
         // Used for testing purposes.
-        internal static RegistryEntry CreateFromEntry(RegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+        internal static EntityRegistryEntry CreateUnmodified(string entityId, string name, string icon = null, DisabledByEnum disabledBy = DisabledByEnum.None)
         {
-            return new RegistryEntry(entry.EntityId, entry.Name, entry.Icon, disabledBy);
+            return new EntityRegistryEntry(entityId, name, icon, disabledBy);
+        }
+
+        // Used for testing purposes.
+        internal static EntityRegistryEntry CreateFromEntry(EntityRegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+        {
+            return new EntityRegistryEntry(entry.EntityId, entry.Name, entry.Icon, disabledBy);
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"{nameof(RegistryEntry)}: {this.EntityId}";
-
-        internal void Update(RegistryEntry updatedEntity, string newEntityId)
+        protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            if (newEntityId != null)
-            {
-                this.entityId = newEntityId;
-            }
-
-            this.disabledBy = updatedEntity.disabledBy;
-
-            this.Update(updatedEntity);
+            return base.GetModifiableProperties().Append(this.disabledBy);
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"{nameof(EntityRegistryEntry)}: {this.EntityId}";
     }
 }

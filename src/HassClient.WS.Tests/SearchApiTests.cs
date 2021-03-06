@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(SearchTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(SearchTests) + "WithRealServer")]
-    public class SearchTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(SearchApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(SearchApiTests) + "WithRealServer")]
+    public class SearchApiTests : BaseHassWSApiTest
     {
-        public SearchTests(bool useFakeHassServer)
+        public SearchApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }

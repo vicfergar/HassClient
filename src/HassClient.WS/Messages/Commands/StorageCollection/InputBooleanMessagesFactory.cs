@@ -3,7 +3,7 @@ using HassClient.Models;
 
 namespace HassClient.WS.Messages
 {
-    internal class InputBooleanMessagesFactory : StorageCollectionMessagesFactory
+    internal class InputBooleanMessagesFactory : StorageCollectionMessagesFactory<InputBoolean>
     {
         public static InputBooleanMessagesFactory Instance = new InputBooleanMessagesFactory();
 
@@ -12,21 +12,19 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateCreateMessage(InputBoolean inputBoolean)
+        public new BaseOutgoingMessage CreateCreateMessage(InputBoolean inputBoolean)
         {
-            var selectedProperties = new[] { nameof(InputBoolean.Name), nameof(InputBoolean.Initial), nameof(InputBoolean.Icon) };
-            return this.CreateCreateMessage(inputBoolean, selectedProperties);
+            return base.CreateCreateMessage(inputBoolean);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(InputBoolean inputBoolean)
+        public new BaseOutgoingMessage CreateUpdateMessage(InputBoolean inputBoolean)
         {
-            var selectedProperties = new[] { nameof(InputBoolean.Name), nameof(InputBoolean.Initial), nameof(InputBoolean.Icon) };
-            return this.CreateUpdateMessage(inputBoolean.UniqueId, inputBoolean, selectedProperties);
+            return base.CreateUpdateMessage(inputBoolean);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(InputBoolean inputBoolean)
+        public new BaseOutgoingMessage CreateDeleteMessage(InputBoolean inputBoolean)
         {
-            return this.CreateDeleteMessage(inputBoolean.UniqueId);
+            return base.CreateDeleteMessage(inputBoolean);
         }
     }
 }

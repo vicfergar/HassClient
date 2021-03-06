@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HassClient.Core.Tests\HassClient.Core.Tests.csproj" />
     <ProjectReference Include="..\HassClient.WS\HassClient.WS.csproj" />
   </ItemGroup>
 

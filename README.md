@@ -124,10 +124,11 @@ At the momment only `Area`, `Device`, `InputBoolean`, `RegistryEntry` and `User`
 IEnumerable<Area> areas = await hassWSApi.GetAreasAsync();
 
 // Create
-Area hallArea = await this.hassWSApi.CreateAreaAsync("Hall");
+var hallArea = new Area("Hall");
+bool createResult = await this.hassWSApi.CreateAreaAsync(hallArea);
 
 // Update
-hallArea.Name = "Hall1";
+hallArea.Name = "Hall_1";
 bool updateResult = await hassWSApi.UpdateArea(hallArea);
 
 // Delete

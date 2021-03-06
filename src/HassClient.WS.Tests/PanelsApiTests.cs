@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(PanelsTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(PanelsTests) + "WithRealServer")]
-    public class PanelsTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(PanelsApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(PanelsApiTests) + "WithRealServer")]
+    public class PanelsApiTests : BaseHassWSApiTest
     {
 
         private IEnumerable<PanelInfo> panels;
 
-        public PanelsTests(bool useFakeHassServer)
+        public PanelsApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }

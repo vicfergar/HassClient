@@ -1,14 +1,22 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace HassClient.Models
 {
     /// <summary>
     /// Represents an area.
     /// </summary>
-    public class Area : ModifiableModelBase<Area>
+    public class Area : RegistryEntryBase
     {
-        private string name;
+        private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
+
+        /// <inheritdoc />
+        internal protected override string UniqueId
+        {
+            get => this.Id;
+            set => this.Id = value;
+        }
 
         /// <summary>
         /// Gets the ID of this area.
@@ -22,28 +30,49 @@ namespace HassClient.Models
         [JsonProperty]
         public string Name
         {
-            get => this.name;
+            get => this.name.Value;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new InvalidOperationException($"{nameof(this.Name)} cannot be null or white space.");
+                    throw new InvalidOperationException($"'{nameof(this.Name)}' cannot be null or whitespace.");
                 }
 
-                this.name = value;
+                this.name.Value = value;
             }
         }
 
-        // Needed for serialization.
+        [JsonConstructor]
         private Area()
         {
         }
 
-        // Needed for testing.
-        internal Area(string name)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Area"/> class.
+        /// </summary>
+        /// <param name="name">The name of the area.</param>
+        public Area(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace", nameof(name));
+            }
+
             this.Name = name;
-            this.ClearPendingChanges();
+        }
+
+        // Used for testing purposes.
+        internal static Area CreateUnmodified(string name)
+        {
+            var result = new Area(name);
+            result.SaveChanges();
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
+        {
+            yield return this.name;
         }
 
         /// <inheritdoc />
@@ -60,19 +89,6 @@ namespace HassClient.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(this.Id);
-        }
-
-        /// <inheritdoc />
-        protected override int GetModificationHash()
-        {
-            return HashCode.Combine(this.name);
-        }
-
-        /// <inheritdoc />
-        protected internal override void Update(Area updatedModel)
-        {
-            this.Name = updatedModel.Name;
-            base.Update(updatedModel);
         }
     }
 }

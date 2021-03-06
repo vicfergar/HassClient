@@ -32,6 +32,7 @@ namespace HassClient.Core.Tests
         [TestCase("themes_updated")]
         [TestCase("time_changed")]
         [TestCase("timer_out_of_sync")]
+        [TestCase("user_removed")]
         public void AllKnownEventTypesCanBeParsed(string snakeCaseValue)
         {
             var result = snakeCaseValue.AsKnownEventType();

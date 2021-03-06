@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(SubscriptionTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(SubscriptionTests) + "WithRealServer")]
-    public class SubscriptionTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(SubscriptionApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(SubscriptionApiTests) + "WithRealServer")]
+    public class SubscriptionApiTests : BaseHassWSApiTest
     {
         private const string testEntitytId = "light.ceiling_lights";
 
-        public SubscriptionTests(bool useFakeHassServer)
+        public SubscriptionApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }

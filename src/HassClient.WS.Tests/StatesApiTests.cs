@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(StatesTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(StatesTests) + "WithRealServer")]
-    public class StatesTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(StatesApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(StatesApiTests) + "WithRealServer")]
+    public class StatesApiTests : BaseHassWSApiTest
     {
         private IEnumerable<StateModel> states;
 
-        public StatesTests(bool useFakeHassServer)
+        public StatesApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }

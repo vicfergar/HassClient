@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Core.Tests;
+using HassClient.Models;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -6,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(UserRegistryTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(UserRegistryTests) + "WithRealServer")]
-    public class UserRegistryTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(UserRegistryApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(UserRegistryApiTests) + "WithRealServer")]
+    public class UserRegistryApiTests : BaseHassWSApiTest
     {
         private User testUser;
 
-        public UserRegistryTests(bool useFakeHassServer)
+        public UserRegistryApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
         }
@@ -23,16 +24,20 @@ namespace HassClient.WS.Tests
         {
             if (this.testUser == null)
             {
-                this.testUser = await this.hassWSApi.CreateUserAsync(new User($"TestUser_{DateTime.Now.Ticks}"));
+                this.testUser = new User(MockHelpers.GetRandomTestName());
+                var result = await this.hassWSApi.CreateUserAsync(this.testUser);
+
+                Assert.IsTrue(result, "SetUp failed");
                 return;
             }
 
-            Assert.NotNull(this.testUser);
             Assert.NotNull(this.testUser.Id);
             Assert.NotNull(this.testUser.Name);
             Assert.IsTrue(this.testUser.IsActive);
             Assert.IsFalse(this.testUser.IsOwner);
             Assert.IsFalse(this.testUser.IsAdministrator);
+            Assert.IsFalse(this.testUser.HasPendingChanges);
+            Assert.IsTrue(this.testUser.IsTracked);
         }
 
         [Test, Order(2)]
@@ -76,9 +81,11 @@ namespace HassClient.WS.Tests
             }
 
             var result = await this.hassWSApi.DeleteUserAsync(this.testUser);
+            var deletedUser = this.testUser;
             this.testUser = null;
 
             Assert.IsTrue(result);
+            Assert.IsFalse(deletedUser.IsTracked);
         }
     }
 }

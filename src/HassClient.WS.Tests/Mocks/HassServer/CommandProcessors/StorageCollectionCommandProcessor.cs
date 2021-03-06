@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using HassClient.WS.Messages.Commands;
@@ -11,7 +12,8 @@ using System.Reflection;
 namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public class StorageCollectionCommandProcessor<TFactory, TModel> : BaseCommandProcessor
-        where TFactory : StorageCollectionMessagesFactory
+    where TFactory : StorageCollectionMessagesFactory<TModel>
+    where TModel : RegistryEntryBase
     {
         protected TFactory modelFactory;
 
@@ -47,7 +49,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
             try
             {
-                if(!this.isContextReady)
+                if (!this.isContextReady)
                 {
                     this.isContextReady = true;
                     this.PrepareHassContext(context);
@@ -110,17 +112,28 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                    commandType.EndsWith("delete");
         }
 
-        protected virtual TModel DeserializeModel(JToken merged)
+        private string GetModelSerialized(JToken merged)
         {
-            var modelSerialized = HassSerializer.SerializeObject(merged);
-
+            string modelSerialized = HassSerializer.SerializeObject(merged);
             var idPropertyName = HassSerializer.GetSerializedPropertyName(idPropertyInfo);
             if (this.modelIdPropertyName != idPropertyName)
             {
                 modelSerialized = modelSerialized.Replace(this.modelIdPropertyName, idPropertyName);
             }
 
+            return modelSerialized;
+        }
+
+        protected virtual TModel DeserializeModel(JToken merged, out string modelSerialized)
+        {
+            modelSerialized = this.GetModelSerialized(merged);
             return HassSerializer.DeserializeObject<TModel>(modelSerialized);
+        }
+
+        protected virtual void PopulateModel(JToken merged, object target)
+        {
+            var modelSerialized = this.GetModelSerialized(merged);
+            HassSerializer.PopulateObject(modelSerialized, target);
         }
 
         protected virtual IEnumerable<TModel> ProccessListCommand(MockHassServerRequestContext context, JToken merged)
@@ -130,22 +143,21 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         protected virtual object ProccessCreateCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var model = this.DeserializeModel(merged);
+            var model = this.DeserializeModel(merged, out var _);
             this.idPropertyInfo.SetValue(model, this.faker.RandomUUID());
             context.HassDB.CreateObject(model);
             return model;
         }
 
-        protected virtual TModel ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var model = this.DeserializeModel(merged);
-            context.HassDB.UpdateObject(model);
-            return model;
+            var model = this.DeserializeModel(merged, out var modelSerialized);
+            return context.HassDB.UpdateObject(model, new JRaw(modelSerialized));
         }
 
         protected virtual object ProccessDeleteCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var model = this.DeserializeModel(merged);
+            var model = this.DeserializeModel(merged, out var _);
             context.HassDB.DeleteObject(model);
             return null;
         }

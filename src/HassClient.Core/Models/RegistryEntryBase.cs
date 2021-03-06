@@ -1,73 +1,95 @@
 ﻿using Newtonsoft.Json;
-using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
 
 namespace HassClient.Models
 {
     /// <summary>
-    /// Base class that defines a registry entry.
+    /// Defines a registry entry model that can be updated by the user using the API.
     /// </summary>
-    public abstract class RegistryEntryBase : ModifiableModelBase<RegistryEntryBase>
+    public abstract class RegistryEntryBase
     {
+        private IModifiableProperty[] modifiableProperties;
+
+        /// <summary>
+        /// Gets the unique identifier that represents this Registry Entry.
+        /// </summary>
+        internal protected abstract string UniqueId { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating that the registry entry already exists on the Home Assistant instance.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsTracked => this.UniqueId != null;
+
+        /// <summary>
+        /// Gets a value indicating that the model has pending changes waiting to update.
+        /// </summary>
+        [JsonIgnore]
+        public bool HasPendingChanges => this.modifiableProperties.Any(x => x.HasPendingChange);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RegistryEntryBase"/> class.
         /// </summary>
-        /// <param name="name">The entity name.</param>
-        /// <param name="icon">The entity icon.</param>
-        protected RegistryEntryBase(string name, string icon)
+        public RegistryEntryBase()
         {
-            this.Name = name;
-            this.Icon = icon;
-            this.ClearPendingChanges();
+            this.modifiableProperties = this.GetModifiableProperties().ToArray();
         }
 
         /// <summary>
-        /// Gets the entity identifier of the entity.
+        /// Gets all modifiable properties of the model.
         /// </summary>
-        [JsonIgnore]
-        public abstract string EntityId { get; }
+        /// <returns>The modifiable properties of the model.</returns>
+        protected abstract IEnumerable<IModifiableProperty> GetModifiableProperties();
 
-        /// <summary>
-        /// Gets or sets the friendly name of this entity.
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the icon to display in front of the entity in the front-end.
-        /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string Icon { get; set; }
-
-        /// <summary>
-        /// Gets the unique identifier of this entity.
-        /// </summary>
-        public abstract string UniqueId { get; internal set; }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
         {
-            return obj is RegistryEntryBase registryEntryBase &&
-                   this.UniqueId == registryEntryBase.UniqueId;
+            this.SaveChanges();
         }
 
-        /// <inheritdoc />
-        public override int GetHashCode()
+        /// <summary>
+        /// Clears the <see cref="HasPendingChanges"/> property.
+        /// <para>
+        /// Called internally when the model is deserialized or populated with updated values.
+        /// </para>
+        /// </summary>
+        protected void SaveChanges()
         {
-            return HashCode.Combine(this.UniqueId);
+            foreach (var property in this.modifiableProperties)
+            {
+                property.SaveChanges();
+            }
         }
 
-        /// <inheritdoc />
-        protected override int GetModificationHash()
+        /// <summary>
+        /// Discard any pending changes made on the entity and clears the <see cref="HasPendingChanges"/> property.
+        /// </summary>
+        public void DiscardPendingChanges()
         {
-            return HashCode.Combine(this.Name, this.Icon);
+            foreach (var property in this.modifiableProperties)
+            {
+                property.DiscardPendingChange();
+            }
         }
 
-        /// <inheritdoc />
-        protected internal override void Update(RegistryEntryBase updatedModel)
+        internal void Untrack()
         {
-            this.Name = updatedModel.Name;
-            this.Icon = updatedModel.Icon;
+            this.UniqueId = null;
+        }
 
-            base.Update(updatedModel);
+        internal IEnumerable<string> GetModifiablePropertyNames()
+        {
+            return this.modifiableProperties
+                          .Select(x => x.Name);
+        }
+
+        internal IEnumerable<string> GetModifiedPropertyNames()
+        {
+            return this.modifiableProperties
+                       .Where(x => x.HasPendingChange)
+                       .Select(x => x.Name);
         }
     }
 }

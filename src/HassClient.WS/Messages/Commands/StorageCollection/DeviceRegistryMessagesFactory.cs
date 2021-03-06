@@ -4,7 +4,7 @@ using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
-    internal class DeviceRegistryMessagesFactory : StorageCollectionMessagesFactory
+    internal class DeviceRegistryMessagesFactory : StorageCollectionMessagesFactory<Device>
     {
         public static DeviceRegistryMessagesFactory Instance = new DeviceRegistryMessagesFactory();
 
@@ -15,9 +15,7 @@ namespace HassClient.WS.Messages
 
         public BaseOutgoingMessage CreateUpdateMessage(Device device, bool? disable)
         {
-            var selectedProperties = new[] { nameof(Device.AreaId), nameof(Device.nameByUser) };
-
-            var model = HassSerializer.CreateJObject(device, selectedProperties);
+            var model = this.CreateDefaultUpdateObject(device);
 
             if (disable.HasValue)
             {

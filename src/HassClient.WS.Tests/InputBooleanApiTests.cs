@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Core.Tests;
+using HassClient.Models;
 using HassClient.Serialization;
 using NUnit.Framework;
 using System;
@@ -7,34 +8,15 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(InputBooleanTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(InputBooleanTests) + "WithRealServer")]
-    public class InputBooleanTests : BaseHassWSApiTest
+    [TestFixture(true, TestName = nameof(InputBooleanApiTests) + "WithFakeServer")]
+    [TestFixture(false, TestName = nameof(InputBooleanApiTests) + "WithRealServer")]
+    public class InputBooleanApiTests : BaseHassWSApiTest
     {
         private InputBoolean testInputBoolean;
 
-        public InputBooleanTests(bool useFakeHassServer)
+        public InputBooleanApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
         {
-        }
-
-        [Test]
-        public void NewInputBooleanHasNoPendingChanges()
-        {
-            var testInputBoolean = HassSerializer.DeserializeObject<InputBoolean>("{}");
-            Assert.IsFalse(testInputBoolean.HasPendingChanges);
-        }
-
-        [Test]
-        public void SetNewInitialMakesHasPendingChangesTrue()
-        {
-            var testInputBoolean = new InputBoolean(null);
-
-            testInputBoolean.Initial = true;
-            Assert.IsTrue(testInputBoolean.HasPendingChanges);
-
-            testInputBoolean.Initial = false;
-            Assert.False(testInputBoolean.HasPendingChanges);
         }
 
         [OneTimeSetUp]
@@ -43,7 +25,7 @@ namespace HassClient.WS.Tests
         {
             if (this.testInputBoolean == null)
             {
-                this.testInputBoolean = new InputBoolean($"{nameof(InputBooleanTests)}_{DateTime.Now.Ticks}", "mdi:fan", true);
+                this.testInputBoolean = new InputBoolean(MockHelpers.GetRandomTestName(), "mdi:fan", true);
                 var result = await this.hassWSApi.CreateInputBooleanAsync(this.testInputBoolean);
 
                 Assert.IsTrue(result, "SetUp failed");
@@ -53,6 +35,8 @@ namespace HassClient.WS.Tests
             Assert.NotNull(this.testInputBoolean);
             Assert.NotNull(this.testInputBoolean.UniqueId);
             Assert.NotNull(this.testInputBoolean.Name);
+            Assert.IsFalse(this.testInputBoolean.HasPendingChanges);
+            Assert.IsTrue(this.testInputBoolean.IsTracked);
         }
 
         [Test, Order(2)]
@@ -71,7 +55,7 @@ namespace HassClient.WS.Tests
         [Test, Order(3)]
         public async Task UpdateInputBooleanName()
         {
-            this.testInputBoolean.Name = $"{nameof(InputBooleanTests)}_{DateTime.Now.Ticks}";
+            this.testInputBoolean.Name = $"{nameof(InputBooleanApiTests)}_{DateTime.Now.Ticks}";
             var result = await this.hassWSApi.UpdateInputBooleanAsync(this.testInputBoolean);
 
             Assert.IsTrue(result);
@@ -105,9 +89,11 @@ namespace HassClient.WS.Tests
             }
 
             var result = await this.hassWSApi.DeleteInputBooleanAsync(this.testInputBoolean);
+            var deletedInputBoolean = this.testInputBoolean;
             this.testInputBoolean = null;
 
             Assert.IsTrue(result);
+            Assert.IsFalse(deletedInputBoolean.IsTracked);
         }
     }
 }
