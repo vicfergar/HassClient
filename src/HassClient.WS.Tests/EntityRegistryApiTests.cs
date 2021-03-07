@@ -119,7 +119,7 @@ namespace HassClient.WS.Tests
         }
 
         [Test, Order(1), NonParallelizable]
-        public async Task UpdateEntityEntityId()
+        public async Task UpdateEntityId()
         {
             var testEntity = await this.hassWSApi.GetEntityAsync(this.testEntityId);
             var newEntityId = this.testEntityId + 1;
@@ -133,7 +133,22 @@ namespace HassClient.WS.Tests
             this.testEntityId = newEntityId; // This is needed for DeleteEntityTest
         }
 
-        [Test, Order(2), NonParallelizable]
+        [Test, Order(2)]
+        public async Task RefreshEntity()
+        {
+            var testEntity = await this.hassWSApi.GetEntityAsync(this.testEntityId);
+            var clonedEntity = testEntity.Clone();
+            clonedEntity.Name = MockHelpers.GetRandomTestName();
+            var result = await this.hassWSApi.UpdateEntityAsync(clonedEntity);
+            Assert.IsTrue(result, "SetUp failed");
+            Assert.False(testEntity.HasPendingChanges, "SetUp failed");
+
+            result = await this.hassWSApi.RefreshEntityAsync(testEntity);
+            Assert.IsTrue(result);
+            Assert.AreEqual(clonedEntity.Name, testEntity.Name);
+        }
+
+        [Test, Order(3), NonParallelizable]
         public async Task DeleteEntity()
         {
             var testEntity = await this.hassWSApi.GetEntityAsync(this.testEntityId);

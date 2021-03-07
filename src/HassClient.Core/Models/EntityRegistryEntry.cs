@@ -152,5 +152,24 @@ namespace HassClient.Models
 
         /// <inheritdoc />
         public override string ToString() => $"{nameof(EntityRegistryEntry)}: {this.EntityId}";
+
+        // Used for testing purposes.
+        internal EntityRegistryEntry Clone()
+        {
+            var result = CreateUnmodified(this.EntityId, this.Name, this.Icon, this.DisabledBy);
+            result.UniqueId = this.UniqueId;
+            result.entityId = this.entityId;
+            result.AreaId = this.AreaId;
+            result.Capabilities = this.Capabilities;
+            result.ConfigEntryId = this.ConfigEntryId;
+            result.DeviceClass = this.DeviceClass;
+            result.DeviceId = this.DeviceId;
+            result.OriginalName = this.OriginalName;
+            result.OriginalIcon = this.OriginalIcon;
+            result.Platform = this.Platform;
+            result.SupportedFeatures = this.SupportedFeatures;
+            result.UnitOfMeasurement = this.UnitOfMeasurement;
+            return result;
+        }
     }
 }
