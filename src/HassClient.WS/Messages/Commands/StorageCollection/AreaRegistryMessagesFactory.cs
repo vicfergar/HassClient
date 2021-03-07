@@ -17,9 +17,9 @@ namespace HassClient.WS.Messages
             return base.CreateCreateMessage(area);
         }
 
-        public new BaseOutgoingMessage CreateUpdateMessage(Area area)
+        public new BaseOutgoingMessage CreateUpdateMessage(Area area, bool forceUpdate)
         {
-            return base.CreateUpdateMessage(area);
+            return base.CreateUpdateMessage(area, forceUpdate);
         }
 
         public new BaseOutgoingMessage CreateDeleteMessage(Area area)

@@ -18,9 +18,9 @@ namespace HassClient.WS.Messages
             return this.CreateCustomOperationMessage("get", entityId);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable)
+        public BaseOutgoingMessage CreateUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable, bool forceUpdate)
         {
-            var model = this.CreateDefaultUpdateObject(entity);
+            var model = this.CreateDefaultUpdateObject(entity, forceUpdate);
 
             if (newEntityId != null)
             {

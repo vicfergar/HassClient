@@ -12,6 +12,8 @@ namespace HassClient.Models
     {
         private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
 
+        private readonly ModifiableProperty<bool> isActive = new ModifiableProperty<bool>(nameof(IsActive));
+
         private readonly ModifiablePropertyCollection<HashSet<string>, string> groupIds = new ModifiablePropertyCollection<HashSet<string>, string>(nameof(GroupIds));
 
         /// <summary>
@@ -57,10 +59,14 @@ namespace HassClient.Models
         public bool IsOwner { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the user is active.
+        /// Gets or sets a value indicating whether the user is active.
         /// </summary>
         [JsonProperty]
-        public bool IsActive { get; private set; }
+        public bool IsActive
+        {
+            get => this.isActive.Value;
+            set => this.isActive.Value = value;
+        }
 
         /// <summary>
         /// Gets a value indicating whether the user is administrator.
@@ -81,6 +87,12 @@ namespace HassClient.Models
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the user name of the user.
+        /// </summary>
+        [JsonProperty]
+        public string Username { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the user has been generated automatically by the system.
@@ -141,6 +153,14 @@ namespace HassClient.Models
             this.IsAdministrator = isAdministrator;
         }
 
+        /// <summary>
+        /// Method used by the serializer to determine if the <see cref="IsActive"/> property should be serialized.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the property should be serialized; otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool ShouldSerializeIsActive() => this.IsTracked;
+
         // Used for testing purposes.
         internal static User CreateUnmodified(string name, bool isOwner)
         {
@@ -157,6 +177,7 @@ namespace HassClient.Models
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
             yield return this.name;
+            yield return this.isActive;
             yield return this.groupIds;
         }
 
@@ -164,12 +185,6 @@ namespace HassClient.Models
         {
             this.IsActive = value;
         }
-
-        /// <summary>
-        /// Method used by the serializer to determine if the <see cref="GroupIds"/> property should be serialized.
-        /// </summary>
-        /// <returns><see langword="true"/> if the property should be serialized; otherwise, <see langword="false"/>.</returns>
-        protected bool ShouldSerializeGroupIds() => this.GroupIds?.Count > 0;
 
         /// <inheritdoc />
         public override string ToString() => $"{nameof(User)}: {this.Name}";
@@ -185,6 +200,14 @@ namespace HassClient.Models
         public override int GetHashCode()
         {
             return HashCode.Combine(this.Id);
+        }
+
+        // Used for testing purposes.
+        internal User Clone()
+        {
+            var result = CreateUnmodified(this.Name, this.IsOwner);
+            result.UniqueId = this.UniqueId;
+            return result;
         }
     }
 }

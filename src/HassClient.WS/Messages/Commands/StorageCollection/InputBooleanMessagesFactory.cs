@@ -17,9 +17,9 @@ namespace HassClient.WS.Messages
             return base.CreateCreateMessage(inputBoolean);
         }
 
-        public new BaseOutgoingMessage CreateUpdateMessage(InputBoolean inputBoolean)
+        public new BaseOutgoingMessage CreateUpdateMessage(InputBoolean inputBoolean, bool forceUpdate)
         {
-            return base.CreateUpdateMessage(inputBoolean);
+            return base.CreateUpdateMessage(inputBoolean, forceUpdate);
         }
 
         public new BaseOutgoingMessage CreateDeleteMessage(InputBoolean inputBoolean)

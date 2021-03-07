@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
+using HassClient.Serialization;
 
 namespace HassClient.WS.Tests.Mocks.HassServer
 {
@@ -85,7 +86,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 }
             }
 
-            return result;
+            return new EntityEntryResponse() { EntityEntryRaw = new JRaw(HassSerializer.SerializeObject(result)) };
         }
 
         protected override object ProccessUnknownCommand(string commandType, MockHassServerRequestContext context, JToken merged)

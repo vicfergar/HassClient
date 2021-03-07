@@ -23,6 +23,20 @@ namespace HassClient.Models
         internal protected override string UniqueId { get; set; }
 
         /// <inheritdoc />
+        public override string Name
+        {
+            get => base.Name ?? this.OriginalName;
+            set => base.Name = value != this.OriginalName ? value : null;
+        }
+
+        /// <inheritdoc />
+        public override string Icon
+        {
+            get => base.Icon ?? this.OriginalIcon;
+            set => base.Icon = value != this.OriginalIcon ? value : null;
+        }
+
+        /// <inheritdoc />
         protected override bool AcceptsNullOrWhiteSpaceName => true;
 
         /// <inheritdoc />
@@ -31,11 +45,13 @@ namespace HassClient.Models
         /// <summary>
         /// Gets the original friendly name of this entity.
         /// </summary>
+        [JsonProperty]
         public string OriginalName { get; protected set; }
 
         /// <summary>
         /// Gets the original icon to display in front of the entity in the front-end.
         /// </summary>
+        [JsonProperty]
         public string OriginalIcon { get; protected set; }
 
         /// <summary>

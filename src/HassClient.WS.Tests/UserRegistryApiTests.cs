@@ -53,16 +53,28 @@ namespace HassClient.WS.Tests
         }
 
         [Test, Order(3)]
-        public async Task UpdateUser()
+        public async Task UpdateUserName()
         {
-            this.testUser.Name = $"TestUser_{DateTime.Now.Ticks}";
+            var updatedName = MockHelpers.GetRandomTestName();
+            this.testUser.Name = updatedName;
             var result = await this.hassWSApi.UpdateUserAsync(this.testUser);
 
             Assert.IsTrue(result);
+            Assert.AreEqual(updatedName, this.testUser.Name);
         }
 
         [Test, Order(3)]
-        public async Task UpdateUserWithAdminGroupId()
+        public async Task UpdateUserIsActive()
+        {
+            this.testUser.IsActive = false;
+            var result = await this.hassWSApi.UpdateUserAsync(this.testUser);
+
+            Assert.IsTrue(result);
+            Assert.IsFalse(this.testUser.IsActive);
+        }
+
+        [Test, Order(3)]
+        public async Task UpdateUserIsAdministrator()
         {
             this.testUser.IsAdministrator = true;
             var result = await this.hassWSApi.UpdateUserAsync(this.testUser);
@@ -71,8 +83,29 @@ namespace HassClient.WS.Tests
             Assert.IsTrue(this.testUser.IsAdministrator);
         }
 
-        [OneTimeTearDown]
         [Test, Order(4)]
+        public async Task UpdateWithForce()
+        {
+            var initialName = this.testUser.Name;
+            var initialGroupIds = this.testUser.GroupIds;
+            var initialIsActive = this.testUser.IsActive;
+            var clonedEntry = this.testUser.Clone();
+            clonedEntry.Name = $"{initialName}_cloned";
+            clonedEntry.IsAdministrator = !this.testUser.IsAdministrator;
+            clonedEntry.IsActive = !initialIsActive;
+            var result = await this.hassWSApi.UpdateUserAsync(clonedEntry);
+            Assert.IsTrue(result, "SetUp failed");
+            Assert.False(this.testUser.HasPendingChanges, "SetUp failed");
+
+            result = await this.hassWSApi.UpdateUserAsync(this.testUser, forceUpdate: true);
+            Assert.IsTrue(result);
+            Assert.AreEqual(initialName, this.testUser.Name);
+            Assert.AreEqual(initialGroupIds, this.testUser.GroupIds);
+            Assert.AreEqual(initialIsActive, this.testUser.IsActive);
+        }
+
+        [OneTimeTearDown]
+        [Test, Order(5)]
         public async Task DeleteUser()
         {
             if (this.testUser == null)

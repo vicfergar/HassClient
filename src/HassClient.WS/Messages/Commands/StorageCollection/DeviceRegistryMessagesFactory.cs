@@ -13,9 +13,9 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(Device device, bool? disable)
+        public BaseOutgoingMessage CreateUpdateMessage(Device device, bool? disable, bool forceUpdate)
         {
-            var model = this.CreateDefaultUpdateObject(device);
+            var model = this.CreateDefaultUpdateObject(device, forceUpdate);
 
             if (disable.HasValue)
             {

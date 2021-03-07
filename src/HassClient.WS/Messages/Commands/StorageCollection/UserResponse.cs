@@ -1,5 +1,4 @@
-﻿using HassClient.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace HassClient.WS.Messages

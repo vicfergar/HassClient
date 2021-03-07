@@ -576,6 +576,9 @@ namespace HassClient.WS
         /// <param name="entity">The <see cref="EntityRegistryEntry"/> with the new values.</param>
         /// <param name="newEntityId">If not <see langword="null"/>, it will update the current entity id.</param>
         /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -583,21 +586,22 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateEntityAsync(EntityRegistryEntry entity, string newEntityId = null, bool? disable = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateEntityAsync(EntityRegistryEntry entity, string newEntityId = null, bool? disable = null, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
             if (newEntityId == entity.EntityId)
             {
                 throw new ArgumentException($"{nameof(newEntityId)} cannot be the same as {nameof(entity.EntityId)}");
             }
 
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateUpdateMessage(entity, newEntityId, disable);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
-            if (result.Success)
+            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateUpdateMessage(entity, newEntityId, disable, forceUpdate);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync<EntityEntryResponse>(commandMessage, cancellationToken);
+            if (result == null)
             {
-                result.PopulateResult(entity);
+                return false;
             }
 
-            return result.Success;
+            HassSerializer.PopulateObject(result.EntityEntryRaw, entity);
+            return true;
         }
 
         /// <summary>
@@ -666,6 +670,9 @@ namespace HassClient.WS
         /// Updates an existing <see cref="Area"/>.
         /// </summary>
         /// <param name="area">The <see cref="Area"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -673,9 +680,9 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateAreaAsync(Area area, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAreaAsync(Area area, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = AreaRegistryMessagesFactory.Instance.CreateUpdateMessage(area);
+            var commandMessage = AreaRegistryMessagesFactory.Instance.CreateUpdateMessage(area, forceUpdate);
 
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
@@ -730,6 +737,9 @@ namespace HassClient.WS
         /// </summary>
         /// <param name="device">The <see cref="Device"/> with the new values.</param>
         /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -737,9 +747,9 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateDeviceAsync(Device device, bool? disable = null, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateDeviceAsync(Device device, bool? disable = null, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateUpdateMessage(device, disable);
+            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateUpdateMessage(device, disable, forceUpdate);
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -792,6 +802,9 @@ namespace HassClient.WS
         /// Updates an existing <see cref="InputBoolean"/> entity.
         /// </summary>
         /// <param name="inputBoolean">The <see cref="InputBoolean"/> entity with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -799,9 +812,9 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateInputBooleanAsync(InputBoolean inputBoolean, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = InputBooleanMessagesFactory.Instance.CreateUpdateMessage(inputBoolean);
+            var commandMessage = InputBooleanMessagesFactory.Instance.CreateUpdateMessage(inputBoolean, forceUpdate);
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -878,6 +891,9 @@ namespace HassClient.WS
         /// Updates an existing <see cref="User"/>.
         /// </summary>
         /// <param name="user">The <see cref="User"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -885,9 +901,9 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// update operation was successfully done.
         /// </returns>
-        public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateUserAsync(User user, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = UserMessagesFactory.Instance.CreateUpdateMessage(user);
+            var commandMessage = UserMessagesFactory.Instance.CreateUpdateMessage(user, forceUpdate);
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync<UserResponse>(commandMessage, cancellationToken);
             if (result == null)
             {

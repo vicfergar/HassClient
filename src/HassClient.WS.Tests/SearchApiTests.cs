@@ -39,10 +39,8 @@ namespace HassClient.WS.Tests
             Assert.NotNull(result);
             Assert.NotNull(result.ConfigEntryIds);
             Assert.NotNull(result.DeviceIds);
-            Assert.NotNull(result.EntityIds);
             Assert.NotZero(result.ConfigEntryIds.Length);
             Assert.NotZero(result.DeviceIds.Length);
-            Assert.NotZero(result.EntityIds.Length);
         }
     }
 }

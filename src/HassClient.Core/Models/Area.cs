@@ -90,5 +90,13 @@ namespace HassClient.Models
         {
             return HashCode.Combine(this.Id);
         }
+
+        // Used for testing purposes.
+        internal Area Clone()
+        {
+            var result = CreateUnmodified(this.Name);
+            result.UniqueId = this.UniqueId;
+            return result;
+        }
     }
 }

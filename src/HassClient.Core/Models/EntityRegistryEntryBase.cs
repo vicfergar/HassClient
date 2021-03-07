@@ -28,7 +28,7 @@ namespace HassClient.Models
         /// <summary>
         /// Gets or sets the friendly name of this entity.
         /// </summary>
-        public string Name
+        public virtual string Name
         {
             get => this.name.Value;
             set
@@ -46,8 +46,8 @@ namespace HassClient.Models
         /// <summary>
         /// Gets or sets the icon to display in front of the entity in the front-end.
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string Icon
+        [JsonProperty]
+        public virtual string Icon
         {
             get => this.icon.Value;
             set => this.icon.Value = value;
@@ -74,6 +74,14 @@ namespace HassClient.Models
             this.Name = name;
             this.Icon = icon;
         }
+
+        /// <summary>
+        /// Method used by the serializer to determine if the <see cref="Icon"/> property should be serialized.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the property should be serialized; otherwise, <see langword="false"/>.
+        /// </returns>
+        public bool ShouldSerializeIcon() => this.Icon != null || this.IsTracked;
 
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()

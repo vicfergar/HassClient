@@ -49,15 +49,30 @@ namespace HassClient.WS.Tests
         [Test, Order(3)]
         public async Task UpdateArea()
         {
-            this.testArea.Name = $"TestArea_{DateTime.Now.Ticks}";
+            this.testArea.Name = MockHelpers.GetRandomTestName();
             var result = await this.hassWSApi.UpdateAreaAsync(this.testArea);
 
             Assert.IsTrue(result);
             Assert.False(this.testArea.HasPendingChanges);
         }
 
-        [OneTimeTearDown]
         [Test, Order(4)]
+        public async Task UpdateWithForce()
+        {
+            var initialName = this.testArea.Name;
+            var clonedArea = this.testArea.Clone();
+            clonedArea.Name = $"{initialName}_cloned";
+            var result = await this.hassWSApi.UpdateAreaAsync(clonedArea);
+            Assert.IsTrue(result, "SetUp failed");
+            Assert.False(this.testArea.HasPendingChanges, "SetUp failed");
+
+            result = await this.hassWSApi.UpdateAreaAsync(this.testArea, forceUpdate: true);
+            Assert.IsTrue(result);
+            Assert.AreEqual(initialName, this.testArea.Name);
+        }
+
+        [OneTimeTearDown]
+        [Test, Order(5)]
         public async Task DeleteArea()
         {
             if (this.testArea == null)

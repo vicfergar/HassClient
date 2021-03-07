@@ -92,12 +92,15 @@ namespace HassClient.WS.Messages.Commands
         /// the collection registry filtering modified properties only.
         /// </summary>
         /// <param name="model">The model for the generation of the message.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update message force the update of every modifiable property.
+        /// </param>
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used to update an existing item from the collection registry.
         /// </returns>
-        protected BaseOutgoingMessage CreateUpdateMessage(TModel model)
+        protected BaseOutgoingMessage CreateUpdateMessage(TModel model, bool forceUpdate)
         {
-            return this.CreateUpdateMessage(model.UniqueId, this.CreateDefaultUpdateObject(model));
+            return this.CreateUpdateMessage(model.UniqueId, this.CreateDefaultUpdateObject(model, forceUpdate));
         }
 
         /// <summary>
@@ -188,10 +191,14 @@ namespace HassClient.WS.Messages.Commands
         /// Creates the default update object filtering modified property names only.
         /// </summary>
         /// <param name="model">The object model to be updated.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update message force the update of every modifiable property.
+        /// </param>
         /// <returns>The default update object filtering modified property names only.</returns>
-        protected JObject CreateDefaultUpdateObject(TModel model)
+        protected JObject CreateDefaultUpdateObject(TModel model, bool forceUpdate)
         {
-            return HassSerializer.CreateJObject(model, model.GetModifiedPropertyNames());
+            var selectedProperties = forceUpdate ? model.GetModifiablePropertyNames() : model.GetModifiedPropertyNames();
+            return HassSerializer.CreateJObject(model, selectedProperties);
         }
 
         private void AddModelIdProperty(JObject mergedObject, string modelId)

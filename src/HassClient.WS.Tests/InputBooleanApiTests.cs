@@ -79,8 +79,29 @@ namespace HassClient.WS.Tests
             Assert.IsTrue(result);
         }
 
-        [OneTimeTearDown]
         [Test, Order(6)]
+        public async Task UpdateWithForce()
+        {
+            var initialName = this.testInputBoolean.Name;
+            var initialIcon = this.testInputBoolean.Icon;
+            var initialInitial = this.testInputBoolean.Initial;
+            var clonedEntry = this.testInputBoolean.Clone();
+            clonedEntry.Name = $"{initialName}_cloned";
+            clonedEntry.Icon = $"{initialIcon}_cloned";
+            clonedEntry.Initial = !initialInitial;
+            var result = await this.hassWSApi.UpdateInputBooleanAsync(clonedEntry);
+            Assert.IsTrue(result, "SetUp failed");
+            Assert.False(this.testInputBoolean.HasPendingChanges, "SetUp failed");
+
+            result = await this.hassWSApi.UpdateInputBooleanAsync(this.testInputBoolean, forceUpdate: true);
+            Assert.IsTrue(result);
+            Assert.AreEqual(initialName, this.testInputBoolean.Name);
+            Assert.AreEqual(initialIcon, this.testInputBoolean.Icon);
+            Assert.AreEqual(initialInitial, this.testInputBoolean.Initial);
+        }
+
+        [OneTimeTearDown]
+        [Test, Order(7)]
         public async Task DeleteInputBoolean()
         {
             if (this.testInputBoolean == null)

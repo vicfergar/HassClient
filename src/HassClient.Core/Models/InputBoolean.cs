@@ -70,5 +70,12 @@ namespace HassClient.Models
 
         /// <inheritdoc />
         public override string ToString() => $"{nameof(InputBoolean)}: {this.Name}";
+
+        // Used for testing purposes.
+        internal InputBoolean Clone()
+        {
+            var result = CreateUnmodified(this.UniqueId, this.Name, this.Icon, this.Initial);
+            return result;
+        }
     }
 }
