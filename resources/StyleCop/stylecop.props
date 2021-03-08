@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\stylecop.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 
