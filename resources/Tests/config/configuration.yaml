@@ -1,0 +1,7 @@
+default_config:
+
+logger:
+  default: info
+ 
+# https://www.home-assistant.io/integrations/demo/
+demo:

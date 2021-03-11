@@ -1,4 +1,4 @@
-name: CI
+name: Continous Integration
 
 on:
   push:
@@ -6,23 +6,51 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       solution-path: ./src/HassClient.sln
+      build-config: Release
+    strategy:
+      matrix:
+        channel:
+          - stable
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Setup .NET Core 3.1
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: 3.1.x
     - name: Setup .NET 5.0
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: 5.0.x
+        
     - name: Restore dependencies
       run: dotnet restore ${{env.solution-path}}
     - name: Build
-      run: dotnet build --no-restore ${{env.solution-path}}
+      run: dotnet build --no-restore ${{env.solution-path}} --configuration ${{env.build-config}}
+      
+    - name: 👷 Setup Home Assistant
+      id: homeassistant
+      uses: ludeeus/setup-homeassistant@main
+      with:
+          tag: ${{ matrix.channel }}
+          config-dir: ./resources/Tests/config
+
+    - name: ✅ Verify API Access
+      run: | 
+        curl -sSL -f -X GET \
+          -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+          -H "Content-Type: application/json" \
+          ${{ steps.homeassistant.outputs.url }}/api/states
+          
     - name: Test
-      run: dotnet test --no-build --verbosity normal ${{env.solution-path}}
+      run: dotnet test --no-build --verbosity normal ${{env.solution-path}} --configuration ${{env.build-config}}
+      env:
+          TestsInstanceBaseUrl: ${{ steps.homeassistant.outputs.url }}
+          TestsAccessToken: ${{ steps.homeassistant.outputs.token }}
+
+    - name: 📜 Get logs
+      run: docker logs ${{ steps.homeassistant.outputs.containername }}
