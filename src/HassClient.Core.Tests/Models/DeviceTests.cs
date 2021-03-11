@@ -56,6 +56,21 @@ namespace HassClient.Core.Tests
             Assert.AreEqual(initialDisabledBy, testEntry.DisabledBy);
         }
 
+        [Test]
+        public void NameIsNameByUserIfDefined()
+        {
+            var testEntry = this.CreateTestEntry(out _, out _, out _, out _);
+
+            Assert.AreEqual(testEntry.OriginalName, testEntry.Name);
+
+            var testName = MockHelpers.GetRandomTestName();
+            testEntry.Name = testName;
+            Assert.AreEqual(testName, testEntry.Name);
+
+            testEntry.Name = null;
+            Assert.AreEqual(testEntry.OriginalName, testEntry.Name);
+        }
+
         private Device CreateTestEntry(out string entityId, out string name, out string areaId, out DisabledByEnum disabledBy)
         {
             entityId = MockHelpers.GetRandomEntityId(KnownDomains.Esphome);

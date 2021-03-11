@@ -193,5 +193,6 @@ _InstallerOutput/
 
 src/.idea/
 .waveengine
+.testEnv
 
 WaveContent.cs

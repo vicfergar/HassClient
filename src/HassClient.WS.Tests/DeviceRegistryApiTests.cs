@@ -25,21 +25,6 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        public void NameIsNameByUserIfDefined()
-        {
-            var testDevice = Device.CreateUnmodified(nameof(Device.Id), nameof(Device.Name));
-
-            Assert.AreEqual(testDevice.OriginalName, testDevice.Name);
-
-            var testName = $"TestDevice_{DateTime.Now.Ticks}";
-            testDevice.Name = testName;
-            Assert.AreEqual(testName, testDevice.Name);
-
-            testDevice.Name = null;
-            Assert.AreEqual(testDevice.OriginalName, testDevice.Name);
-        }
-
-        [Test]
         public async Task UpdateNameDevice()
         {
             var devices = await this.hassWSApi.GetDevicesAsync();
