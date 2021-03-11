@@ -15,7 +15,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             var resultResponse = new SearchRelatedResponse();
 
             if (searchMessage.ItemType == ItemTypes.Entity &&
-                searchMessage.ItemId == "weather.home")
+                searchMessage.ItemId == "light.bed_light")
             {
                 var faker = new Faker();
                 resultResponse.AreaIds = new[] { faker.RandomUUID() };

@@ -146,7 +146,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
             base.PrepareHassContext(context);
             var hassDB = context.HassDB;
-            hassDB.CreateObject(new MockRegistryEntity("weather.home", "Weather")
+            hassDB.CreateObject(new MockRegistryEntity("light.bed_light", "Bed Light")
             {
                 UniqueId = this.faker.RandomUUID(),
                 ConfigEntryId = this.faker.RandomUUID(),

@@ -96,7 +96,7 @@ namespace HassClient.Models
         /// <summary>
         /// Gets the type of entry.
         /// </summary>
-        [JsonProperty]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public DeviceEntryTypes EntryType { get; private set; }
 
         /// <summary>

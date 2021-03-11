@@ -66,7 +66,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task GetEntity()
         {
-            var entityId = "weather.home";
+            var entityId = "light.bed_light";
             var entity = await this.hassWSApi.GetEntityAsync(entityId);
 
             Assert.IsNotNull(entity);

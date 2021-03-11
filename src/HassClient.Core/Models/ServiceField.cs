@@ -9,15 +9,39 @@ namespace HassClient.Models
     public class ServiceField
     {
         /// <summary>
+        /// Gets the name of this field.
+        /// </summary>
+        [JsonProperty]
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Gets the description of this field.
         /// </summary>
         [JsonProperty]
         public string Description { get; private set; }
 
         /// <summary>
-        /// Gets the example text for this field (may be <see langword="null"/>).
+        /// Gets a value indicating whether the field is required or optional.
+        /// </summary>
+        [JsonProperty("required")]
+        public string IsRequired { get; private set; }
+
+        /// <summary>
+        /// Gets the default value of this field if defined; otherwise, <see langword="null"/>.
+        /// </summary>
+        [JsonProperty("default")]
+        public string DefaultValue { get; private set; }
+
+        /// <summary>
+        /// Gets the example for this field (may be <see langword="null"/>).
         /// </summary>
         [JsonProperty]
         public JRaw Example { get; private set; }
+
+        /// <summary>
+        /// Gets the selector for this field (may be <see langword="null"/>).
+        /// </summary>
+        [JsonProperty]
+        public JRaw Selector { get; private set; }
     }
 }

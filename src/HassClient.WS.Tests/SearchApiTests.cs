@@ -34,7 +34,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task SearchRelatedKnownEntity()
         {
-            var result = await this.hassWSApi.SearchRelated(ItemTypes.Entity, "weather.home");
+            var result = await this.hassWSApi.SearchRelated(ItemTypes.Entity, "light.bed_light");
 
             Assert.NotNull(result);
             Assert.NotNull(result.ConfigEntryIds);
