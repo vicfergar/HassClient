@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Setup .NET Core 3.1
       uses: actions/setup-dotnet@v1.7.2
       with:
@@ -26,7 +26,12 @@ jobs:
       uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: 5.0.x
-        
+
+    - name: Install trx2junit
+      run: |
+        export PATH="$PATH:/root/.dotnet/tools"
+        dotnet tool install --global trx2junit --version 1.5.0
+
     - name: Restore dependencies
       run: dotnet restore ${{env.solution-path}}
     - name: Build
@@ -45,19 +50,31 @@ jobs:
           -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
           -H "Content-Type: application/json" \
           ${{ steps.homeassistant.outputs.url }}/api/states
-          
+
     - name: Test
       run: dotnet test --no-build --configuration ${{env.build-config}} --logger "trx;LogFileName=test-results.trx" ${{env.solution-path}}
       env:
           TestsInstanceBaseUrl: ${{ steps.homeassistant.outputs.url }}
           TestsAccessToken: ${{ steps.homeassistant.outputs.token }}
 
+    - name: 📜 Get logs
+      if: always()
+      run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
     - uses: actions/upload-artifact@v2
-      if: success() || failure()
       with:
         name: test-results
         path: ./src/**/*.trx
 
-    - name: 📜 Get logs
-      if: always()
-      run: docker logs ${{ steps.homeassistant.outputs.containername }}
+    - uses: actions/download-artifact@v2.0.8
+      with:
+        name: test-results
+        path: ./test-results
+
+    - name: Convert to JUnit format
+      run: trx2junit ./test-results/*.trx
+
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      with:
+        files: ./test-results/*.xml
