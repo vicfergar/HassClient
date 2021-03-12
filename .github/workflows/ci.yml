@@ -56,7 +56,7 @@ jobs:
       if: success() || failure()
       with:
         name: test-results
-        path: ./*.Tests/**/*.trx
+        path: ./src/**/*.trx
 
     - name: 📜 Get logs
       if: always()
