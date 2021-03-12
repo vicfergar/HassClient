@@ -1,4 +1,4 @@
-name: Continous Integration
+name: CI
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ${{env.solution-path}}
     - name: Build
-      run: dotnet build --no-restore ${{env.solution-path}} --configuration ${{env.build-config}}
+      run: dotnet build --no-restore --configuration ${{env.build-config}} ${{env.solution-path}}
       
     - name: 👷 Setup Home Assistant
       id: homeassistant
@@ -47,10 +47,17 @@ jobs:
           ${{ steps.homeassistant.outputs.url }}/api/states
           
     - name: Test
-      run: dotnet test --no-build --verbosity normal ${{env.solution-path}} --configuration ${{env.build-config}}
+      run: dotnet test --no-build --configuration ${{env.build-config}} --logger "trx;LogFileName=test-results.trx" ${{env.solution-path}}
       env:
           TestsInstanceBaseUrl: ${{ steps.homeassistant.outputs.url }}
           TestsAccessToken: ${{ steps.homeassistant.outputs.token }}
 
+    - uses: actions/upload-artifact@v2
+      if: success() || failure()
+      with:
+        name: test-results
+        path: ./*.Tests/**/*.trx
+
     - name: 📜 Get logs
+      if: always()
       run: docker logs ${{ steps.homeassistant.outputs.containername }}

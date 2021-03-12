@@ -196,3 +196,4 @@ src/.idea/
 .testEnv
 
 WaveContent.cs
+test-result.xml

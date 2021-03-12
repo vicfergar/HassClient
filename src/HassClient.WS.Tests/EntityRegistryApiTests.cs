@@ -46,7 +46,6 @@ namespace HassClient.WS.Tests
             Assert.IsTrue(entities.All(e => e.EntityId != null));
             Assert.IsTrue(entities.All(e => e.Platform != null), entities.FirstOrDefault(e => e.Platform == null)?.EntityId);
             Assert.IsTrue(entities.Any(e => e.ConfigEntryId != null));
-            Assert.IsTrue(entities.Any(e => e.DisabledBy != DisabledByEnum.None));
         }
 
         [Test]
