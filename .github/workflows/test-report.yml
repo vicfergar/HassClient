@@ -6,12 +6,33 @@ on:
     types:
       - completed
 jobs:
+  
+
   report:
     runs-on: ubuntu-latest
     steps:
-    - uses: dorny/test-reporter@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
       with:
-        artifact: test-results
-        name: Tests
-        path: "**/*.trx"
-        reporter: dotnet-trx
+        dotnet-version: 2.1
+
+    - name: Install trx2junit
+      run: |
+        export PATH="$PATH:/root/.dotnet/tools"
+        dotnet tool install --global trx2junit --version 1.5.0
+        
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.0.8
+      with:
+        name: test-results
+        path: ./results
+        
+    - name: Convert to JUnit format
+      run: trx2junit ./results/*.trx
+
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1
+      with:
+        files: ./results/*.xml
+      
+    
