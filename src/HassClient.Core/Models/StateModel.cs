@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using HassClient.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -20,6 +21,12 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public string State { get; private set; }
+
+        /// <summary>
+        /// Gets the state that this entity is currently in as a <see cref="KnownStates"/>.
+        /// </summary>
+        [JsonIgnore]
+        public KnownStates KnownState => this.State.AsKnownState();
 
         /// <summary>
         /// Gets the entity's current attributes and values.

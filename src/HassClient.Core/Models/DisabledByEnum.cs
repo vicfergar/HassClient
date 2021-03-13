@@ -19,6 +19,11 @@
         ConfigEntry,
 
         /// <summary>
+        /// The entity has been disabled by the entity device.
+        /// </summary>
+        Device,
+
+        /// <summary>
         /// The entity has been disabled by the Home Assistant.
         /// </summary>
         Hass,

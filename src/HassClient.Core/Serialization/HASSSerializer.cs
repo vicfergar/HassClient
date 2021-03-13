@@ -155,8 +155,9 @@ namespace HassClient.Serialization
             where TEnum : Enum
         {
             if (value is KnownDomains ||
+                value is KnownEventTypes ||
                 value is KnownServices ||
-                value is KnownEventTypes)
+                value is KnownStates)
             {
                 throw new InvalidOperationException($"For known enums use {nameof(KnownEnumHelpers)} extension methods.");
             }

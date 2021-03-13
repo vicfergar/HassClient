@@ -1,5 +1,6 @@
 ﻿using HassClient.Models;
 using HassClient.Serialization;
+using System;
 
 namespace HassClient.Helpers
 {
@@ -24,6 +25,11 @@ namespace HassClient.Helpers
         /// </returns>
         public static KnownDomains AsKnownDomain(this string domain)
         {
+            if (string.IsNullOrEmpty(domain))
+            {
+                throw new ArgumentException($"'{nameof(domain)}' cannot be null or empty", nameof(domain));
+            }
+
             if (!knownDomainsCache.Forward.TryGetValue(domain, out var result) &&
                 HassSerializer.TryGetEnumFromSnakeCase(domain, out result))
             {
@@ -51,6 +57,51 @@ namespace HassClient.Helpers
             return result;
         }
 
+        private static Map<string, KnownEventTypes> knownEventTypesCache = new Map<string, KnownEventTypes>();
+
+        /// <summary>
+        /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownDomains"/>.
+        /// </summary>
+        /// <param name="eventType">
+        /// The event type as a snake case <see cref="string"/>. (e.g. <c>state_changed</c>).
+        /// </param>
+        /// <returns>
+        /// The event type as a <see cref="KnownEventTypes"/> if defined; otherwise, <see cref="KnownEventTypes.Any"/>.
+        /// </returns>
+        public static KnownEventTypes AsKnownEventType(this string eventType)
+        {
+            if (string.IsNullOrEmpty(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or empty", nameof(eventType));
+            }
+
+            if (!knownEventTypesCache.Forward.TryGetValue(eventType, out var result) &&
+                HassSerializer.TryGetEnumFromSnakeCase(eventType, out result))
+            {
+                knownEventTypesCache.Add(eventType, result);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts a given <see cref="KnownEventTypes"/> to a snake case <see cref="string"/>.
+        /// </summary>
+        /// <param name="eventType">A <see cref="KnownEventTypes"/>.</param>
+        /// <returns>
+        /// The service as a <see cref="string"/>.
+        /// </returns>
+        public static string ToEventTypeString(this KnownEventTypes eventType)
+        {
+            if (!knownEventTypesCache.Reverse.TryGetValue(eventType, out var result))
+            {
+                result = eventType.ToSnakeCaseUnchecked();
+                knownEventTypesCache.Add(result, eventType);
+            }
+
+            return result;
+        }
+
         private static Map<string, KnownServices> knownServicesCache = new Map<string, KnownServices>();
 
         /// <summary>
@@ -64,6 +115,11 @@ namespace HassClient.Helpers
         /// </returns>
         public static KnownServices AsKnownService(this string service)
         {
+            if (string.IsNullOrEmpty(service))
+            {
+                throw new ArgumentException($"'{nameof(service)}' cannot be null or empty", nameof(service));
+            }
+
             if (!knownServicesCache.Forward.TryGetValue(service, out var result) &&
                 HassSerializer.TryGetEnumFromSnakeCase(service, out result))
             {
@@ -91,41 +147,46 @@ namespace HassClient.Helpers
             return result;
         }
 
-        private static Map<string, KnownEventTypes> knownEventTypesCache = new Map<string, KnownEventTypes>();
+        private static Map<string, KnownStates> knownStatesCache = new Map<string, KnownStates>();
 
         /// <summary>
-        /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownDomains"/>.
+        /// Converts a given snake case <paramref name="state"/> to <see cref="KnownStates"/>.
         /// </summary>
-        /// <param name="eventType">
-        /// The event type as a snake case <see cref="string"/>. (e.g. <c>state_changed</c>).
+        /// <param name="state">
+        /// The state as a snake case <see cref="string"/>. (e.g. <c>above_horizon</c>).
         /// </param>
         /// <returns>
-        /// The event type as a <see cref="KnownEventTypes"/> if defined; otherwise, <see cref="KnownEventTypes.Any"/>.
+        /// The state as a <see cref="KnownStates"/> if defined; otherwise, <see cref="KnownStates.Undefined"/>.
         /// </returns>
-        public static KnownEventTypes AsKnownEventType(this string eventType)
+        public static KnownStates AsKnownState(this string state)
         {
-            if (!knownEventTypesCache.Forward.TryGetValue(eventType, out var result) &&
-                HassSerializer.TryGetEnumFromSnakeCase(eventType, out result))
+            if (string.IsNullOrEmpty(state))
             {
-                knownEventTypesCache.Add(eventType, result);
+                return KnownStates.Unknown;
+            }
+
+            if (!knownStatesCache.Forward.TryGetValue(state, out var result) &&
+                HassSerializer.TryGetEnumFromSnakeCase(state, out result))
+            {
+                knownStatesCache.Add(state, result);
             }
 
             return result;
         }
 
         /// <summary>
-        /// Converts a given <see cref="KnownEventTypes"/> to a snake case <see cref="string"/>.
+        /// Converts a given <see cref="KnownStates"/> to a snake case <see cref="string"/>.
         /// </summary>
-        /// <param name="eventType">A <see cref="KnownEventTypes"/>.</param>
+        /// <param name="state">A <see cref="KnownStates"/>.</param>
         /// <returns>
-        /// The service as a <see cref="string"/>.
+        /// The state as a <see cref="string"/>.
         /// </returns>
-        public static string ToEventTypeString(this KnownEventTypes eventType)
+        public static string ToStateString(this KnownStates state)
         {
-            if (!knownEventTypesCache.Reverse.TryGetValue(eventType, out var result))
+            if (!knownStatesCache.Reverse.TryGetValue(state, out var result))
             {
-                result = eventType.ToSnakeCaseUnchecked();
-                knownEventTypesCache.Add(result, eventType);
+                result = state.ToSnakeCaseUnchecked();
+                knownStatesCache.Add(result, state);
             }
 
             return result;

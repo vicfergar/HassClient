@@ -1,6 +1,7 @@
 ﻿using HassClient.Helpers;
 using HassClient.Models;
 using NUnit.Framework;
+using System;
 
 namespace HassClient.Core.Tests
 {
@@ -40,8 +41,24 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
+        public void NullStringAsEventTypeThrows()
+        {
+            Assert.Throws<ArgumentException>(() => ((string)null).AsKnownEventType());
+        }
+
+        [Test]
+        public void EmptyStringAsEventTypeThrows()
+        {
+            Assert.Throws<ArgumentException>(() => string.Empty.AsKnownEventType());
+        }
+
+        [Test]
         [TestCase("adguard")]
+        [TestCase("air_quality")]
+        [TestCase("alarm_control_panel")]
         [TestCase("automation")]
+        [TestCase("binary_sensor")]
+        [TestCase("calendar")]
         [TestCase("camera")]
         [TestCase("cast")]
         [TestCase("climate")]
@@ -59,6 +76,8 @@ namespace HassClient.Core.Tests
         [TestCase("hassio")]
         [TestCase("homeassistant")]
         [TestCase("html5")]
+        [TestCase("humidifier")]
+        [TestCase("image_processing")]
         [TestCase("input_boolean")]
         [TestCase("input_datetime")]
         [TestCase("input_number")]
@@ -68,6 +87,7 @@ namespace HassClient.Core.Tests
         [TestCase("lock")]
         [TestCase("logbook")]
         [TestCase("logger")]
+        [TestCase("mailbox")]
         [TestCase("media_player")]
         [TestCase("mqtt")]
         [TestCase("notify")]
@@ -79,8 +99,10 @@ namespace HassClient.Core.Tests
         [TestCase("remote")]
         [TestCase("scene")]
         [TestCase("script")]
+        [TestCase("sensor")]
         [TestCase("speedtestdotnet")]
         [TestCase("stream")]
+        [TestCase("sun")]
         [TestCase("switch")]
         [TestCase("system_log")]
         [TestCase("template")]
@@ -88,6 +110,8 @@ namespace HassClient.Core.Tests
         [TestCase("tts")]
         [TestCase("vacuum")]
         [TestCase("wake_on_lan")]
+        [TestCase("water_heater")]
+        [TestCase("weather")]
         [TestCase("webos_tv")]
         [TestCase("xiaomi_miio")]
         [TestCase("zha")]
@@ -96,6 +120,18 @@ namespace HassClient.Core.Tests
         {
             var result = snakeCaseValue.AsKnownDomain();
             Assert.AreNotEqual(KnownDomains.Undefined, result);
+        }
+
+        [Test]
+        public void NullStringAsKnownDomainThrows()
+        {
+            Assert.Throws<ArgumentException>(() => ((string)null).AsKnownDomain());
+        }
+
+        [Test]
+        public void EmptyStringAsKnownDomainThrows()
+        {
+            Assert.Throws<ArgumentException>(() => string.Empty.AsKnownDomain());
         }
 
         [Test]
@@ -240,6 +276,114 @@ namespace HassClient.Core.Tests
         {
             var result = snakeCaseValue.AsKnownService();
             Assert.AreNotEqual(KnownServices.Undefined, result);
+        }
+
+        [Test]
+        public void NullStringAsKnownServiceThrows()
+        {
+            Assert.Throws<ArgumentException>(() => ((string)null).AsKnownService());
+        }
+
+        [Test]
+        public void EmptyStringAsKnownServiceThrows()
+        {
+            Assert.Throws<ArgumentException>(() => string.Empty.AsKnownService());
+        }
+
+        [TestCase("above_horizon")]
+        [TestCase("active")]
+        [TestCase("armed")]
+        [TestCase("armed_away")]
+        [TestCase("armed_custom_bypass")]
+        [TestCase("armed_home")]
+        [TestCase("armed_night")]
+        [TestCase("arming")]
+        [TestCase("auto")]
+        [TestCase("backed_up")]
+        [TestCase("bellow_horizon")]
+        [TestCase("cleaning")]
+        [TestCase("clear-night")]
+        [TestCase("closed")]
+        [TestCase("closing")]
+        [TestCase("cloudy")]
+        [TestCase("configure")]
+        [TestCase("configured")]
+        [TestCase("cool")]
+        [TestCase("dead")]
+        [TestCase("disarmed")]
+        [TestCase("disarming")]
+        [TestCase("discharging")]
+        [TestCase("docked")]
+        [TestCase("dry")]
+        [TestCase("eco")]
+        [TestCase("error")]
+        [TestCase("exceptional")]
+        [TestCase("fan_only")]
+        [TestCase("far")]
+        [TestCase("fog")]
+        [TestCase("hail")]
+        [TestCase("Hans")]
+        [TestCase("heat")]
+        [TestCase("heat_cool")]
+        [TestCase("home")]
+        [TestCase("idle")]
+        [TestCase("initializing")]
+        [TestCase("lightning")]
+        [TestCase("lightning-rainy")]
+        [TestCase("locked")]
+        [TestCase("none")]
+        [TestCase("not_home")]
+        [TestCase("notifying")]
+        [TestCase("off")]
+        [TestCase("ok")]
+        [TestCase("on")]
+        [TestCase("open")]
+        [TestCase("opening")]
+        [TestCase("partlycloudy")]
+        [TestCase("paused")]
+        [TestCase("pending")]
+        [TestCase("playing")]
+        [TestCase("pouring")]
+        [TestCase("priority_only")]
+        [TestCase("problem")]
+        [TestCase("rainy")]
+        [TestCase("ready")]
+        [TestCase("recording")]
+        [TestCase("returning")]
+        [TestCase("sleeping")]
+        [TestCase("snowy")]
+        [TestCase("snowy-rainy")]
+        [TestCase("standby")]
+        [TestCase("still")]
+        [TestCase("stopped")]
+        [TestCase("streaming")]
+        [TestCase("sunny")]
+        [TestCase("triggered")]
+        [TestCase("unavailable")]
+        [TestCase("unknown")]
+        [TestCase("unlocked")]
+        [TestCase("vibrate")]
+        [TestCase("windy")]
+        [TestCase("windy-variant")]
+        [TestCase("zoning")]
+        public void AllKnownStatesCanBeParsed(string snakeCaseValue)
+        {
+            var result = snakeCaseValue.AsKnownState();
+            Assert.AreNotEqual(KnownStates.Undefined, result);
+        }
+
+        [Test]
+        public void NullStringAsKnownStateReturnsUnknown()
+        {
+            var result = ((string)null).AsKnownState();
+            Assert.AreEqual(KnownStates.Unknown, result);
+        }
+
+        [Test]
+        public void EmptyStringAsKnownStateReturnsUnknown()
+        {
+            var result = string.Empty.AsKnownState();
+            Assert.AreEqual(KnownStates.Unknown, result);
         }
     }
 }
