@@ -550,6 +550,7 @@ namespace HassClient.WS
         /// Refresh a given <see cref="EntityRegistryEntry"/> with the values from the server.
         /// </summary>
         /// <param name="entityRegistryEntry">The entity registry entry to refresh.</param>
+        /// <param name="newEntityId">If not <see langword="null"/>, it will be used as entity id.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
@@ -557,9 +558,10 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// refresh operation was successfully done.
         /// </returns>
-        public async Task<bool> RefreshEntityAsync(EntityRegistryEntry entityRegistryEntry, CancellationToken cancellationToken = default)
+        public async Task<bool> RefreshEntityAsync(EntityRegistryEntry entityRegistryEntry, string newEntityId = null, CancellationToken cancellationToken = default)
         {
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateGetMessage(entityRegistryEntry.EntityId);
+            var entityId = newEntityId ?? entityRegistryEntry.EntityId;
+            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateGetMessage(entityId);
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (!result.Success)
             {
