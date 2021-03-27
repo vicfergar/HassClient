@@ -21,7 +21,7 @@ namespace HassClient.WS.Tests
         [TestCaseSource(nameof(GetItemTypes))]
         public async Task SearchRelatedUnknown(ItemTypes itemTypes)
         {
-            var result = await this.hassWSApi.SearchRelated(itemTypes, $"Unknown_{DateTime.Now.Ticks}");
+            var result = await this.hassWSApi.SearchRelatedAsync(itemTypes, $"Unknown_{DateTime.Now.Ticks}");
 
             Assert.NotNull(result);
             Assert.IsNull(result.AreaIds);
@@ -34,7 +34,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task SearchRelatedKnownEntity()
         {
-            var result = await this.hassWSApi.SearchRelated(ItemTypes.Entity, "light.bed_light");
+            var result = await this.hassWSApi.SearchRelatedAsync(ItemTypes.Entity, "light.bed_light");
 
             Assert.NotNull(result);
             Assert.NotNull(result.ConfigEntryIds);

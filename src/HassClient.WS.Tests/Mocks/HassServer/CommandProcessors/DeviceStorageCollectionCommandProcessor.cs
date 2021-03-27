@@ -4,7 +4,7 @@ using HassClient.WS.Messages;
 namespace HassClient.WS.Tests.Mocks.HassServer
 {
     internal class DeviceStorageCollectionCommandProcessor
-        : StorageCollectionCommandProcessor<DeviceRegistryMessagesFactory, Device>
+        : RegistryEntryCollectionCommandProcessor<DeviceRegistryMessagesFactory, Device>
     {
         protected override void PrepareHassContext(MockHassServerRequestContext context)
         {

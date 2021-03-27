@@ -4,7 +4,7 @@ using HassClient.Serialization;
 
 namespace HassClient.WS.Messages
 {
-    internal class EntityRegistryMessagesFactory : StorageCollectionMessagesFactory<EntityRegistryEntry>
+    internal class EntityRegistryMessagesFactory : RegistryEntryCollectionMessagesFactory<EntityRegistryEntry>
     {
         public static EntityRegistryMessagesFactory Instance = new EntityRegistryMessagesFactory();
 

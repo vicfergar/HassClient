@@ -3,7 +3,7 @@ using HassClient.Models;
 
 namespace HassClient.WS.Messages
 {
-    internal class UserMessagesFactory : StorageCollectionMessagesFactory<User>
+    internal class UserMessagesFactory : RegistryEntryCollectionMessagesFactory<User>
     {
         public static UserMessagesFactory Instance = new UserMessagesFactory();
 

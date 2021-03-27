@@ -7,10 +7,10 @@ using System.Collections.Generic;
 namespace HassClient.WS.Messages.Commands
 {
     /// <summary>
-    /// Factory used to create Storage Collection Messages.
+    /// Factory used to create Registry Entry Collection Messages.
     /// </summary>
     /// <typeparam name="TModel">The modifiable model type associated with the Storage Collection.</typeparam>
-    public abstract class StorageCollectionMessagesFactory<TModel>
+    public abstract class RegistryEntryCollectionMessagesFactory<TModel>
         where TModel : RegistryEntryBase
     {
         private readonly string apiPrefix;
@@ -28,11 +28,11 @@ namespace HassClient.WS.Messages.Commands
         public string ModelName => this.modelName;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StorageCollectionMessagesFactory{TModel}"/> class.
+        /// Initializes a new instance of the <see cref="RegistryEntryCollectionMessagesFactory{TModel}"/> class.
         /// </summary>
         /// <param name="apiPrefix">The API prefix used in underlaying message types.</param>
         /// <param name="modelName">The name used to generate model identifier property.</param>
-        protected StorageCollectionMessagesFactory(string apiPrefix, string modelName)
+        protected RegistryEntryCollectionMessagesFactory(string apiPrefix, string modelName)
         {
             if (string.IsNullOrEmpty(apiPrefix))
             {
@@ -47,16 +47,6 @@ namespace HassClient.WS.Messages.Commands
             /* TODO: Implement other found API prefixes:
              * "lovelace/resources"
              * "lovelace/dashboards"
-             * "tag"
-             * "image"
-             * "counter"
-             * "input_number"
-             * "input_select"
-             * "input_text
-             * "zone"
-             * "timer"
-             * "input_datetime"
-             * "person"
              */
 
             this.apiPrefix = apiPrefix;

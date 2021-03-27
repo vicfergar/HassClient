@@ -195,6 +195,30 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Refresh the configuration in use by the Home Assistant instance.
+        /// </summary>
+        /// <param name="configuration">The configuration model to be refreshed.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// refresh operation was successfully done.
+        /// </returns>
+        public async Task<bool> RefreshConfigurationAsync(Configuration configuration, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new GetConfigMessage();
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (!result.Success)
+            {
+                return false;
+            }
+
+            result.PopulateResult(configuration);
+            return true;
+        }
+
+        /// <summary>
         /// Gets the <see cref="PanelInfo"/> of the panel located at the specified <paramref name="urlPath"/> in the Home Assistant instance.
         /// </summary>
         /// <param name="urlPath">The URL path of the panel.</param>
@@ -762,94 +786,6 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Gets a collection with every registered <see cref="InputBoolean"/> entity in the Home Assistant instance.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a collection with
-        /// every registered <see cref="InputBoolean"/> entity in the Home Assistant instance.
-        /// </returns>
-        public Task<IEnumerable<InputBoolean>> GetInputBooleansAsync(CancellationToken cancellationToken = default)
-        {
-            var commandMessage = InputBooleanMessagesFactory.Instance.CreateListMessage();
-            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<InputBoolean>>(commandMessage, cancellationToken);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="InputBoolean"/> entity.
-        /// </summary>
-        /// <param name="value">The new <see cref="InputBoolean"/> entity.</param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
-        /// create operation was successfully done.
-        /// </returns>
-        public async Task<bool> CreateInputBooleanAsync(InputBoolean value, CancellationToken cancellationToken = default)
-        {
-            var commandMessage = InputBooleanMessagesFactory.Instance.CreateCreateMessage(value);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
-            if (result.Success)
-            {
-                result.PopulateResult(value);
-            }
-
-            return result.Success;
-        }
-
-        /// <summary>
-        /// Updates an existing <see cref="InputBoolean"/> entity.
-        /// </summary>
-        /// <param name="inputBoolean">The <see cref="InputBoolean"/> entity with the new values.</param>
-        /// <param name="forceUpdate">
-        /// Indicates if the update operation should force the update of every modifiable property.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
-        /// update operation was successfully done.
-        /// </returns>
-        public async Task<bool> UpdateInputBooleanAsync(InputBoolean inputBoolean, bool forceUpdate = false, CancellationToken cancellationToken = default)
-        {
-            var commandMessage = InputBooleanMessagesFactory.Instance.CreateUpdateMessage(inputBoolean, forceUpdate);
-            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
-            if (result.Success)
-            {
-                result.PopulateResult(inputBoolean);
-            }
-
-            return result.Success;
-        }
-
-        /// <summary>
-        /// Deletes an existing <see cref="InputBoolean"/> entity.
-        /// </summary>
-        /// <param name="inputBoolean">The <see cref="InputBoolean"/> entity to delete.</param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
-        /// delete operation was successfully done.
-        /// </returns>
-        public async Task<bool> DeleteInputBooleanAsync(InputBoolean inputBoolean, CancellationToken cancellationToken = default)
-        {
-            var commandMessage = InputBooleanMessagesFactory.Instance.CreateDeleteMessage(inputBoolean);
-            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
-            if (success)
-            {
-                inputBoolean.Untrack();
-            }
-
-            return success;
-        }
-
-        /// <summary>
         /// Gets a collection with every registered <see cref="User"/> in the Home Assistant instance.
         /// </summary>
         /// <param name="cancellationToken">
@@ -940,6 +876,122 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Gets a collection with every registered storage entity registry entry of the given type
+        /// in the Home Assistant instance.
+        /// </summary>
+        /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <typeparamref name="TStorageEntity"/> entity in the Home Assistant instance.
+        /// </returns>
+        public async Task<IEnumerable<TStorageEntity>> GetStorageEntityRegistryEntriesAsync<TStorageEntity>(CancellationToken cancellationToken = default)
+            where TStorageEntity : StorageEntityRegistryEntryBase
+        {
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateListMessage();
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                if (typeof(TStorageEntity) == typeof(Person))
+                {
+                    var response = result.DeserializeResult<PersonResponse>();
+                    return response.Storage
+                                   .Select(person =>
+                                   {
+                                       person.IsStorageEntry = true;
+                                       return person;
+                                   })
+                                   .Concat(response.Config)
+                                   .Cast<TStorageEntity>();
+                }
+
+                return result.DeserializeResult<IEnumerable<TStorageEntity>>();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Creates a new storage entity registry entry of the given type.
+        /// </summary>
+        /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
+        /// <param name="storageEntity">The new storage entity registry entry.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// create operation was successfully done.
+        /// </returns>
+        public async Task<bool> CreateStorageEntityRegistryEntryAsync<TStorageEntity>(TStorageEntity storageEntity, CancellationToken cancellationToken = default)
+            where TStorageEntity : StorageEntityRegistryEntryBase
+        {
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateCreateMessage(storageEntity);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(storageEntity);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Updates an existing storage entity registry entry of the given type.
+        /// </summary>
+        /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
+        /// <param name="storageEntity">The storage entity registry entry with the updated values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateStorageEntityRegistryEntryAsync<TStorageEntity>(TStorageEntity storageEntity, bool forceUpdate = false, CancellationToken cancellationToken = default)
+            where TStorageEntity : StorageEntityRegistryEntryBase
+        {
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateUpdateMessage(storageEntity, forceUpdate);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(storageEntity);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Deletes an existing storage entity registry entry of the given type.
+        /// </summary>
+        /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
+        /// <param name="storageEntity">The storage entity registry entry to delete.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// delete operation was successfully done.
+        /// </returns>
+        public async Task<bool> DeleteStorageEntityRegistryEntryAsync<TStorageEntity>(TStorageEntity storageEntity, CancellationToken cancellationToken = default)
+            where TStorageEntity : StorageEntityRegistryEntryBase
+        {
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateDeleteMessage(storageEntity);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                storageEntity.Untrack();
+            }
+
+            return success;
+        }
+
+        /// <summary>
         /// Performs a search related operation for the specified item id.
         /// </summary>
         /// <param name="itemType">The item type.</param>
@@ -951,7 +1003,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a <see cref="SearchRelatedResponse"/>
         /// with all found relations.
         /// </returns>
-        public Task<SearchRelatedResponse> SearchRelated(ItemTypes itemType, string itemId, CancellationToken cancellationToken = default)
+        public Task<SearchRelatedResponse> SearchRelatedAsync(ItemTypes itemType, string itemId, CancellationToken cancellationToken = default)
         {
             var commandMessage = new SearchRelatedMessage(itemType, itemId);
             return this.hassClientWebSocket.SendCommandWithResultAsync<SearchRelatedResponse>(commandMessage, cancellationToken);

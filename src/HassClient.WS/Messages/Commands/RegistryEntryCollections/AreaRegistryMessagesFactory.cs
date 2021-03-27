@@ -3,7 +3,7 @@ using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
-    internal class AreaRegistryMessagesFactory : StorageCollectionMessagesFactory<Area>
+    internal class AreaRegistryMessagesFactory : RegistryEntryCollectionMessagesFactory<Area>
     {
         public static AreaRegistryMessagesFactory Instance = new AreaRegistryMessagesFactory();
 

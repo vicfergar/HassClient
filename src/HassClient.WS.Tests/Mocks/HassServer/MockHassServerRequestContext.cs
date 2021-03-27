@@ -51,11 +51,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 new CallServiceCommandProcessor(),
                 new GetServicesCommandProcessor(),
                 new GetStatesCommandProcessor(),
-                new StorageCollectionCommandProcessor<InputBooleanMessagesFactory, InputBoolean>(),
-                new StorageCollectionCommandProcessor<AreaRegistryMessagesFactory, Area>(),
+                new RegistryEntryCollectionCommandProcessor<AreaRegistryMessagesFactory, Area>(),
                 new DeviceStorageCollectionCommandProcessor(),
                 new UserStorageCollectionCommandProcessor(),
                 new EntityRegistryStorageCollectionCommandProcessor(),
+                new StorageCollectionCommandProcessor<InputBoolean>(),
+                new StorageCollectionCommandProcessor<Zone>(),
             };
         }
 

@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using HassClient.Helpers;
 using HassClient.Models;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ namespace HassClient.WS.Tests.Mocks
             .RuleFor(x => x.EntityId, f => f.RandomEntityId())
             .RuleFor(x => x.Context, f => ContextFaker.Generate())
             .RuleFor(x => x.State, f => f.RandomEntityState())
-            .RuleFor(x => x.Attributes, (f, x) => new Dictionary<string, object>() { { "friendly_name", x.EntityId.SplitEntityId()[1] } });
+            .RuleFor(x => x.Attributes, (f, x) => new Dictionary<string, JRaw>() { { "friendly_name", new JRaw($"\"{x.EntityId.SplitEntityId()[1]}\"") } });
 
         public static readonly Faker<StateChangedEvent> StateChangedEventFaker =
             new Faker<StateChangedEvent>()

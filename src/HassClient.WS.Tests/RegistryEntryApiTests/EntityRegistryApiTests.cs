@@ -24,7 +24,7 @@ namespace HassClient.WS.Tests
         {
             await base.OneTimeSetUp();
             this.testInputBoolean = new InputBoolean(MockHelpers.GetRandomTestName(), "mdi:switch");
-            var result = await this.hassWSApi.CreateInputBooleanAsync(this.testInputBoolean);
+            var result = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(this.testInputBoolean);
             this.testEntityId = this.testInputBoolean.EntityId;
 
             Assert.IsTrue(result, "SetUp failed");
@@ -33,7 +33,7 @@ namespace HassClient.WS.Tests
         protected override async Task OneTimeTearDown()
         {
             await base.OneTimeTearDown();
-            await this.hassWSApi.DeleteInputBooleanAsync(this.testInputBoolean);
+            await this.hassWSApi.DeleteStorageEntityRegistryEntryAsync(this.testInputBoolean);
         }
 
         [Test]

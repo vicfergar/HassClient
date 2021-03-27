@@ -114,10 +114,10 @@ Render a Home Assistant template. [See template docs for more information](https
 string result = await hassWSApi.RenderTemplateAsync("Paulus is at {{ states('sun.sun') }} {{ states('binary_sensor.is_rainy') }}!");
 ```
 
-### Storage Collections
-Home Assistant defines a `Storage Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
+### RegistryEntry Collections
+Home Assistant defines a `Registry Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
 
-At the momment only `Area`, `Device`, `InputBoolean`, `RegistryEntry` and `User` items are exposed.
+At the momment only `Area`, `Device`, `RegistryEntry` and `User` entries are defined.
 
 ```csharp
 // List
@@ -133,6 +133,27 @@ bool updateResult = await hassWSApi.UpdateArea(hallArea);
 
 // Delete
 bool deleteResult = await hassWSApi.DeleteAreaAsync(hallArea);
+```
+
+#### Storage Collections
+A `Storage Collection` constains a special registry entry type to store entities. The Web Socket API exposes four methods to `list`, `create`, `update` and `delete` this type of entries.
+
+At the momment only `InputBoolean`, `Person` and `Zone` entity models are defined.
+
+```csharp
+// List
+IEnumerable<InputBoolean> inputBooleans = await hassWSApi.GetStorageEntityRegistryEntriesAsync<InputBoolean>();
+
+// Create
+var alarmInputBoolean = new InputBoolean("Alarm");
+bool createResult = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(alarmInputBoolean);
+
+// Update
+alarmInputBoolean.Name = "Alarm_1";
+bool updateResult = await hassWSApi.UpdateArea(alarmInputBoolean);
+
+// Delete
+bool deleteResult = await hassWSApi.DeleteAreaAsync(alarmInputBoolean);
 ```
 
 ### Search related

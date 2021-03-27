@@ -4,7 +4,7 @@ using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
-    internal class DeviceRegistryMessagesFactory : StorageCollectionMessagesFactory<Device>
+    internal class DeviceRegistryMessagesFactory : RegistryEntryCollectionMessagesFactory<Device>
     {
         public static DeviceRegistryMessagesFactory Instance = new DeviceRegistryMessagesFactory();
 

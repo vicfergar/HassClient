@@ -11,7 +11,7 @@ using HassClient.Serialization;
 namespace HassClient.WS.Tests.Mocks.HassServer
 {
     internal class EntityRegistryStorageCollectionCommandProcessor
-        : StorageCollectionCommandProcessor<EntityRegistryMessagesFactory, EntityRegistryEntry>
+        : RegistryEntryCollectionCommandProcessor<EntityRegistryMessagesFactory, EntityRegistryEntry>
     {
         private class MockRegistryEntity : EntityRegistryEntry
         {
@@ -56,7 +56,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                    commandType.EndsWith("remove");
         }
 
-        protected override IEnumerable<EntityRegistryEntry> ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
         {
             return context.HassDB.GetAllEntityEntries().Select(x => x as EntityRegistryEntry ?? EntityRegistryEntry.CreateFromEntry(x));
         }
