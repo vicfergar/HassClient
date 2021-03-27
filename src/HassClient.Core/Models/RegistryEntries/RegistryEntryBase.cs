@@ -13,6 +13,11 @@ namespace HassClient.Models
         private IModifiableProperty[] modifiableProperties;
 
         /// <summary>
+        /// Gets a value indicating whether the object has been deserialized.
+        /// </summary>
+        protected bool isDeserialized;
+
+        /// <summary>
         /// Gets the unique identifier that represents this Registry Entry.
         /// </summary>
         internal protected abstract string UniqueId { get; set; }
@@ -21,13 +26,19 @@ namespace HassClient.Models
         /// Gets a value indicating that the registry entry already exists on the Home Assistant instance.
         /// </summary>
         [JsonIgnore]
-        public bool IsTracked => this.UniqueId != null;
+        public bool IsTracked => this.isDeserialized && this.UniqueId != null;
+
+        /// <summary>
+        /// Gets a value indicating that the registry entry is marked as dirty and is pending to be updated.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsDirty { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating that the model has pending changes waiting to update.
         /// </summary>
         [JsonIgnore]
-        public bool HasPendingChanges => this.modifiableProperties.Any(x => x.HasPendingChange);
+        public bool HasPendingChanges => this.modifiableProperties.Any(x => x.HasPendingChanges);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RegistryEntryBase"/> class.
@@ -46,6 +57,7 @@ namespace HassClient.Models
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
+            this.isDeserialized = true;
             this.SaveChanges();
         }
 
@@ -70,7 +82,7 @@ namespace HassClient.Models
         {
             foreach (var property in this.modifiableProperties)
             {
-                property.DiscardPendingChange();
+                property.DiscardPendingChanges();
             }
         }
 
@@ -88,7 +100,7 @@ namespace HassClient.Models
         internal IEnumerable<string> GetModifiedPropertyNames()
         {
             return this.modifiableProperties
-                       .Where(x => x.HasPendingChange)
+                       .Where(x => x.HasPendingChanges)
                        .Select(x => x.Name);
         }
     }

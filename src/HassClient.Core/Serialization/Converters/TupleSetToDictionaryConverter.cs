@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace HassClient.Serialization
@@ -8,10 +9,10 @@ namespace HassClient.Serialization
     /// <summary>
     /// Converter to convert Set[Tuple[str, str]] to <see cref="Dictionary{TKey, TValue}"/>.
     /// </summary>
-    public class TupleSetToDictionaryConverter : JsonConverter
+    public class TupleSetToDictionaryConverter : JsonConverter<Dictionary<string, string>>
     {
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, Dictionary<string, string> value, JsonSerializer serializer)
         {
             var valueDic = value as Dictionary<string, string>;
             var array = valueDic.Select(x => new[] { x.Key, x.Value }).ToArray();
@@ -19,7 +20,7 @@ namespace HassClient.Serialization
         }
 
         /// <inheritdoc />
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override Dictionary<string, string> ReadJson(JsonReader reader, Type objectType, [AllowNull] Dictionary<string, string> existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var array = serializer.Deserialize<string[][]>(reader);
 
@@ -30,12 +31,6 @@ namespace HassClient.Serialization
             }
 
             return array.ToDictionary(x => x[0], x => x.Length > 1 ? x[1] : null);
-        }
-
-        /// <inheritdoc />
-        public override bool CanConvert(Type type)
-        {
-            return type == typeof(Dictionary<string, string>);
         }
     }
 }

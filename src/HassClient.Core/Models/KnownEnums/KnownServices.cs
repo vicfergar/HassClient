@@ -84,8 +84,11 @@ namespace HassClient.Models
         See,
 
         // Fan
+        DecreaseSpeed,
+        IncreaseSpeed,
         Oscillate,
         SetDirection,
+        SetPercentage,
         SetSpeed,
 
         // Frontend

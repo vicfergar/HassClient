@@ -80,7 +80,7 @@ namespace HassClient.Core.Tests
         private User CreateTestEntry(out string name)
         {
             name = MockHelpers.GetRandomTestName();
-            return User.CreateUnmodified(name, false);
+            return User.CreateUnmodified("testId", name, false);
         }
     }
 }

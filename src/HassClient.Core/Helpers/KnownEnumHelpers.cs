@@ -1,6 +1,7 @@
 ﻿using HassClient.Models;
 using HassClient.Serialization;
 using System;
+using System.Collections.Generic;
 
 namespace HassClient.Helpers
 {
@@ -12,9 +13,9 @@ namespace HassClient.Helpers
     /// <see cref="HassSerializer.ToSnakeCase{TEnum}(TEnum)"/>.
     /// </para>
     /// </summary>
-    public static class KnownEnumHelpers
+    public static partial class KnownEnumHelpers
     {
-        private static Map<string, KnownDomains> knownDomainsCache = new Map<string, KnownDomains>();
+        private static KnownEnumCache<KnownDomains> knownDomainsCache = new KnownEnumCache<KnownDomains>();
 
         /// <summary>
         /// Converts a given <paramref name="domain"/> to <see cref="KnownDomains"/>.
@@ -30,13 +31,7 @@ namespace HassClient.Helpers
                 throw new ArgumentException($"'{nameof(domain)}' cannot be null or empty", nameof(domain));
             }
 
-            if (!knownDomainsCache.Forward.TryGetValue(domain, out var result) &&
-                HassSerializer.TryGetEnumFromSnakeCase(domain, out result))
-            {
-                knownDomainsCache.Add(domain, result);
-            }
-
-            return result;
+            return knownDomainsCache.AsEnum(domain);
         }
 
         /// <summary>
@@ -48,16 +43,10 @@ namespace HassClient.Helpers
         /// </returns>
         public static string ToDomainString(this KnownDomains domain)
         {
-            if (!knownDomainsCache.Reverse.TryGetValue(domain, out var result))
-            {
-                result = domain.ToSnakeCaseUnchecked();
-                knownDomainsCache.Add(result, domain);
-            }
-
-            return result;
+            return knownDomainsCache.AsString(domain);
         }
 
-        private static Map<string, KnownEventTypes> knownEventTypesCache = new Map<string, KnownEventTypes>();
+        private static KnownEnumCache<KnownEventTypes> knownEventTypesCache = new KnownEnumCache<KnownEventTypes>();
 
         /// <summary>
         /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownDomains"/>.
@@ -75,13 +64,7 @@ namespace HassClient.Helpers
                 throw new ArgumentException($"'{nameof(eventType)}' cannot be null or empty", nameof(eventType));
             }
 
-            if (!knownEventTypesCache.Forward.TryGetValue(eventType, out var result) &&
-                HassSerializer.TryGetEnumFromSnakeCase(eventType, out result))
-            {
-                knownEventTypesCache.Add(eventType, result);
-            }
-
-            return result;
+            return knownEventTypesCache.AsEnum(eventType);
         }
 
         /// <summary>
@@ -93,16 +76,10 @@ namespace HassClient.Helpers
         /// </returns>
         public static string ToEventTypeString(this KnownEventTypes eventType)
         {
-            if (!knownEventTypesCache.Reverse.TryGetValue(eventType, out var result))
-            {
-                result = eventType.ToSnakeCaseUnchecked();
-                knownEventTypesCache.Add(result, eventType);
-            }
-
-            return result;
+            return knownEventTypesCache.AsString(eventType);
         }
 
-        private static Map<string, KnownServices> knownServicesCache = new Map<string, KnownServices>();
+        private static KnownEnumCache<KnownServices> knownServicesCache = new KnownEnumCache<KnownServices>();
 
         /// <summary>
         /// Converts a given snake case <paramref name="service"/> to <see cref="KnownServices"/>.
@@ -120,13 +97,7 @@ namespace HassClient.Helpers
                 throw new ArgumentException($"'{nameof(service)}' cannot be null or empty", nameof(service));
             }
 
-            if (!knownServicesCache.Forward.TryGetValue(service, out var result) &&
-                HassSerializer.TryGetEnumFromSnakeCase(service, out result))
-            {
-                knownServicesCache.Add(service, result);
-            }
-
-            return result;
+            return knownServicesCache.AsEnum(service);
         }
 
         /// <summary>
@@ -138,16 +109,10 @@ namespace HassClient.Helpers
         /// </returns>
         public static string ToServiceString(this KnownServices service)
         {
-            if (!knownServicesCache.Reverse.TryGetValue(service, out var result))
-            {
-                result = service.ToSnakeCaseUnchecked();
-                knownServicesCache.Add(result, service);
-            }
-
-            return result;
+            return knownServicesCache.AsString(service);
         }
 
-        private static Map<string, KnownStates> knownStatesCache = new Map<string, KnownStates>();
+        private static KnownEnumCache<KnownStates> knownStatesCache = new KnownEnumCache<KnownStates>(KnownStates.Unknown);
 
         /// <summary>
         /// Converts a given snake case <paramref name="state"/> to <see cref="KnownStates"/>.
@@ -160,18 +125,7 @@ namespace HassClient.Helpers
         /// </returns>
         public static KnownStates AsKnownState(this string state)
         {
-            if (string.IsNullOrEmpty(state))
-            {
-                return KnownStates.Unknown;
-            }
-
-            if (!knownStatesCache.Forward.TryGetValue(state, out var result) &&
-                HassSerializer.TryGetEnumFromSnakeCase(state, out result))
-            {
-                knownStatesCache.Add(state, result);
-            }
-
-            return result;
+            return knownStatesCache.AsEnum(state);
         }
 
         /// <summary>
@@ -183,13 +137,7 @@ namespace HassClient.Helpers
         /// </returns>
         public static string ToStateString(this KnownStates state)
         {
-            if (!knownStatesCache.Reverse.TryGetValue(state, out var result))
-            {
-                result = state.ToSnakeCaseUnchecked();
-                knownStatesCache.Add(result, state);
-            }
-
-            return result;
+            return knownStatesCache.AsString(state);
         }
     }
 }

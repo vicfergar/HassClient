@@ -22,9 +22,10 @@ namespace HassClient.Serialization
             ContractResolver = CreateContractResolver<DefaultContractResolver>(),
             Converters = new List<JsonConverter>
             {
+                new ColorConverter(),
+                new ModifiablePropertyConverter(),
                 new StringEnumConverter(namingStrategy),
                 new TupleSetToDictionaryConverter(),
-                new ModifiablePropertyConverter(),
             },
         };
 

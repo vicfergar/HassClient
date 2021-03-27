@@ -13,16 +13,16 @@
         /// <summary>
         /// Gets a value indicating whether the property value has been changed.
         /// </summary>
-        bool HasPendingChange { get; }
+        bool HasPendingChanges { get; }
 
         /// <summary>
-        /// Save pending change and clears the <see cref="HasPendingChange"/> flag.
+        /// Save pending change and clears the <see cref="HasPendingChanges"/> flag.
         /// </summary>
         void SaveChanges();
 
         /// <summary>
-        /// Discards any pending change and clears the <see cref="HasPendingChange"/> flag.
+        /// Discards any pending change and clears the <see cref="HasPendingChanges"/> flag.
         /// </summary>
-        void DiscardPendingChange();
+        void DiscardPendingChanges();
     }
 }

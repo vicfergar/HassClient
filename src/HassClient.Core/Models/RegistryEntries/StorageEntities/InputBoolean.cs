@@ -7,22 +7,10 @@ namespace HassClient.Models
     /// <summary>
     /// Represents an input boolean.
     /// </summary>
-    public class InputBoolean : EntityRegistryEntryBase
+    [StorageEntityDomain(KnownDomains.InputBoolean)]
+    public class InputBoolean : StorageEntityRegistryEntryBase
     {
         private readonly ModifiableProperty<bool> initial = new ModifiableProperty<bool>(nameof(Initial));
-
-        /// <inheritdoc />
-        internal protected override string UniqueId
-        {
-            get => this.Id;
-            set => this.Id = value;
-        }
-
-        /// <summary>
-        /// Gets the entity identifier of the <see cref="InputBoolean"/>.
-        /// </summary>
-        [JsonProperty("id")]
-        public string Id { get; private set; }
 
         /// <summary>
         /// Gets or sets the initial value when Home Assistant starts.
@@ -34,11 +22,9 @@ namespace HassClient.Models
             set => this.initial.Value = value;
         }
 
-        /// <inheritdoc />
-        public override string EntityId => $"input_boolean.{this.UniqueId}";
-
         [JsonConstructor]
         private InputBoolean()
+            : base()
         {
         }
 

@@ -14,7 +14,7 @@ namespace HassClient.Models
 
         private readonly ModifiableProperty<bool> isActive = new ModifiableProperty<bool>(nameof(IsActive));
 
-        private readonly ModifiablePropertyCollection<HashSet<string>, string> groupIds = new ModifiablePropertyCollection<HashSet<string>, string>(nameof(GroupIds));
+        private readonly ModifiablePropertyCollection<string> groupIds = new ModifiablePropertyCollection<string>(nameof(GroupIds));
 
         /// <summary>
         /// The System Administrator group id constant.
@@ -104,7 +104,7 @@ namespace HassClient.Models
         /// Gets a set of group ids where the user is included.
         /// </summary>
         [JsonProperty]
-        public HashSet<string> GroupIds
+        public ICollection<string> GroupIds
         {
             get => this.groupIds.Value;
         }
@@ -162,10 +162,11 @@ namespace HassClient.Models
         public bool ShouldSerializeIsActive() => this.IsTracked;
 
         // Used for testing purposes.
-        internal static User CreateUnmodified(string name, bool isOwner)
+        internal static User CreateUnmodified(string uniqueId, string name, bool isOwner)
         {
             var result = new User(name, isOwner)
             {
+                UniqueId = uniqueId,
                 IsOwner = isOwner,
             };
             result.SaveChanges();
@@ -205,8 +206,7 @@ namespace HassClient.Models
         // Used for testing purposes.
         internal User Clone()
         {
-            var result = CreateUnmodified(this.Name, this.IsOwner);
-            result.UniqueId = this.UniqueId;
+            var result = CreateUnmodified(this.UniqueId, this.Name, this.IsOwner);
             return result;
         }
     }
