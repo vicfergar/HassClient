@@ -15,17 +15,22 @@ A Home Assistant .NET client using [Web Sockect API](https://developers.home-ass
 `HassWSApi` provides access to Web Socket communication and a multitude of common operations:
 
 ### Connection
-To start we should connect with the Home Assistant instance:
+To start using the Web Socket API client, it should be connected a Home Assistant instance.
 
-- As client: Connects using the Home Assistant instance **base address** (e.g. "http://localhost:8123") and a **valid token**. You can obtain a token ("Long-Lived Access Token") by logging into the frontend using a web browser, and going [to your profile](https://www.home-assistant.io/docs/authentication/#your-account-profile) `http://IP_ADDRESS:8123/profile`.
+The method `ConnectAsync` with `ConnectionParameters` will be used:
+
+- Using Instance base URL: Connects using the Home Assistant instance **base address** (e.g. "http://localhost:8123") and a **valid token**. You can obtain a token ("Long-Lived Access Token") by logging into the frontend using a web browser, and going [to your profile](https://www.home-assistant.io/docs/authentication/#your-account-profile) `http://IP_ADDRESS:8123/profile`.
 ```csharp
 var hassWSApi = new HassWSApi();
-await hassWSApi.ConnectAsClientAsync("http://localhost:8123", HASS_TOKEN);
+var connectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl("http://localhost:8123", HASS_TOKEN);
+await hassWSApi.ConnectAsync(connectionParameters);
 ```
-- From Addon: Connects to a Home Assistant instance using the [add-ons internal proxy](https://developers.home-assistant.io/docs/add-ons/communication#home-assistant-core).
+
+- Within an Add-on: Connects to a Home Assistant instance using the [add-ons internal proxy](https://developers.home-assistant.io/docs/add-ons/communication#home-assistant-core).
 ```csharp
 var hassWSApi = new HassWSApi();
-await hassWSApi.ConnectFromAddonAsync();
+var connectionParameters = ConnectionParameters.CreateForAddonConnection();
+await hassWSApi.ConnectAsync(connectionParameters);
 ```
 
 ### Services

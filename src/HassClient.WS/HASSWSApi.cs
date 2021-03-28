@@ -37,78 +37,17 @@ namespace HassClient.WS
         /// </summary>
         public StateChagedEventListener StateChagedEventListener { get; private set; }
 
-        private async Task ConnectAsync(Uri uri, string accessToken)
+        /// <summary>
+        /// Connects to a Home Assistant instance using the specified connection parameters.
+        /// </summary>
+        /// <param name="connectionParameters">The connection parameters.</param>
+        /// <returns>A task representing the connection work.</returns>
+        public async Task ConnectAsync(ConnectionParameters connectionParameters)
         {
-            await this.hassClientWebSocket.ConnectAsync(uri, accessToken);
+            await this.hassClientWebSocket.ConnectAsync(connectionParameters);
 
             this.StateChagedEventListener = new StateChagedEventListener();
             this.StateChagedEventListener.Initialize(this.hassClientWebSocket);
-        }
-
-        /// <summary>
-        /// Connects to a Home Assistant instance using the specified base URL and Access Token.
-        /// </summary>
-        /// <param name="instanceBaseUrl">
-        /// An URL representing the Home Assistant instance base address. (e.g. "http://localhost:8123").
-        /// </param>
-        /// <param name="accessToken">
-        /// The access token to be used during authentication phase.
-        /// <para>
-        /// You can obtain a token ("Long-Lived Access Token") by logging into the frontend using a web browser,
-        /// and going to your profile http://IP_ADDRESS:8123/profile.
-        /// </para>
-        /// </param>
-        /// <returns>A task representing the connection work.</returns>
-        public Task ConnectAsClientAsync(string instanceBaseUrl, string accessToken)
-        {
-            if (string.IsNullOrEmpty(instanceBaseUrl))
-            {
-                throw new ArgumentNullException(nameof(instanceBaseUrl), $"{nameof(instanceBaseUrl)} is null or empty");
-            }
-
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                throw new ArgumentNullException(nameof(accessToken));
-            }
-
-            var uriBuilder = new UriBuilder(instanceBaseUrl);
-            if (uriBuilder.Scheme == Uri.UriSchemeHttp)
-            {
-                uriBuilder.Scheme = "ws";
-            }
-            else if (uriBuilder.Scheme == Uri.UriSchemeHttps)
-            {
-                uriBuilder.Scheme = "wss";
-            }
-            else if (uriBuilder.Scheme != "ws" &&
-                     uriBuilder.Scheme != "wss")
-            {
-                throw new ArgumentException("Invalid URI Scheme", nameof(instanceBaseUrl));
-            }
-
-            uriBuilder.Path = "/api/websocket";
-
-            return this.ConnectAsync(uriBuilder.Uri, accessToken);
-        }
-
-        /// <summary>
-        /// Connects to a Home Assistant instance using the add-ons internal proxy.
-        /// </summary>
-        /// <remarks>
-        /// More information at <see href="https://developers.home-assistant.io/docs/add-ons/communication#home-assistant-core"/>.
-        /// </remarks>
-        /// <returns>A task representing the connection work.</returns>
-        public Task ConnectFromAddonAsync()
-        {
-            const string tokenEnvVar = "SUPERVISOR_TOKEN";
-            var supervisorToken = Environment.GetEnvironmentVariable(tokenEnvVar);
-
-            if (string.IsNullOrEmpty(supervisorToken))
-            {
-                throw new InvalidOperationException($"Error initializing API as Supervisor: Environment variable '{tokenEnvVar}' not found.");
-            }
-
-            return this.ConnectAsync(new Uri("ws://supervisor/core/websocket"), supervisorToken);
         }
 
         /// <summary>

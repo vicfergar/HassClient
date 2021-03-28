@@ -18,9 +18,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public Version HAVersion => Version.Parse("0.117.1");
 
-        public string InstanceBaseUrl => $"http://{this.ServerUri.Host}:{this.ServerUri.Port}";
-
-        public string AccessToken { get; private set; }
+        public ConnectionParameters ConnectionParameters { get; private set; }
 
         public bool IgnoreAuthenticationMessages { get; set; } = false;
 
@@ -29,7 +27,9 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         public MockHassServerWebSocket()
             : base()
         {
-            this.AccessToken = this.GenerateRandomToken();
+            this.ConnectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl(
+                $"http://{this.ServerUri.Host}:{this.ServerUri.Port}",
+                this.GenerateRandomToken());
         }
 
         public Task<bool> RaiseStateChangedEventAsync(string entityId)
@@ -84,7 +84,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                     if (!this.IgnoreAuthenticationMessages &&
                         incomingMessage is AuthenticationMessage authMessage)
                     {
-                        if (authMessage.AccessToken == this.AccessToken)
+                        if (authMessage.AccessToken == this.ConnectionParameters.AccessToken)
                         {
                             await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion }, token);
                             context.IsAuthenticating = false;

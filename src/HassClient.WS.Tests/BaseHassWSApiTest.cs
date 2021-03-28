@@ -13,9 +13,7 @@ namespace HassClient.WS.Tests
         private const string TestsInstanceBaseUrlVar = "TestsInstanceBaseUrl";
         private const string TestsAccessTokenVar = "TestsAccessToken";
 
-        private readonly string instanceBaseUrl;
-
-        private readonly string accessToken;
+        private readonly ConnectionParameters connectionParameters;
 
         protected MockHassServerWebSocket hassServer;
 
@@ -26,22 +24,24 @@ namespace HassClient.WS.Tests
             if (useFakeHassServer)
             {
                 this.hassServer = new MockHassServerWebSocket();
-                this.instanceBaseUrl = this.hassServer.InstanceBaseUrl;
-                this.accessToken = this.hassServer.AccessToken;
+                this.connectionParameters = this.hassServer.ConnectionParameters;
             }
             else
             {
-                this.instanceBaseUrl = Environment.GetEnvironmentVariable(TestsInstanceBaseUrlVar);
-                this.accessToken = Environment.GetEnvironmentVariable(TestsAccessTokenVar);
+                var instanceBaseUrl = Environment.GetEnvironmentVariable(TestsInstanceBaseUrlVar);
+                var accessToken = Environment.GetEnvironmentVariable(TestsAccessTokenVar);
 
-                if (this.instanceBaseUrl == null)
+                if (instanceBaseUrl == null)
                 {
                     Assert.Ignore($"Hass instance base URL for tests not provided. It should be set in the environment variable '{TestsInstanceBaseUrlVar}'");
                 }
-                else if (this.accessToken == null)
+
+                if (accessToken == null)
                 {
                     Assert.Ignore($"Hass access token for tests not provided. It should be set in the environment variable '{TestsAccessTokenVar}'");
                 }
+
+                this.connectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl(instanceBaseUrl, accessToken);
             }
         }
 
@@ -54,7 +54,7 @@ namespace HassClient.WS.Tests
             }
 
             this.hassWSApi = new HassWSApi();
-            await this.hassWSApi.ConnectAsClientAsync(this.instanceBaseUrl, this.accessToken);
+            await this.hassWSApi.ConnectAsync(this.connectionParameters);
 
             HassSerializer.DefaultSettings.MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Error;
             HassSerializer.DefaultSettings.Error += this.HassSerializerError;

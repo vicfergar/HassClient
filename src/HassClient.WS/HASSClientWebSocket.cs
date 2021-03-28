@@ -94,24 +94,14 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Connects to a Home Assistant instance using the specified <see cref="Uri"/> and Access Token.
-        /// (More info at <see href="https://developers.home-assistant.io/docs/api/websocket"/>).
+        /// Connects to a Home Assistant instance using the specified connection parameters.
         /// </summary>
-        /// <param name="uri">
-        /// An <see cref="Uri"/> representing the connection endpoint. (e.g. "ws://localhost:8123/api/websocket").
-        /// </param>
-        /// <param name="accessToken">
-        /// The access token to be used during authentication phase.
-        /// <para>
-        /// You can obtain a token ("Long-Lived Access Token") by logging into the frontend using a web browser,
-        /// and going to your profile http://IP_ADDRESS:8123/profile.
-        /// </para>
-        /// </param>
+        /// <param name="connectionParameters">The connection parameters.</param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
         /// <returns>The task object representing the asynchronous operation.</returns>
-        public async Task ConnectAsync(Uri uri, string accessToken, CancellationToken cancellationToken = default)
+        public async Task ConnectAsync(ConnectionParameters connectionParameters, CancellationToken cancellationToken = default)
         {
             this.CheckIsDiposed();
 
@@ -132,7 +122,7 @@ namespace HassClient.WS
             var rcvBuffer = new ArraySegment<byte>(rcvBytes);
             try
             {
-                await this.socket.ConnectAsync(uri, linkedCTS.Token);
+                await this.socket.ConnectAsync(connectionParameters.Endpoint, linkedCTS.Token);
 
                 this.ConnectionState = ConnectionStates.Authenticating;
 
@@ -140,7 +130,7 @@ namespace HassClient.WS
                 if (incomingMsg is AuthenticationRequiredMessage authRequired)
                 {
                     var authMsg = new AuthenticationMessage();
-                    authMsg.AccessToken = accessToken;
+                    authMsg.AccessToken = connectionParameters.AccessToken;
                     await this.SendMessage(authMsg, linkedCTS.Token);
 
                     incomingMsg = await this.ReceiveMessage<BaseMessage>(rcvBuffer, linkedCTS.Token);

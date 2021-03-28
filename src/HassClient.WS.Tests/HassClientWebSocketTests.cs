@@ -36,7 +36,7 @@ namespace HassClient.WS.Tests
 
         private Task ConnectClientAsync()
         {
-            return this.wsClient.ConnectAsync(this.mockServer.ServerUri, this.mockServer.AccessToken, this.connectionCTS.Token);
+            return this.wsClient.ConnectAsync(this.mockServer.ConnectionParameters, this.connectionCTS.Token);
         }
 
         private async Task StartMockServerAndConnectClientAsync()
