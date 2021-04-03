@@ -5,9 +5,9 @@ namespace HassClient.WS
 {
     internal class SocketEventSubscription
     {
-        public readonly uint SubscriptionId;
-
         private EventHandler<EventResultInfo> internalEventHandler;
+
+        public uint SubscriptionId { get; set; }
 
         public uint SubscriptionCount { get; private set; }
 

@@ -28,20 +28,34 @@ namespace HassClient.WS
 
         private const int INCONMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
 
-        private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1);
+        private readonly TimeSpan RetryingInterval = TimeSpan.FromSeconds(5);
+
+        private readonly SemaphoreSlim connectionSemaphore = new SemaphoreSlim(1, 1);
+
+        private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
 
         private readonly Dictionary<string, SocketEventSubscription> socketEventSubscriptionIdByEventType = new Dictionary<string, SocketEventSubscription>();
         private readonly Dictionary<uint, Action<EventResultMessage>> socketEventCallbacksBySubsciptionId = new Dictionary<uint, Action<EventResultMessage>>();
         private readonly ConcurrentDictionary<uint, TaskCompletionSource<BaseIncomingMessage>> incomingMessageAwaitersById = new ConcurrentDictionary<uint, TaskCompletionSource<BaseIncomingMessage>>();
 
+        private ConnectionParameters connectionParameters;
+        private ArraySegment<byte> receivingBuffer;
+
         private Channel<EventResultMessage> receivedEventsChannel;
 
         private ClientWebSocket socket;
-        private CancellationTokenSource socketCTS;
+        private TaskCompletionSource<bool> connectionTCS;
+        private CancellationTokenSource closeConnectionCTS;
         private uint lastSentID;
         private Task socketListenerTask;
         private Task eventListenerTask;
         private ConnectionStates connectionState;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the client will try to reconnect when connection is lost.
+        /// Default: <see langword="true"/>.
+        /// </summary>
+        public bool AutomaticReconnection { get; set; } = true;
 
         /// <summary>
         /// Gets a value indicating whether this instance is disposed.
@@ -59,10 +73,21 @@ namespace HassClient.WS
                 if (this.connectionState != value)
                 {
                     this.connectionState = value;
+                    if (value == ConnectionStates.Connected)
+                    {
+                        this.connectionTCS.TrySetResult(true);
+                    }
+
                     this.ConnectionStateChanged?.Invoke(this, value);
                 }
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the connection with the server has been
+        /// lost and the client is trying to reconnect.
+        /// </summary>
+        public bool IsReconnecting { get; private set; }
 
         /// <summary>
         /// Gets the connected Home Assistant instance version.
@@ -97,123 +122,49 @@ namespace HassClient.WS
         /// Connects to a Home Assistant instance using the specified connection parameters.
         /// </summary>
         /// <param name="connectionParameters">The connection parameters.</param>
+        /// <param name="retries">
+        /// Number of retries if connection failed. Default: 0.
+        /// <para>
+        /// Retries will only be performed if Home Assistant instance cannot be reached and not if:
+        /// authentication fails OR
+        /// invalid response from server OR
+        /// connection refused by server.
+        /// </para>
+        /// <para>
+        /// If set to <c>-1</c>, this method will try indefinitely until connection succeed or
+        /// cancellation is requested. Therefore, <paramref name="cancellationToken"/> must be set
+        /// to a value different to <see cref="CancellationToken.None"/> in that case.
+        /// </para>
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
         /// <returns>The task object representing the asynchronous operation.</returns>
-        public async Task ConnectAsync(ConnectionParameters connectionParameters, CancellationToken cancellationToken = default)
+        public async Task ConnectAsync(ConnectionParameters connectionParameters, int retries = 0, CancellationToken cancellationToken = default)
         {
             this.CheckIsDiposed();
+
+            if (retries < 0 &&
+                cancellationToken == CancellationToken.None)
+            {
+                throw new ArgumentException(
+                    nameof(cancellationToken),
+                    $"{nameof(cancellationToken)} must be set to a value different to {nameof(CancellationToken.None)} when retrying indefinitely");
+            }
 
             if (this.ConnectionState != ConnectionStates.Disconnected)
             {
                 throw new InvalidOperationException($"{nameof(HassClientWebSocket)} is not disconnected.");
             }
 
-            this.ConnectionState = ConnectionStates.Connecting;
+            this.closeConnectionCTS = new CancellationTokenSource();
 
-            this.socket = new ClientWebSocket();
-            this.socketCTS = new CancellationTokenSource();
-            this.lastSentID = 0;
-
-            var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.socketCTS.Token, cancellationToken);
-
-            var rcvBytes = new byte[INCONMING_BUFFER_SIZE];
-            var rcvBuffer = new ArraySegment<byte>(rcvBytes);
-            try
-            {
-                await this.socket.ConnectAsync(connectionParameters.Endpoint, linkedCTS.Token);
-
-                this.ConnectionState = ConnectionStates.Authenticating;
-
-                var incomingMsg = await this.ReceiveMessage<BaseMessage>(rcvBuffer, linkedCTS.Token);
-                if (incomingMsg is AuthenticationRequiredMessage authRequired)
-                {
-                    var authMsg = new AuthenticationMessage();
-                    authMsg.AccessToken = connectionParameters.AccessToken;
-                    await this.SendMessage(authMsg, linkedCTS.Token);
-
-                    incomingMsg = await this.ReceiveMessage<BaseMessage>(rcvBuffer, linkedCTS.Token);
-                    if (incomingMsg is AuthenticationInvalidMessage authenticationInvalid)
-                    {
-                        throw new InvalidOperationException($"{TAG} Invalid authentication: {authenticationInvalid.Message}");
-                    }
-                    else if (incomingMsg is AuthenticationOkMessage authenticationOk)
-                    {
-                        this.HAVersion = authenticationOk.HAVersion;
-                        this.ConnectionState = ConnectionStates.Connected;
-                        Trace.WriteLine($"{TAG} Authentication succeed. Client connected {nameof(this.HAVersion)}: {this.HAVersion}");
-                    }
-                }
-                else
-                {
-                    throw new Exception("Unexpected message received during authentication.");
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                this.ClearSocketResources();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"[{nameof(HassClientWebSocket)}] Connection failed: {ex}", ex);
-            }
-
+            this.receivingBuffer = new ArraySegment<byte>(new byte[INCONMING_BUFFER_SIZE]);
+            var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.closeConnectionCTS.Token, cancellationToken);
+            await this.InternalConnect(connectionParameters, retries, linkedCTS.Token).ConfigureAwait(false);
+            this.connectionParameters = connectionParameters;
             this.receivedEventsChannel = Channel.CreateUnbounded<EventResultMessage>();
-
-            this.socketListenerTask = Task.Factory.StartNew(
-                async () =>
-                {
-                    while (this.socket.State.HasFlag(WebSocketState.Open))
-                    {
-                        var incomingMessage = await this.ReceiveMessage<BaseIncomingMessage>(rcvBuffer, this.socketCTS.Token);
-                        if (incomingMessage is EventResultMessage eventResultMessage)
-                        {
-                            if (!this.receivedEventsChannel.Writer.TryWrite(eventResultMessage))
-                            {
-                                Debug.WriteLine($"{TAG} {nameof(this.receivedEventsChannel)} is full. One event message will discarded.");
-                            }
-                        }
-                        else if (incomingMessage is PongMessage ||
-                                 incomingMessage is ResultMessage)
-                        {
-                            Trace.WriteLine($"{TAG} Command message received {incomingMessage}");
-                            if (this.incomingMessageAwaitersById.TryRemove(incomingMessage.Id, out var responseTCS))
-                            {
-                                responseTCS.SetResult(incomingMessage);
-                            }
-                            else
-                            {
-                                Debug.WriteLine($"{TAG} No awaiter found for incoming message {incomingMessage}. Message will be discarded.");
-                            }
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"{TAG} Unexpected message type received: {incomingMessage}");
-                        }
-                    }
-
-                    // TODO: Handle socket connection lost and reconnection
-                    Trace.WriteLine($"{TAG} Connection ended {this.socket.CloseStatus}");
-                    this.ClearSocketResources();
-                }, TaskCreationOptions.LongRunning);
-
-            this.eventListenerTask = Task.Factory.StartNew(
-                async () =>
-                {
-                    var channelReader = this.receivedEventsChannel.Reader;
-                    while (await channelReader.WaitToReadAsync(this.socketCTS.Token))
-                    {
-                        while (channelReader.TryRead(out var incomingMessage))
-                        {
-                            if (this.socketEventCallbacksBySubsciptionId.TryGetValue(incomingMessage.Id, out var callback))
-                            {
-                                callback(incomingMessage);
-                            }
-                        }
-                    }
-                }, TaskCreationOptions.LongRunning);
+            this.eventListenerTask = Task.Factory.StartNew(this.CreateEventListenerTask, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
@@ -227,26 +178,90 @@ namespace HassClient.WS
         {
             this.CheckIsDiposed();
 
-            if (this.ConnectionState == ConnectionStates.Disconnected ||
-                cancellationToken.IsCancellationRequested)
+            if (this.ConnectionState == ConnectionStates.Disconnected)
             {
                 return;
             }
 
-            if (this.socket.State == WebSocketState.Connecting)
-            {
-                this.socket.Abort();
-            }
-            else
-            {
-                await this.socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Connection closed by user", cancellationToken);
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this.closeConnectionCTS?.Cancel();
+            await this.connectionSemaphore.WaitAsync();
 
             this.ClearSocketResources();
+            this.connectionSemaphore.Release();
+        }
+
+        /// <summary>
+        /// Waits until the client state changed to connected.
+        /// </summary>
+        /// <param name="timeout">The maximum time to wait for connection.</param>
+        /// <returns>
+        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
+        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
+        /// </returns>
+        public Task<bool> WaitForConnectionAsync(TimeSpan timeout)
+        {
+            if (timeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentException($"{nameof(timeout)} must be set greater than zero.");
+            }
+
+            return this.WaitForConnectionAsync(timeout, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Waits until the client state changed to connected.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
+        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
+        /// </returns>
+        public Task<bool> WaitForConnectionAsync(CancellationToken cancellationToken)
+        {
+            if (cancellationToken == CancellationToken.None)
+            {
+                throw new ArgumentException($"{nameof(cancellationToken)} must be set to avoid never ending wait..");
+            }
+
+            return this.WaitForConnectionAsync(TimeSpan.Zero, cancellationToken);
+        }
+
+        /// <summary>
+        /// Waits until the client state changed to connected.
+        /// <para>
+        /// Either <paramref name="timeout"/> or <paramref name="cancellationToken"/> must be set to avoid never ending wait.
+        /// </para>
+        /// </summary>
+        /// <param name="timeout">The maximum time to wait for connection.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
+        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
+        /// </returns>
+        public Task<bool> WaitForConnectionAsync(TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            if (timeout <= TimeSpan.Zero && cancellationToken == CancellationToken.None)
+            {
+                throw new ArgumentException($"Either {nameof(timeout)} or {nameof(cancellationToken)} must be set to avoid never ending wait.");
+            }
+
+            if (this.connectionState == ConnectionStates.Connected)
+            {
+                return Task.FromResult(true);
+            }
+
+            if (this.connectionTCS == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            return Task.Run(() => this.connectionTCS.Task, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -266,6 +281,196 @@ namespace HassClient.WS
             }
         }
 
+        private async Task InternalConnect(ConnectionParameters connectionParameters, int retries, CancellationToken cancellationToken)
+        {
+            this.ConnectionState = ConnectionStates.Connecting;
+
+            var retry = false;
+            do
+            {
+                await this.connectionSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    retry = false;
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    this.lastSentID = 0;
+                    this.connectionTCS = new TaskCompletionSource<bool>();
+                    this.socket = new ClientWebSocket();
+                    await this.socket.ConnectAsync(connectionParameters.Endpoint, cancellationToken).ConfigureAwait(false);
+
+                    this.ConnectionState = ConnectionStates.Authenticating;
+
+                    var incomingMsg = await this.ReceiveMessage<BaseMessage>(this.receivingBuffer, cancellationToken);
+                    if (incomingMsg is AuthenticationRequiredMessage authRequired)
+                    {
+                        var authMsg = new AuthenticationMessage();
+                        authMsg.AccessToken = connectionParameters.AccessToken;
+                        await this.SendMessage(authMsg, cancellationToken);
+
+                        incomingMsg = await this.ReceiveMessage<BaseMessage>(this.receivingBuffer, cancellationToken);
+                        if (incomingMsg is AuthenticationInvalidMessage authenticationInvalid)
+                        {
+                            throw new AuthenticationException($"{TAG} Invalid authentication: {authenticationInvalid.Message}");
+                        }
+                        else if (incomingMsg is AuthenticationOkMessage authenticationOk)
+                        {
+                            this.HAVersion = authenticationOk.HAVersion;
+
+                            if (this.IsReconnecting)
+                            {
+                                await this.RestoreEventsSubscriptionsAsync(cancellationToken);
+                            }
+
+                            this.IsReconnecting = false;
+                            this.ConnectionState = ConnectionStates.Connected;
+
+                            Trace.WriteLine($"{TAG} Authentication succeed. Client connected {nameof(this.HAVersion)}: {this.HAVersion}");
+                        }
+                    }
+                    else
+                    {
+                        throw new AuthenticationException("Unexpected message received during authentication.");
+                    }
+
+                    this.socketListenerTask = Task.Factory.StartNew(this.CreateSocketListenerTask, TaskCreationOptions.LongRunning);
+                }
+                catch (Exception ex)
+                {
+                    retry = (retries < 0 || retries-- > 0) && ex is WebSocketException;
+
+                    if (retry)
+                    {
+                        Trace.WriteLine($"{TAG} Connecting attempt failed. Retrying in {this.RetryingInterval.TotalSeconds} seconds...");
+                        await Task.Delay(this.RetryingInterval);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                finally
+                {
+                    if (!retry && this.ConnectionState != ConnectionStates.Connected)
+                    {
+                        this.ClearSocketResources();
+                    }
+
+                    if (this.connectionSemaphore.CurrentCount == 0)
+                    {
+                        this.connectionSemaphore.Release();
+                    }
+                }
+            }
+            while (retry);
+        }
+
+        private async Task RestoreEventsSubscriptionsAsync(CancellationToken closeCancellationToken)
+        {
+            this.socketEventCallbacksBySubsciptionId.Clear();
+
+            foreach (var item in this.socketEventSubscriptionIdByEventType)
+            {
+                this.ConnectionState = ConnectionStates.Restoring;
+
+                var eventType = item.Key;
+                while (true)
+                {
+                    var subscribeMessage = new SubscribeEventsMessage(eventType);
+                    await this.SendMessage(subscribeMessage, closeCancellationToken);
+                    var result = await this.ReceiveMessage<ResultMessage>(this.receivingBuffer, closeCancellationToken);
+                    if (result.Success)
+                    {
+                        var socketSubscription = item.Value;
+                        socketSubscription.SubscriptionId = result.Id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private async Task CreateSocketListenerTask()
+        {
+            var closeCancellationToken = this.closeConnectionCTS.Token;
+
+            try
+            {
+                while (this.socket.State.HasFlag(WebSocketState.Open))
+                {
+                    var incomingMessage = await this.ReceiveMessage<BaseIncomingMessage>(this.receivingBuffer, closeCancellationToken);
+                    closeCancellationToken.ThrowIfCancellationRequested();
+
+                    if (incomingMessage is EventResultMessage eventResultMessage)
+                    {
+                        if (!this.receivedEventsChannel.Writer.TryWrite(eventResultMessage))
+                        {
+                            Trace.TraceWarning($"{TAG} {nameof(this.receivedEventsChannel)} is full. One event message will discarded.");
+                        }
+                    }
+                    else if (incomingMessage is PongMessage ||
+                             incomingMessage is ResultMessage)
+                    {
+                        Debug.WriteLine($"{TAG} Command message received {incomingMessage}");
+                        if (this.incomingMessageAwaitersById.TryRemove(incomingMessage.Id, out var responseTCS))
+                        {
+                            responseTCS.SetResult(incomingMessage);
+                        }
+                        else
+                        {
+                            Trace.TraceError($"{TAG} No awaiter found for incoming message {incomingMessage}. Message will be discarded.");
+                        }
+                    }
+                    else if (this.socket.State.HasFlag(WebSocketState.Open))
+                    {
+                        Trace.TraceError($"{TAG} Unexpected message type received: {incomingMessage}");
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Trace.WriteLine($"{TAG} Connection stopped for cancellation.");
+                return;
+            }
+            catch (WebSocketException)
+            {
+            }
+
+            this.ConnectionState = ConnectionStates.Disconnected;
+            Trace.WriteLine($"{TAG} Connection ended {this.socket.CloseStatus?.ToString() ?? this.socket.State.ToString()}");
+
+            if (closeCancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            if (this.AutomaticReconnection &&
+                this.connectionParameters != null)
+            {
+                this.IsReconnecting = true;
+                this.socketListenerTask = Task.Run(() => this.InternalConnect(this.connectionParameters, -1, closeCancellationToken));
+            }
+            else
+            {
+                this.ClearSocketResources();
+            }
+        }
+
+        private async Task CreateEventListenerTask()
+        {
+            var channelReader = this.receivedEventsChannel.Reader;
+            while (await channelReader.WaitToReadAsync(this.closeConnectionCTS.Token))
+            {
+                while (channelReader.TryRead(out var incomingMessage))
+                {
+                    if (this.socketEventCallbacksBySubsciptionId.TryGetValue(incomingMessage.Id, out var callback))
+                    {
+                        callback(incomingMessage);
+                    }
+                }
+            }
+        }
+
         private void CheckIsDiposed()
         {
             if (this.IsDiposed)
@@ -279,8 +484,17 @@ namespace HassClient.WS
             if (this.ConnectionState != ConnectionStates.Disconnected)
             {
                 this.ConnectionState = ConnectionStates.Disconnected;
+                this.IsReconnecting = false;
 
-                this.socketCTS?.Cancel();
+                this.connectionParameters = null;
+                this.receivingBuffer = null;
+
+                if (this.connectionTCS?.TrySetResult(false) == false)
+                {
+                    this.connectionTCS = null;
+                }
+
+                this.socket.Abort();
                 this.socket.Dispose();
 
                 this.socketEventCallbacksBySubsciptionId.Clear();
@@ -359,7 +573,10 @@ namespace HassClient.WS
             }
             finally
             {
-                this.sendingSemaphore.Release();
+                if (this.sendingSemaphore.CurrentCount == 0)
+                {
+                    this.sendingSemaphore.Release();
+                }
             }
         }
 
@@ -388,7 +605,7 @@ namespace HassClient.WS
 
             try
             {
-                var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.socketCTS.Token, cancellationToken);
+                var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.closeConnectionCTS.Token, cancellationToken);
                 var responseTCS = new TaskCompletionSource<BaseIncomingMessage>(linkedCTS.Token);
                 await this.SendMessage(commandMessage, responseTCS, linkedCTS.Token);
 
@@ -513,12 +730,17 @@ namespace HassClient.WS
         /// </returns>
         internal async Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
+            }
+
             this.CheckIsDiposed();
 
             // TODO: Make AddEventHandlerSubscriptionAsync and RemoveEventHandlerSubscriptionAsync thread-safe
             if (!this.socketEventSubscriptionIdByEventType.ContainsKey(eventType))
             {
-                var subscribeMessage = new SubscribeEventsMessage() { EventType = eventType != Event.AnyEventFilter ? eventType : null };
+                var subscribeMessage = new SubscribeEventsMessage(eventType);
                 if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
                 {
                     return false;
@@ -533,6 +755,11 @@ namespace HassClient.WS
 
         internal async Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
+            }
+
             this.CheckIsDiposed();
 
             if (!this.socketEventSubscriptionIdByEventType.TryGetValue(eventType, out var socketEventSubscription))

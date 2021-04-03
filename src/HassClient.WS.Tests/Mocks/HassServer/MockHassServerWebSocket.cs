@@ -4,6 +4,7 @@ using HassClient.Serialization;
 using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,67 +69,73 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         private string GenerateRandomToken() => Guid.NewGuid().ToString("N");
 
-        protected override async Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken token)
+        protected override async Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken cancellationToken)
         {
             var context = new MockHassServerRequestContext(this.hassDB, webSocket);
 
-            await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion }, token);
+            await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion }, cancellationToken);
 
-            while (true)
+            try
             {
-                if (context.IsAuthenticating)
+                while (true)
                 {
-                    var incomingMessage = await context.ReceiveMessageAsync<BaseMessage>(token);
-                    await Task.Delay(this.ResponseSimulatedDelay);
-
-                    if (!this.IgnoreAuthenticationMessages &&
-                        incomingMessage is AuthenticationMessage authMessage)
+                    if (context.IsAuthenticating)
                     {
-                        if (authMessage.AccessToken == this.ConnectionParameters.AccessToken)
-                        {
-                            await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion }, token);
-                            context.IsAuthenticating = false;
-                            this.activeRequestContext = context;
-                        }
-                        else
-                        {
-                            await context.SendMessageAsync(new AuthenticationInvalidMessage(), token);
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    var receivedMessage = await context.ReceiveMessageAsync<BaseOutgoingMessage>(token);
-                    var receivedMessageId = receivedMessage.Id;
+                        var incomingMessage = await context.ReceiveMessageAsync<BaseMessage>(cancellationToken);
+                        await Task.Delay(this.ResponseSimulatedDelay);
 
-                    await Task.Delay(this.ResponseSimulatedDelay);
-
-                    BaseIdentifiableMessage response;
-                    if (context.LastReceivedID >= receivedMessageId)
-                    {
-                        response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.IdReuse) };
+                        if (!this.IgnoreAuthenticationMessages &&
+                            incomingMessage is AuthenticationMessage authMessage)
+                        {
+                            if (authMessage.AccessToken == this.ConnectionParameters.AccessToken)
+                            {
+                                await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion }, cancellationToken);
+                                context.IsAuthenticating = false;
+                                this.activeRequestContext = context;
+                            }
+                            else
+                            {
+                                await context.SendMessageAsync(new AuthenticationInvalidMessage(), cancellationToken);
+                                break;
+                            }
+                        }
                     }
                     else
                     {
-                        context.LastReceivedID = receivedMessageId;
+                        var receivedMessage = await context.ReceiveMessageAsync<BaseOutgoingMessage>(cancellationToken);
+                        var receivedMessageId = receivedMessage.Id;
 
-                        if (receivedMessage is PingMessage)
+                        await Task.Delay(this.ResponseSimulatedDelay);
+
+                        BaseIdentifiableMessage response;
+                        if (context.LastReceivedID >= receivedMessageId)
                         {
-                            response = new PongMessage();
+                            response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.IdReuse) };
                         }
-                        else if (!context.TryProccesMessage(receivedMessage, out response))
+                        else
                         {
-                            response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.UnknownCommand) };
+                            context.LastReceivedID = receivedMessageId;
+
+                            if (receivedMessage is PingMessage)
+                            {
+                                response = new PongMessage();
+                            }
+                            else if (!context.TryProccesMessage(receivedMessage, out response))
+                            {
+                                response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.UnknownCommand) };
+                            }
                         }
+
+                        response.Id = receivedMessageId;
+                        await context.SendMessageAsync(response, cancellationToken);
                     }
-
-                    response.Id = receivedMessageId;
-                    await context.SendMessageAsync(response, token);
                 }
             }
-
-            await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, string.Empty, default);
+            catch
+            {
+                Trace.WriteLine("A problem occured while attending client. Closing connection.");
+                await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, string.Empty, default);
+            }
         }
     }
 }

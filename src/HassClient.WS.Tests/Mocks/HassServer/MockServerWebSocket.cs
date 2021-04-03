@@ -1,5 +1,6 @@
 ﻿using Ninja.WebSockets;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -13,11 +14,13 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public abstract class MockServerWebSocket : IDisposable
     {
+        private readonly IWebSocketServerFactory webSocketServerFactory = new WebSocketServerFactory();
+
+        private readonly List<TcpClient> activeClients = new List<TcpClient>();
+
         private TcpListener listener;
 
         private bool isDisposed = false;
-
-        private readonly IWebSocketServerFactory webSocketServerFactory = new WebSocketServerFactory();
 
         private TaskCompletionSource<bool> startTCS;
 
@@ -87,12 +90,13 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         private void ProcessTcpClient(TcpClient tcpClient)
         {
-            Task.Run(() => ProcessTcpClientAsync(tcpClient));
+            Task.Run(() => this.ProcessTcpClientAsync(tcpClient));
         }
 
         private async Task ProcessTcpClientAsync(TcpClient tcpClient)
         {
-            CancellationTokenSource source = new CancellationTokenSource();
+            var source = new CancellationTokenSource();
+            this.activeClients.Add(tcpClient);
 
             try
             {
@@ -115,7 +119,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                     var options = new WebSocketServerOptions() { KeepAliveInterval = TimeSpan.MaxValue };
                     Trace.TraceInformation("HTTP header has requested an upgrade to Web Socket protocol. Negotiating Web Socket handshake");
 
-                    WebSocket webSocket = await this.webSocketServerFactory.AcceptWebSocketAsync(context, options);
+                    var webSocket = await this.webSocketServerFactory.AcceptWebSocketAsync(context, options);
 
                     Trace.TraceInformation("Web Socket handshake response sent. Stream ready.");
                     await RespondToWebSocketRequestAsync(webSocket, source.Token);
@@ -137,6 +141,8 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             }
             finally
             {
+                this.activeClients.Remove(tcpClient);
+
                 try
                 {
                     tcpClient.Client.Close();
@@ -151,6 +157,18 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         }
 
         protected abstract Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken token);
+
+        public Task CloseActiveClientsAsync()
+        {
+            foreach (var client in this.activeClients.ToArray())
+            {
+                client.Close();
+                this.activeClients.Remove(client);
+            }
+
+            // Wait to clients notices disconnection
+            return Task.Delay(1000);
+        }
 
         public void Dispose()
         {
