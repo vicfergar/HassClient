@@ -21,6 +21,12 @@
         Authenticating,
 
         /// <summary>
+        /// When reconnecting the web client socket will restore all subscriptions
+        /// before changing to <see cref="Connected"/>.
+        /// </summary>
+        Restoring,
+
+        /// <summary>
         /// The web socket client is connected and listening for commands.
         /// </summary>
         Connected,

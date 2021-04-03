@@ -41,13 +41,42 @@ namespace HassClient.WS
         /// Connects to a Home Assistant instance using the specified connection parameters.
         /// </summary>
         /// <param name="connectionParameters">The connection parameters.</param>
+        /// <param name="retries">
+        /// Number of retries if connection failed. Default: 0.
+        /// <para>
+        /// Retries will only be performed if Home Assistant instance cannot be reached and not if:
+        /// authentication fails OR
+        /// invalid response from server OR
+        /// connection refused by server.
+        /// </para>
+        /// <para>
+        /// If set to <c>-1</c>, this method will try indefinitely until connection succeed or
+        /// cancellation is requested. Therefore, <paramref name="cancellationToken"/> must be set
+        /// to a value different to <see cref="CancellationToken.None"/> in that case.
+        /// </para>
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
         /// <returns>A task representing the connection work.</returns>
-        public async Task ConnectAsync(ConnectionParameters connectionParameters)
+        public async Task ConnectAsync(ConnectionParameters connectionParameters, int retries = 0, CancellationToken cancellationToken = default)
         {
-            await this.hassClientWebSocket.ConnectAsync(connectionParameters);
+            await this.hassClientWebSocket.ConnectAsync(connectionParameters, retries, cancellationToken);
 
             this.StateChagedEventListener = new StateChagedEventListener();
             this.StateChagedEventListener.Initialize(this.hassClientWebSocket);
+        }
+
+        /// <summary>
+        /// Close the Home Assistant connection as an asynchronous operation.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
+        public Task CloseAsync(CancellationToken cancellationToken = default)
+        {
+            return this.hassClientWebSocket.CloseAsync(cancellationToken);
         }
 
         /// <summary>

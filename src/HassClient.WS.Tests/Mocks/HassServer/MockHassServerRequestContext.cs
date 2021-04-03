@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -87,15 +88,8 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             }
             while (!rcvResult.EndOfMessage);
 
-            try
-            {
-                var rcvMsg = receivedString.ToString();
-                return HassSerializer.DeserializeObject<TMessage>(rcvMsg);
-            }
-            catch (JsonException)
-            {
-                throw;
-            }
+            var rcvMsg = receivedString.ToString();
+            return HassSerializer.DeserializeObject<TMessage>(rcvMsg);
         }
 
         public async Task SendMessageAsync(BaseMessage message, CancellationToken cancellationToken)
