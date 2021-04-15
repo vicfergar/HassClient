@@ -123,20 +123,6 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        public async Task CloseWithCanceledTokenWhileConnectingHasNoEffect()
-        {
-            this.mockServer.ResponseSimulatedDelay = TimeSpan.FromMilliseconds(20);
-            var connectTask = this.StartMockServerAndConnectClientAsync();
-
-            var closeCTS = new CancellationTokenSource();
-            closeCTS.Cancel();
-            await this.wsClient.CloseAsync(closeCTS.Token);
-
-            await connectTask;
-            Assert.AreEqual(ConnectionStates.Connected, this.wsClient.ConnectionState);
-        }
-
-        [Test]
         public void ConnectWithInfiniteRetriesAndNoCancellationTokenThrows()
         {
             Assert.ThrowsAsync<ArgumentException>(() => this.wsClient.ConnectAsync(new ConnectionParameters(), -1));

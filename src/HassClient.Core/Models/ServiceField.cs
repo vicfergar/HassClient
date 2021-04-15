@@ -27,6 +27,12 @@ namespace HassClient.Models
         public string IsRequired { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether the field is considered for advanced users.
+        /// </summary>
+        [JsonProperty("advanced")]
+        public string IsAdvanced { get; private set; }
+
+        /// <summary>
         /// Gets the default value of this field if defined; otherwise, <see langword="null"/>.
         /// </summary>
         [JsonProperty("default")]
