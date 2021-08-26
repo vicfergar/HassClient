@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
     <Authors>VFerrer</Authors>
     <Description>A shared package used by HassClient. Do not install this package manually, it will be added as a prerequisite by other packages that require it.</Description>
     <RepositoryUrl>https://github.com/vicfergar/HassClient</RepositoryUrl>
