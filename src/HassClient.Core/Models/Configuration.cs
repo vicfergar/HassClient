@@ -123,6 +123,11 @@ namespace HassClient.Models
         [JsonProperty]
         public string InternalUrl { get; private set; }
 
+        /// <summary>
+        /// Gets the currency code according to ISO 4217 (column "Code" from <see href="https://en.wikipedia.org/wiki/ISO_4217#Active_codes"/>).
+        /// </summary>
+        public string Currency { get; private set; }
+
         /// <inheritdoc />
         public override string ToString() => this.LocationName;
     }
