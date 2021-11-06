@@ -32,6 +32,12 @@ namespace HassClient.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ConfigEntry { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicathing whether the entity uses a custom component platform.
+        /// </summary>
+        [JsonProperty("custom_component")]
+        public bool IsCustomComponent { get; private set; }
+
         /// <inheritdoc />
         public override string ToString() => $"Id: {this.EntityId} Domain: {this.Domain} Source: {this.Source} ";
     }

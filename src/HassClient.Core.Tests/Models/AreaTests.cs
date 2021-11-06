@@ -43,7 +43,7 @@ namespace HassClient.Core.Tests
         [Test]
         public void SetNewNameMakesHasPendingChangesTrue()
         {
-            var testEntry = this.CreateTestEntry(out var initialName);
+            var testEntry = this.CreateTestEntry(out var initialName, out _);
 
             testEntry.Name = MockHelpers.GetRandomTestName();
             Assert.IsTrue(testEntry.HasPendingChanges);
@@ -53,22 +53,37 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
+        public void SetNewPictureMakesHasPendingChangesTrue()
+        {
+            var testEntry = this.CreateTestEntry(out _, out var picture);
+
+            testEntry.Picture = $"/test/{MockHelpers.GetRandomTestName()}.png";
+            Assert.IsTrue(testEntry.HasPendingChanges);
+
+            testEntry.Picture = picture;
+            Assert.False(testEntry.HasPendingChanges);
+        }
+
+        [Test]
         public void DiscardPendingChanges()
         {
-            var testEntry = this.CreateTestEntry(out var initialName);
+            var testEntry = this.CreateTestEntry(out var initialName, out var initialPicture);
 
             testEntry.Name = MockHelpers.GetRandomTestName();
+            testEntry.Picture = $"/test/{MockHelpers.GetRandomTestName()}.png";
             Assert.IsTrue(testEntry.HasPendingChanges);
 
             testEntry.DiscardPendingChanges();
             Assert.False(testEntry.HasPendingChanges);
             Assert.AreEqual(initialName, testEntry.Name);
+            Assert.AreEqual(initialPicture, testEntry.Picture);
         }
 
-        private Area CreateTestEntry(out string name)
+        private Area CreateTestEntry(out string name, out string picture)
         {
             name = MockHelpers.GetRandomTestName();
-            return Area.CreateUnmodified(name);
+            picture = "/test/Picture.png";
+            return Area.CreateUnmodified(name, picture);
         }
     }
 }

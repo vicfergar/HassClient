@@ -11,6 +11,8 @@ namespace HassClient.Models
     {
         private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
 
+        private readonly ModifiableProperty<string> picture = new ModifiableProperty<string>(nameof(Picture));
+
         /// <inheritdoc />
         internal protected override string UniqueId
         {
@@ -42,6 +44,16 @@ namespace HassClient.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets a URL (relative or absolute) to a picture for this area.
+        /// </summary>
+        [JsonProperty]
+        public string Picture
+        {
+            get => this.picture.Value;
+            set => this.picture.Value = value;
+        }
+
         [JsonConstructor]
         private Area()
         {
@@ -51,7 +63,8 @@ namespace HassClient.Models
         /// Initializes a new instance of the <see cref="Area"/> class.
         /// </summary>
         /// <param name="name">The name of the area.</param>
-        public Area(string name)
+        /// <param name="picture">a URL (relative or absolute) to a picture for this area.</param>
+        public Area(string name, string picture = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -59,12 +72,13 @@ namespace HassClient.Models
             }
 
             this.Name = name;
+            this.Picture = picture;
         }
 
         // Used for testing purposes.
-        internal static Area CreateUnmodified(string name)
+        internal static Area CreateUnmodified(string name, string picture)
         {
-            var result = new Area(name);
+            var result = new Area(name, picture);
             result.SaveChanges();
             return result;
         }
@@ -73,6 +87,7 @@ namespace HassClient.Models
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
             yield return this.name;
+            yield return this.picture;
         }
 
         /// <inheritdoc />
@@ -94,7 +109,7 @@ namespace HassClient.Models
         // Used for testing purposes.
         internal Area Clone()
         {
-            var result = CreateUnmodified(this.Name);
+            var result = CreateUnmodified(this.Name, this.Picture);
             result.UniqueId = this.UniqueId;
             return result;
         }

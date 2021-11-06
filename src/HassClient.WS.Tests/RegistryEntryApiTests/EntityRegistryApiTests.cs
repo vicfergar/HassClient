@@ -57,7 +57,7 @@ namespace HassClient.WS.Tests
         [Test]
         public void UpdateEntityWithSameEntityIdThrows()
         {
-            var testEntity = new EntityRegistryEntry("switch.TestEntity", null, null);
+            var testEntity = new EntityRegistryEntry("switch.TestEntity", null, null, EntityCategory.None);
 
             Assert.ThrowsAsync<ArgumentException>(() => this.hassWSApi.UpdateEntityAsync(testEntity, testEntity.EntityId));
         }

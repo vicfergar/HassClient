@@ -62,6 +62,12 @@ namespace HassClient.Models
         public string[] ConfigurationEntries { get; private set; }
 
         /// <summary>
+        /// Gets a URL on which the device or service can be configured.
+        /// </summary>
+        [JsonProperty]
+        public string ConfigurationUrl { get; private set; }
+
+        /// <summary>
         /// Gets a set of tuples of (connection_type, connection identifier).
         /// Connection types are defined in the device registry module.
         /// </summary>

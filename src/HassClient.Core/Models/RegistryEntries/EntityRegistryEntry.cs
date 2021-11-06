@@ -15,6 +15,9 @@ namespace HassClient.Models
         [JsonProperty]
         private readonly ModifiableProperty<DisabledByEnum?> disabledBy = new ModifiableProperty<DisabledByEnum?>(nameof(disabledBy));
 
+        [JsonProperty]
+        private readonly ModifiableProperty<EntityCategory> entityCategory = new ModifiableProperty<EntityCategory>(nameof(entityCategory));
+
         [JsonProperty(Required = Required.Always)]
         private string entityId;
 
@@ -97,6 +100,19 @@ namespace HassClient.Models
         public Dictionary<string, JRaw> Capabilities { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating the entity category.
+        /// <para>
+        /// Primary entity's category will be <see cref="EntityCategory.None"/>.
+        /// </para>
+        /// </summary>
+        [JsonIgnore]
+        public EntityCategory EntityCategory
+        {
+            get => this.entityCategory.Value;
+            set => this.entityCategory.Value = value;
+        }
+
+        /// <summary>
         /// Gets a the supported features of this entity, if any.
         /// </summary>
         [JsonProperty]
@@ -137,33 +153,37 @@ namespace HassClient.Models
         /// <param name="entityId">The entity id.</param>
         /// <param name="name">The original name.</param>
         /// <param name="icon">The original icon.</param>
+        /// <param name="category">The entity category.</param>
         /// <param name="disabledBy">The original disable.</param>
-        internal protected EntityRegistryEntry(string entityId, string name, string icon, DisabledByEnum disabledBy = DisabledByEnum.None)
+        internal protected EntityRegistryEntry(string entityId, string name, string icon, EntityCategory category, DisabledByEnum disabledBy = DisabledByEnum.None)
             : base(name, icon)
         {
             this.entityId = entityId;
             this.Platform = entityId.GetDomain();
+            this.EntityCategory = category;
             this.disabledBy.Value = disabledBy;
 
             this.SaveChanges();
         }
 
         // Used for testing purposes.
-        internal static EntityRegistryEntry CreateUnmodified(string entityId, string name, string icon = null, DisabledByEnum disabledBy = DisabledByEnum.None)
+        internal static EntityRegistryEntry CreateUnmodified(string entityId, string name, string icon = null, EntityCategory category = EntityCategory.None, DisabledByEnum disabledBy = DisabledByEnum.None)
         {
-            return new EntityRegistryEntry(entityId, name, icon, disabledBy);
+            return new EntityRegistryEntry(entityId, name, icon, category, disabledBy);
         }
 
         // Used for testing purposes.
-        internal static EntityRegistryEntry CreateFromEntry(EntityRegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+        internal static EntityRegistryEntry CreateFromEntry(EntityRegistryEntryBase entry, EntityCategory category, DisabledByEnum disabledBy = DisabledByEnum.None)
         {
-            return new EntityRegistryEntry(entry.EntityId, entry.Name, entry.Icon, disabledBy);
+            return new EntityRegistryEntry(entry.EntityId, entry.Name, entry.Icon, category, disabledBy);
         }
 
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            return base.GetModifiableProperties().Append(this.disabledBy);
+            return base.GetModifiableProperties()
+                       .Append(this.disabledBy)
+                       .Append(this.entityCategory);
         }
 
         /// <inheritdoc />
@@ -172,7 +192,7 @@ namespace HassClient.Models
         // Used for testing purposes.
         internal EntityRegistryEntry Clone()
         {
-            var result = CreateUnmodified(this.EntityId, this.Name, this.Icon, this.DisabledBy);
+            var result = CreateUnmodified(this.EntityId, this.Name, this.Icon, this.EntityCategory, this.DisabledBy);
             result.UniqueId = this.UniqueId;
             result.entityId = this.entityId;
             result.AreaId = this.AreaId;

@@ -18,15 +18,15 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             [JsonIgnore]
             public EntityRegistryEntryBase Entry;
 
-            public MockRegistryEntity(string entityId, string originalName, string originalIcon = null, DisabledByEnum disabledBy = DisabledByEnum.None)
-            : base(entityId, null, null, disabledBy)
+            public MockRegistryEntity(string entityId, string originalName, string originalIcon = null, EntityCategory entityCategory = EntityCategory.None, DisabledByEnum disabledBy = DisabledByEnum.None)
+            : base(entityId, null, null, entityCategory, disabledBy)
             {
                 this.OriginalName = originalName;
                 this.OriginalIcon = originalIcon;
             }
 
-            public MockRegistryEntity(EntityRegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
-            : this(entry.EntityId, entry.Name, entry.Icon, disabledBy)
+            public MockRegistryEntity(EntityRegistryEntryBase entry, EntityCategory entityCategory = EntityCategory.None, DisabledByEnum disabledBy = DisabledByEnum.None)
+            : this(entry.EntityId, entry.Name, entry.Icon, entityCategory, disabledBy)
             {
                 this.Entry = entry;
                 this.UniqueId = entry.UniqueId;
@@ -58,7 +58,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         protected override object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
         {
-            return context.HassDB.GetAllEntityEntries().Select(x => x as EntityRegistryEntry ?? EntityRegistryEntry.CreateFromEntry(x));
+            return context.HassDB.GetAllEntityEntries().Select(x => x as EntityRegistryEntry ?? EntityRegistryEntry.CreateFromEntry(x, EntityCategory.None, DisabledByEnum.None));
         }
 
         protected override object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
@@ -152,7 +152,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 ConfigEntryId = this.faker.RandomUUID(),
             });
 
-            hassDB.CreateObject(new MockRegistryEntity("switch.fake_switch", "Fake Switch", "mdi: switch", DisabledByEnum.Integration)
+            hassDB.CreateObject(new MockRegistryEntity("switch.fake_switch", "Fake Switch", "mdi: switch", EntityCategory.None, DisabledByEnum.Integration)
             {
                 UniqueId = this.faker.RandomUUID(),
                 ConfigEntryId = this.faker.RandomUUID()
