@@ -16,7 +16,7 @@ namespace HassClient.Models
         private readonly ModifiableProperty<DisabledByEnum?> disabledBy = new ModifiableProperty<DisabledByEnum?>(nameof(disabledBy));
 
         [JsonProperty]
-        private readonly ModifiableProperty<EntityCategory> entityCategory = new ModifiableProperty<EntityCategory>(nameof(entityCategory));
+        private readonly ModifiableProperty<EntityCategory?> entityCategory = new ModifiableProperty<EntityCategory?>(nameof(entityCategory));
 
         [JsonProperty(Required = Required.Always)]
         private string entityId;
@@ -108,8 +108,8 @@ namespace HassClient.Models
         [JsonIgnore]
         public EntityCategory EntityCategory
         {
-            get => this.entityCategory.Value;
-            set => this.entityCategory.Value = value;
+            get => this.entityCategory.Value ?? EntityCategory.None;
+            set => this.entityCategory.Value = (value == EntityCategory.None) ? null : (EntityCategory?)value;
         }
 
         /// <summary>
