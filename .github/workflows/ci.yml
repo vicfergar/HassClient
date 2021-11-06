@@ -64,6 +64,7 @@ jobs:
       run: docker logs ${{ steps.homeassistant.outputs.containername }}
 
     - name: Convert to JUnit format
+      if: always()
       run: | 
         mkdir ${{env.test-results-path}}
         find ./src/ -print \
@@ -74,6 +75,7 @@ jobs:
         trx2junit ${{env.test-results-path}}/*.trx
 
     - name: Publish Unit Test Results
+      if: always()
       uses: EnricoMi/publish-unit-test-result-action@v1
       with:
         files: ${{env.test-results-path}}/*.xml
