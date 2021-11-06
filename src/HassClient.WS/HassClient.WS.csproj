@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <Authors>VFerrer</Authors>
     <Description>A Home Assistant WebSocket client to communicate with Home Assistant instances.</Description>
     <RepositoryUrl>https://github.com/vicfergar/HassClient</RepositoryUrl>
