@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,12 @@ namespace HassClient.WS.Messages
         /// </summary>
         [JsonProperty(Required = Required.Always)]
         public string EventType { get; set; }
+
+        /// <summary>
+        /// Gets the event type as <see cref="KnownEventTypes"/>.
+        /// </summary>
+        [JsonIgnore]
+        public KnownEventTypes KnownEventType => this.EventType.AsKnownEventType();
 
         /// <summary>
         /// Gets or sets the time at which the event was fired.

@@ -138,6 +138,11 @@ namespace HassClient.Models
         TimerOutOfSync,
 
         /// <summary>
+        /// Fired when a Home Assistant user is added.
+        /// </summary>
+        UserAdded,
+
+        /// <summary>
         /// Fired when a Home Assistant user is removed.
         /// </summary>
         UserRemoved,
