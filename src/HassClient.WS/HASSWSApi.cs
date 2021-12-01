@@ -154,12 +154,12 @@ namespace HassClient.WS
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
         /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is the <see cref="Configuration"/> object.
+        /// A task representing the asynchronous operation. The result of the task is the <see cref="ConfigurationModel"/> object.
         /// </returns>
-        public Task<Configuration> GetConfigurationAsync(CancellationToken cancellationToken = default)
+        public Task<ConfigurationModel> GetConfigurationAsync(CancellationToken cancellationToken = default)
         {
             var commandMessage = new GetConfigMessage();
-            return this.hassClientWebSocket.SendCommandWithResultAsync<Configuration>(commandMessage, cancellationToken);
+            return this.hassClientWebSocket.SendCommandWithResultAsync<ConfigurationModel>(commandMessage, cancellationToken);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// refresh operation was successfully done.
         /// </returns>
-        public async Task<bool> RefreshConfigurationAsync(Configuration configuration, CancellationToken cancellationToken = default)
+        public async Task<bool> RefreshConfigurationAsync(ConfigurationModel configuration, CancellationToken cancellationToken = default)
         {
             var commandMessage = new GetConfigMessage();
             var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);

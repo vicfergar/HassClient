@@ -8,7 +8,7 @@ namespace HassClient.Models
     /// <summary>
     /// Represents the Home Assistant configuration object.
     /// </summary>
-    public class Configuration
+    public class ConfigurationModel
     {
         [JsonProperty("whitelist_external_dirs")]
         private string[] whitelist_external_dirs

@@ -46,8 +46,8 @@ namespace HassClient.WS.Tests.Mocks
             .RuleFor(x => x.Temperature, f => f.PickRandom("°C", "°F"))
             .RuleFor(x => x.Volume, f => f.PickRandom("L", "gal"));
 
-        public static readonly Faker<Configuration> ConfigurationFaker =
-            new Faker<Configuration>()
+        public static readonly Faker<ConfigurationModel> ConfigurationFaker =
+            new Faker<ConfigurationModel>()
             .RuleFor(x => x.AllowedExternalDirs, f => f.Make(3, () => f.System.DirectoryPath()))
             .RuleFor(x => x.AllowedExternalUrls, f => f.Make(3, () => f.Internet.Url()))
             .RuleFor(x => x.Components, f => f.Make(10, () => f.RandomDomain()).Distinct().ToList())

@@ -9,7 +9,7 @@ namespace HassClient.WS.Tests
     public class ConfigurationApiTests : BaseHassWSApiTest
     {
 
-        private Configuration configuration;
+        private ConfigurationModel configuration;
 
         public ConfigurationApiTests(bool useFakeHassServer)
             : base(useFakeHassServer)
