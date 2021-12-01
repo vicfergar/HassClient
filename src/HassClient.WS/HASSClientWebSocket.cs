@@ -627,7 +627,7 @@ namespace HassClient.WS
                     throw new InvalidOperationException($"Unexpected incoming message type '{incomingMessage.Type}' for command type '{commandMessage.Type}'.");
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 if (commandMessage.Id > 0)
                 {

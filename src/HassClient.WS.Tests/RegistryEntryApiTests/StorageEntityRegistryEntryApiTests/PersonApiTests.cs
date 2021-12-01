@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
+    [TestFixture(false, TestName = nameof(PersonApiTests) + "WithRealServer")]
     public class PersonApiTests : BaseHassWSApiTest
     {
         private Person testPerson;
-
-        public PersonApiTests()
-            : base(false)
+        public PersonApiTests(bool useFakeHassServer)
+            : base(useFakeHassServer)
         {
         }
 

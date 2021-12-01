@@ -104,7 +104,7 @@ namespace HassClient.WS.Tests
 
             this.connectionCTS.Cancel();
 
-            Assert.ThrowsAsync<TaskCanceledException>(() => connectTask);
+            Assert.CatchAsync<OperationCanceledException>(() => connectTask);
             Assert.AreEqual(ConnectionStates.Disconnected, this.wsClient.ConnectionState);
             Assert.AreEqual(TaskStatus.Canceled, connectTask.Status);
         }
@@ -118,7 +118,7 @@ namespace HassClient.WS.Tests
 
             await this.wsClient.CloseAsync();
 
-            Assert.ThrowsAsync<TaskCanceledException>(async () => await connectTask);
+            Assert.CatchAsync<OperationCanceledException>(async () => await connectTask);
             Assert.AreEqual(ConnectionStates.Disconnected, this.wsClient.ConnectionState);
         }
 
@@ -222,7 +222,7 @@ namespace HassClient.WS.Tests
 
             Assert.Zero(this.wsClient.SubscriptionsCount);
             Assert.Zero(this.wsClient.PendingRequestsCount);
-            Assert.ThrowsAsync<TaskCanceledException>(() => subscriptionTask);
+            Assert.CatchAsync<OperationCanceledException>(() => subscriptionTask);
         }
 
         [Test]
@@ -239,7 +239,7 @@ namespace HassClient.WS.Tests
 
             Assert.Zero(this.wsClient.SubscriptionsCount);
             Assert.Zero(this.wsClient.PendingRequestsCount);
-            Assert.ThrowsAsync<TaskCanceledException>(() => subscriptionTask);
+            Assert.CatchAsync<OperationCanceledException>(() => subscriptionTask);
         }
 
         [Test]
@@ -252,7 +252,7 @@ namespace HassClient.WS.Tests
             var sendTask = this.wsClient.SendCommandWithSuccessAsync(new PingMessage(), cancellationTokenSource.Token);
 
             Assert.Zero(this.wsClient.PendingRequestsCount);
-            Assert.ThrowsAsync<TaskCanceledException>(() => sendTask);
+            Assert.CatchAsync<OperationCanceledException>(() => sendTask);
         }
 
         [Test, Repeat(200)]
@@ -269,7 +269,7 @@ namespace HassClient.WS.Tests
 
             Assert.Zero(this.wsClient.PendingRequestsCount);
 
-            Assert.ThrowsAsync<TaskCanceledException>(() => sendTask);
+            Assert.CatchAsync<OperationCanceledException>(() => sendTask);
         }
 
         [Test]
