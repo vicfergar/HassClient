@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace HassClient.Serialization
 {
@@ -18,7 +17,7 @@ namespace HassClient.Serialization
         }
 
         /// <inheritdoc />
-        public override Color ReadJson(JsonReader reader, Type objectType, [AllowNull] Color existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (objectType == typeof(RGBColor))
             {

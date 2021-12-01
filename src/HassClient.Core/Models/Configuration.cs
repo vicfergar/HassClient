@@ -14,14 +14,14 @@ namespace HassClient.Models
         private string[] whitelist_external_dirs
         {
             get => this.AllowedExternalDirs?.ToArray();
-            set => this.AllowedExternalDirs ??= value.ToList();
+            set => this.AllowedExternalDirs = this.AllowedExternalDirs ?? value.ToList();
         }
 
         [JsonProperty("allowlist_external_dirs")]
         private string[] allowlist_external_dirs
         {
             get => this.AllowedExternalDirs?.ToArray();
-            set => this.AllowedExternalDirs ??= value.ToList();
+            set => this.AllowedExternalDirs = this.AllowedExternalDirs ?? value.ToList();
         }
 
         /// <summary>

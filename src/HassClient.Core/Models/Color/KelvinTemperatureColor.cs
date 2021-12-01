@@ -20,7 +20,7 @@ namespace HassClient.Core.Models
         /// </param>
         public KelvinTemperatureColor(uint kelvins)
         {
-            this.Kelvins = Math.Clamp(kelvins, 1000, 40000);
+            this.Kelvins = Math.Min(Math.Max(kelvins, 1000), 40000);
         }
     }
 }

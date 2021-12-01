@@ -103,7 +103,7 @@ namespace HassClient.Models
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.Id);
+            return 2108858624 + EqualityComparer<string>.Default.GetHashCode(this.Id);
         }
 
         // Used for testing purposes.

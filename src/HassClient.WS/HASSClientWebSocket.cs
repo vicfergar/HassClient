@@ -487,7 +487,6 @@ namespace HassClient.WS
                 this.IsReconnecting = false;
 
                 this.connectionParameters = null;
-                this.receivingBuffer = null;
 
                 if (this.connectionTCS?.TrySetResult(false) == false)
                 {

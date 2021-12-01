@@ -20,7 +20,7 @@ namespace HassClient.Core.Models
         /// </param>
         public MiredsTemperatureColor(uint mireds)
         {
-            this.Mireds = Math.Clamp(mireds, 153, 500);
+            this.Mireds = Math.Min(Math.Max(mireds, 153), 500);
         }
     }
 }
