@@ -193,7 +193,11 @@ namespace HassClient.WS.Messages.Commands
 
         private void AddModelIdProperty(JObject mergedObject, string modelId)
         {
-            mergedObject.TryAdd($"{this.modelName}_id", modelId);
+            var propertyName = $"{this.modelName}_id";
+            if (!mergedObject.ContainsKey(propertyName))
+            {
+                mergedObject.Add(propertyName, modelId);
+            }
         }
     }
 }

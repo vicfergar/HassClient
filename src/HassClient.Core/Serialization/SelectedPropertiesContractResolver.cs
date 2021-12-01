@@ -19,7 +19,7 @@ namespace HassClient.Serialization
         public IEnumerable<string> SelectedProperties
         {
             get => this.selectedProperties;
-            set => this.selectedProperties = value.ToHashSet();
+            set => this.selectedProperties = new HashSet<string>(value);
         }
 
         /// <inheritdoc />

@@ -100,7 +100,7 @@ namespace HassClient.Models
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.UniqueId);
+            return -401120461 + EqualityComparer<string>.Default.GetHashCode(this.UniqueId);
         }
     }
 }

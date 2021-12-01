@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace HassClient.Serialization
@@ -20,7 +19,7 @@ namespace HassClient.Serialization
         }
 
         /// <inheritdoc />
-        public override Dictionary<string, string> ReadJson(JsonReader reader, Type objectType, [AllowNull] Dictionary<string, string> existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override Dictionary<string, string> ReadJson(JsonReader reader, Type objectType, Dictionary<string, string> existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var array = serializer.Deserialize<string[][]>(reader);
 
