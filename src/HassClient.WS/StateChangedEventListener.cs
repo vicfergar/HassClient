@@ -10,7 +10,7 @@ namespace HassClient.WS
     /// <summary>
     /// Helper class to handle state changed event subscriptions from multiple consumers.
     /// </summary>
-    public class StateChagedEventListener : IDisposable
+    public class StateChangedEventListener : IDisposable
     {
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByEntityId = new Dictionary<string, EventHandler<StateChangedEvent>>();
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByDomain = new Dictionary<string, EventHandler<StateChangedEvent>>();
@@ -26,14 +26,14 @@ namespace HassClient.WS
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
-        /// Initialization method of the <see cref="StateChagedEventListener"/>.
+        /// Initialization method of the <see cref="StateChangedEventListener"/>.
         /// </summary>
         /// <param name="clientWebSocket">The Home Assistant Web Socket client instance.</param>
         public void Initialize(HassClientWebSocket clientWebSocket)
         {
             if (this.clientWebSocket != null)
             {
-                throw new InvalidOperationException($"{nameof(StateChagedEventListener)} is already initialized");
+                throw new InvalidOperationException($"{nameof(StateChangedEventListener)} is already initialized");
             }
 
             if (clientWebSocket == null)

@@ -35,7 +35,7 @@ namespace HassClient.WS
         /// <summary>
         /// Gets the <see cref="StateChagedEventListener"/> instance of this client instance.
         /// </summary>
-        public StateChagedEventListener StateChagedEventListener { get; private set; }
+        public StateChangedEventListener StateChagedEventListener { get; private set; }
 
         /// <summary>
         /// Connects to a Home Assistant instance using the specified connection parameters.
@@ -63,7 +63,7 @@ namespace HassClient.WS
         {
             await this.hassClientWebSocket.ConnectAsync(connectionParameters, retries, cancellationToken);
 
-            this.StateChagedEventListener = new StateChagedEventListener();
+            this.StateChagedEventListener = new StateChangedEventListener();
             this.StateChagedEventListener.Initialize(this.hassClientWebSocket);
         }
 
