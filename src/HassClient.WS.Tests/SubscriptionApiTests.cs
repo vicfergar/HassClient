@@ -1,37 +1,22 @@
 ﻿using HassClient.Helpers;
 using HassClient.Models;
 using HassClient.Serialization;
-using HassClient.WS.Tests.Mocks;
 using HassClient.WS.Messages;
+using HassClient.WS.Tests.Mocks;
 using NUnit.Framework;
 using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(SubscriptionApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(SubscriptionApiTests) + "WithRealServer")]
     public class SubscriptionApiTests : BaseHassWSApiTest
     {
         private const string testEntitytId = "light.ceiling_lights";
 
-        public SubscriptionApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
-
         private async Task<StateChangedEvent> ForceStateChangedAndGetEventData(MockEventSubscriber subscriber)
         {
-            if (this.hassServer != null)
-            {
-                var succeed = await this.hassServer.RaiseStateChangedEventAsync(testEntitytId);
-                Assert.IsTrue(succeed, "SetUp failed");
-            }
-            else
-            {
-                var domain = testEntitytId.GetDomain();
-                var update = await this.hassWSApi.CallServiceForEntitiesAsync(domain, "toggle", testEntitytId);
-                Assert.NotNull(update, "SetUp failed");
-            }
+            var domain = testEntitytId.GetDomain();
+            var update = await this.hassWSApi.CallServiceForEntitiesAsync(domain, "toggle", testEntitytId);
+            Assert.NotNull(update, "SetUp failed");
 
             var eventResultInfo = await subscriber.WaitFirstEventArgWithTimeoutAsync<EventResultInfo>(
                                             (x) => HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(x.EventType, out var knownEventType) &&

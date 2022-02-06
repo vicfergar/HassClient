@@ -7,16 +7,9 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(ZoneApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(ZoneApiTests) + "WithRealServer")]
     public class ZoneApiTests : BaseHassWSApiTest
     {
         private Zone testZone;
-
-        public ZoneApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
 
         [OneTimeSetUp]
         [Test, Order(1)]

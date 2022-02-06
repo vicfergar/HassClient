@@ -1,12 +1,10 @@
 ﻿using HassClient.Models;
-using HassClient.Helpers;
+using HassClient.Serialization;
 using HassClient.WS.Messages;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Runtime.Serialization;
-using HassClient.Serialization;
 
 namespace HassClient.WS.Tests.Mocks.HassServer
 {

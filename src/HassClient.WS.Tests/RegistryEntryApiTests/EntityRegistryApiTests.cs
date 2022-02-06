@@ -7,18 +7,11 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(EntityRegistryApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(EntityRegistryApiTests) + "WithRealServer")]
     public class EntityRegistryApiTests : BaseHassWSApiTest
     {
         private InputBoolean testInputBoolean;
 
         private string testEntityId;
-
-        public EntityRegistryApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
 
         protected override async Task OneTimeSetUp()
         {

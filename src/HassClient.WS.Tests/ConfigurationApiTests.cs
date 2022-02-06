@@ -4,17 +4,10 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(ConfigurationApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(ConfigurationApiTests) + "WithRealServer")]
     public class ConfigurationApiTests : BaseHassWSApiTest
     {
 
         private ConfigurationModel configuration;
-
-        public ConfigurationApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
 
         [OneTimeSetUp]
         [Test]

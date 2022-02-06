@@ -1,20 +1,12 @@
-﻿using HassClient.Models;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(DeviceRegistryApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(DeviceRegistryApiTests) + "WithRealServer")]
     public class DeviceRegistryApiTests : BaseHassWSApiTest
     {
-        public DeviceRegistryApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
-
         [Test]
         public async Task GetDevices()
         {

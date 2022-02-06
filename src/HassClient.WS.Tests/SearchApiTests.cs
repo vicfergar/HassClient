@@ -4,15 +4,8 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(SearchApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(SearchApiTests) + "WithRealServer")]
     public class SearchApiTests : BaseHassWSApiTest
     {
-        public SearchApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
-
         public static Array GetItemTypes()
         {
             return Enum.GetValues(typeof(ItemTypes));

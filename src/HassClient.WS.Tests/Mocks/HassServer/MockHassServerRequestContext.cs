@@ -1,11 +1,9 @@
 ﻿using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;

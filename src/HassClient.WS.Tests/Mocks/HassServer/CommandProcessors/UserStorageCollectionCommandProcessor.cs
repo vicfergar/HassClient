@@ -2,7 +2,6 @@
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace HassClient.WS.Tests.Mocks.HassServer
 {

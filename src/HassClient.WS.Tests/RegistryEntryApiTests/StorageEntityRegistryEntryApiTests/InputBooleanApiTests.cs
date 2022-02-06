@@ -7,16 +7,9 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(InputBooleanApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(InputBooleanApiTests) + "WithRealServer")]
     public class InputBooleanApiTests : BaseHassWSApiTest
     {
         private InputBoolean testInputBoolean;
-
-        public InputBooleanApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
 
         [OneTimeSetUp]
         [Test, Order(1)]

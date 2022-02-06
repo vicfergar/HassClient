@@ -3,15 +3,8 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(EntitySourcesApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(EntitySourcesApiTests) + "WithRealServer")]
     public class EntitySourcesApiTests : BaseHassWSApiTest
     {
-        public EntitySourcesApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
-
         [Test]
         public async Task GetEntitySources()
         {

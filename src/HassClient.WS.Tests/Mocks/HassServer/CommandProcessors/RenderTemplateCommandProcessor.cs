@@ -2,7 +2,6 @@
 using HassClient.Helpers;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
-using HassClient.WS.Tests.Mocks;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,10 +43,10 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 Id = commandRenderTemplate.Id,
                 Event = new JRaw(HassSerializer.SerializeObject(renderTemplateEvent))
             };
-            Task.Factory.StartNew(async() =>
+            Task.Factory.StartNew(async () =>
             {
                 await Task.Delay(40);
-                await context.SendMessageAsync(eventMsg, CancellationToken.None); 
+                await context.SendMessageAsync(eventMsg, CancellationToken.None);
             });
 
             return this.CreateResultMessageWithResult(null);

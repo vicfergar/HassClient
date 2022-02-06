@@ -1,6 +1,6 @@
-﻿using HassClient.WS.Tests.Mocks;
+﻿using HassClient.WS.Messages;
+using HassClient.WS.Tests.Mocks;
 using HassClient.WS.Tests.Mocks.HassServer;
-using HassClient.WS.Messages;
 using NUnit.Framework;
 using System;
 using System.Linq;

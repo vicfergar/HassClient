@@ -1,6 +1,5 @@
 ﻿using HassClient.Helpers;
 using HassClient.Models;
-using HassClient.Serialization;
 using HassClient.WS.Messages;
 using System.Collections.Generic;
 

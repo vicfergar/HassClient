@@ -4,15 +4,8 @@ using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
 {
-    [TestFixture(true, TestName = nameof(RawCommandApiTests) + "WithFakeServer")]
-    [TestFixture(false, TestName = nameof(RawCommandApiTests) + "WithRealServer")]
     public class RawCommandApiTests : BaseHassWSApiTest
     {
-        public RawCommandApiTests(bool useFakeHassServer)
-            : base(useFakeHassServer)
-        {
-        }
-
         [Test]
         public async Task SendRawCommandWithResult()
         {
