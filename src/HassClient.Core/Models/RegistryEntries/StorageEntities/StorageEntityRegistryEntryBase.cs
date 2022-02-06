@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using HassClient.Helpers;
+﻿using HassClient.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 

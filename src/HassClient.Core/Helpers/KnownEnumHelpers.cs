@@ -1,7 +1,6 @@
 ﻿using HassClient.Models;
 using HassClient.Serialization;
 using System;
-using System.Collections.Generic;
 
 namespace HassClient.Helpers
 {

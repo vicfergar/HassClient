@@ -22,7 +22,7 @@ namespace HassClient.Core.Tests
         [Test]
         public void NewPersonHasPendingChanges()
         {
-            var testEntry = new Person( MockHelpers.GetRandomTestName(), this.testUser);
+            var testEntry = new Person(MockHelpers.GetRandomTestName(), this.testUser);
             Assert.IsTrue(testEntry.HasPendingChanges);
         }
 

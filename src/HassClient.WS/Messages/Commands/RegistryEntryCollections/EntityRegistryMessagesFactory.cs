@@ -1,6 +1,6 @@
-﻿using HassClient.WS.Messages.Commands;
-using HassClient.Models;
+﻿using HassClient.Models;
 using HassClient.Serialization;
+using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {

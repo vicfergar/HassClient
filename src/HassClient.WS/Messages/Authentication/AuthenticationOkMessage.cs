@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HassClient.WS.Messages
+﻿namespace HassClient.WS.Messages
 {
     /// <summary>
     /// Represents an authentication message used by Web Socket API.

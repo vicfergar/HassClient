@@ -1,5 +1,5 @@
-﻿using HassClient.WS.Messages.Commands;
-using HassClient.Models;
+﻿using HassClient.Models;
+using HassClient.WS.Messages.Commands;
 
 namespace HassClient.WS.Messages
 {
