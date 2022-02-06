@@ -17,7 +17,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         private MockHassServerRequestContext activeRequestContext;
 
-        public Version HAVersion => Version.Parse("0.117.1");
+        public CalVer HAVersion => CalVer.Parse("2022.1.0");
 
         public ConnectionParameters ConnectionParameters { get; private set; }
 
@@ -73,7 +73,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
             var context = new MockHassServerRequestContext(this.hassDB, webSocket);
 
-            await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion }, cancellationToken);
+            await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
 
             try
             {
@@ -89,7 +89,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                         {
                             if (authMessage.AccessToken == this.ConnectionParameters.AccessToken)
                             {
-                                await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion }, cancellationToken);
+                                await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
                                 context.IsAuthenticating = false;
                                 this.activeRequestContext = context;
                             }

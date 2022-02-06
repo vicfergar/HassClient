@@ -92,7 +92,7 @@ namespace HassClient.WS
         /// <summary>
         /// Gets the connected Home Assistant instance version.
         /// </summary>
-        public Version HAVersion { get; private set; }
+        public CalVer HAVersion { get; private set; }
 
         /// <summary>
         /// Gets the number of requests that are pending to be attended by the server.
@@ -316,7 +316,7 @@ namespace HassClient.WS
                         }
                         else if (incomingMsg is AuthenticationOkMessage authenticationOk)
                         {
-                            this.HAVersion = authenticationOk.HAVersion;
+                            this.HAVersion = CalVer.Parse(authenticationOk.HAVersion);
 
                             if (this.IsReconnecting)
                             {

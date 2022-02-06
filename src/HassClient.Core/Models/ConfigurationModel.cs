@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -88,10 +87,10 @@ namespace HassClient.Models
         public List<string> AllowedExternalUrls { get; private set; }
 
         /// <summary>
-        /// Gets the version of Home Assistant that is currently running (e.g. "0.115.3").
+        /// Gets the version of Home Assistant that is currently running.
         /// </summary>
         [JsonProperty]
-        public Version Version { get; private set; }
+        public CalVer Version { get; private set; }
 
         /// <summary>
         /// Gets the configuration source, or type of configuration file (usually "storage").

@@ -7,7 +7,7 @@ namespace HassClient.WS.Messages
     /// </summary>
     internal class AuthenticationOkMessage : BaseMessage
     {
-        public Version HAVersion { get; set; }
+        public string HAVersion { get; set; }
 
         public AuthenticationOkMessage()
             : base("auth_ok")

@@ -7,7 +7,7 @@ namespace HassClient.WS.Messages
     /// </summary>
     internal class AuthenticationRequiredMessage : BaseMessage
     {
-        public Version HAVersion { get; set; }
+        public string HAVersion { get; set; }
 
         public AuthenticationRequiredMessage()
             : base("auth_required")

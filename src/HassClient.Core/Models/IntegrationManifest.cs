@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 
 namespace HassClient.Models
 {
@@ -82,7 +81,7 @@ namespace HassClient.Models
         /// Gets the version number from which this integration is available or compatible.
         /// </summary>
         [JsonProperty("homeassistant")]
-        public Version SinceHassVersion { get; private set; }
+        public CalVer SinceHassVersion { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => this.Name;
