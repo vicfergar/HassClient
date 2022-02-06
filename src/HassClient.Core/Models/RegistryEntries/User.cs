@@ -14,6 +14,8 @@ namespace HassClient.Models
 
         private readonly ModifiableProperty<bool> isActive = new ModifiableProperty<bool>(nameof(IsActive));
 
+        private readonly ModifiableProperty<bool> isLocalOnly = new ModifiableProperty<bool>(nameof(IsLocalOnly));
+
         private readonly ModifiablePropertyCollection<string> groupIds = new ModifiablePropertyCollection<string>(nameof(GroupIds));
 
         /// <summary>
@@ -57,6 +59,16 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public bool IsOwner { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the user is only allowed to log in from the local network and not from the internet or cloud.
+        /// </summary>
+        [JsonProperty("local_only")]
+        public bool IsLocalOnly
+        {
+            get => this.isLocalOnly.Value;
+            set => this.isLocalOnly.Value = value;
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the user is active.
@@ -179,6 +191,7 @@ namespace HassClient.Models
         {
             yield return this.name;
             yield return this.isActive;
+            yield return this.isLocalOnly;
             yield return this.groupIds;
         }
 

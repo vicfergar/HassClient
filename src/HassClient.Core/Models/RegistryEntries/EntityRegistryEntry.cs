@@ -18,6 +18,8 @@ namespace HassClient.Models
         [JsonProperty(Required = Required.Always)]
         private string entityId;
 
+        private string deviceClass;
+
         /// <inheritdoc />
         [JsonProperty]
         internal protected override string UniqueId { get; set; }
@@ -53,6 +55,23 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public string OriginalIcon { get; protected set; }
+
+        /// <summary>
+        /// Gets the original device class.
+        /// </summary>
+        [JsonProperty]
+        public string OriginalDeviceClass { get; protected set; }
+
+        /// <summary>
+        /// Gets the class of the device. This affects the state and default icon representation
+        /// of the entity.
+        /// </summary>
+        [JsonProperty]
+        public string DeviceClass
+        {
+            get => this.deviceClass ?? this.OriginalDeviceClass;
+            set => this.deviceClass = value != this.OriginalDeviceClass ? value : null;
+        }
 
         /// <summary>
         /// Gets the platform associated with this entity registry.
@@ -101,13 +120,6 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public int SupportedFeatures { get; private set; }
-
-        /// <summary>
-        /// Gets the class of the device. This affects the state and default icon representation
-        /// of the entity.
-        /// </summary>
-        [JsonProperty]
-        public string DeviceClass { get; private set; }
 
         /// <summary>
         /// Gets the units of measurement, if any. This will also influence the graphical presentation

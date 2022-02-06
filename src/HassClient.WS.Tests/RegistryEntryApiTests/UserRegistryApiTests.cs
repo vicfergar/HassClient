@@ -34,6 +34,7 @@ namespace HassClient.WS.Tests
             Assert.NotNull(this.testUser.Id);
             Assert.NotNull(this.testUser.Name);
             Assert.IsTrue(this.testUser.IsActive);
+            Assert.IsFalse(this.testUser.IsLocalOnly);
             Assert.IsFalse(this.testUser.IsOwner);
             Assert.IsFalse(this.testUser.IsAdministrator);
             Assert.IsFalse(this.testUser.HasPendingChanges);
@@ -74,6 +75,16 @@ namespace HassClient.WS.Tests
         }
 
         [Test, Order(3)]
+        public async Task UpdateUserIsLocalOnly()
+        {
+            this.testUser.IsLocalOnly = true;
+            var result = await this.hassWSApi.UpdateUserAsync(this.testUser);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(this.testUser.IsLocalOnly);
+        }
+
+        [Test, Order(3)]
         public async Task UpdateUserIsAdministrator()
         {
             this.testUser.IsAdministrator = true;
@@ -89,10 +100,12 @@ namespace HassClient.WS.Tests
             var initialName = this.testUser.Name;
             var initialGroupIds = this.testUser.GroupIds;
             var initialIsActive = this.testUser.IsActive;
+            var initialIsLocalOnly = this.testUser.IsLocalOnly;
             var clonedEntry = this.testUser.Clone();
             clonedEntry.Name = $"{initialName}_cloned";
             clonedEntry.IsAdministrator = !this.testUser.IsAdministrator;
             clonedEntry.IsActive = !initialIsActive;
+            clonedEntry.IsLocalOnly = !initialIsLocalOnly;
             var result = await this.hassWSApi.UpdateUserAsync(clonedEntry);
             Assert.IsTrue(result, "SetUp failed");
             Assert.False(this.testUser.HasPendingChanges, "SetUp failed");
@@ -102,6 +115,7 @@ namespace HassClient.WS.Tests
             Assert.AreEqual(initialName, this.testUser.Name);
             Assert.AreEqual(initialGroupIds, this.testUser.GroupIds);
             Assert.AreEqual(initialIsActive, this.testUser.IsActive);
+            Assert.AreEqual(initialIsLocalOnly, this.testUser.IsLocalOnly);
         }
 
         [OneTimeTearDown]

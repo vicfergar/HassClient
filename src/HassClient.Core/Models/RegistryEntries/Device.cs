@@ -100,6 +100,12 @@ namespace HassClient.Models
         public string SWVersion { get; private set; }
 
         /// <summary>
+        /// Gets the hardware version of the device.
+        /// </summary>
+        [JsonProperty]
+        public string HWVersion { get; private set; }
+
+        /// <summary>
         /// Gets the type of entry.
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

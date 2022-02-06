@@ -36,5 +36,17 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public string Volume { get; private set; }
+
+        /// <summary>
+        /// Gets the accumulated precipitation unit (usually "mm" or "in").
+        /// </summary>
+        [JsonProperty]
+        public string AccumulatedPrecipitation { get; private set; }
+
+        /// <summary>
+        /// Gets the wind speed unit (usually "m/s" or "mi/h").
+        /// </summary>
+        [JsonProperty]
+        public string WindSpeed { get; private set; }
     }
 }
