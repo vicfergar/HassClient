@@ -36,7 +36,7 @@ namespace HassClient.Models
         /// Gets the default value of this field if defined; otherwise, <see langword="null"/>.
         /// </summary>
         [JsonProperty("default")]
-        public string DefaultValue { get; private set; }
+        public JRaw DefaultValue { get; private set; }
 
         /// <summary>
         /// Gets the example for this field (may be <see langword="null"/>).
