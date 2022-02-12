@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <None Remove="Mocks\Data\GetServicesResponse.json" />
+	<Content Include="..\..\resources\tests\**\*">
+		<Link>resources\%(RecursiveDir)\%(Filename)%(Extension)</Link>
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="Bogus" Version="33.0.2" />
+    <PackageReference Include="DotNet.Testcontainers" Version="1.6.0-beta.2104" />
     <PackageReference Include="Ninja.WebSockets" Version="1.1.8" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />

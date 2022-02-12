@@ -8,8 +8,8 @@ namespace HassClient.WS.Tests
 {
     public abstract class BaseHassWSApiTest
     {
-        private const string TestsInstanceBaseUrlVar = "TestsInstanceBaseUrl";
-        private const string TestsAccessTokenVar = "TestsAccessToken";
+        public const string TestsInstanceBaseUrlVar = "TestsInstanceBaseUrl";
+        public const string TestsAccessTokenVar = "TestsAccessToken";
 
         private readonly ConnectionParameters connectionParameters;
 
