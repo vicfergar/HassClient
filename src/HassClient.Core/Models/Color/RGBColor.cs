@@ -1,4 +1,4 @@
-﻿namespace HassClient.Core.Models
+﻿namespace HassClient.Models
 {
     /// <summary>
     /// Represents an RGB (red, green, blue) color.

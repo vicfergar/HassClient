@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace HassClient.Core.Models
+namespace HassClient.Models
 {
     /// <summary>
     /// Represents a color described by a known name.

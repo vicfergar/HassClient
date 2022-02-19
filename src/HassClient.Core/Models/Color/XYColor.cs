@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace HassClient.Core.Models
+namespace HassClient.Models
 {
     /// <summary>
     /// Represents a CIE 1931 XY coordinate pair.

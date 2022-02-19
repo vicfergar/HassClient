@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HassClient.Core.Models
+namespace HassClient.Models
 {
     /// <summary>
     /// Represents a temperature color expressed in kelvins.

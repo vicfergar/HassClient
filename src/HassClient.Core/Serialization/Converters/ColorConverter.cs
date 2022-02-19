@@ -1,4 +1,4 @@
-﻿using HassClient.Core.Models;
+﻿using HassClient.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,7 +19,22 @@ namespace HassClient.Serialization
         /// <inheritdoc />
         public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            if (objectType == typeof(RGBColor))
+            if (objectType == typeof(RGBWColor))
+            {
+                var values = serializer.Deserialize<JArray>(reader);
+                if (hasExistingValue)
+                {
+                    var rgbwColor = existingValue as RGBWColor;
+                    rgbwColor.R = (byte)values[0];
+                    rgbwColor.G = (byte)values[1];
+                    rgbwColor.B = (byte)values[2];
+                    rgbwColor.W = (byte)values[3];
+                    return rgbwColor;
+                }
+
+                return Color.FromRGBW((byte)values[0], (byte)values[1], (byte)values[2], (byte)values[3]);
+            }
+            else if (objectType == typeof(RGBColor))
             {
                 var values = serializer.Deserialize<JArray>(reader);
                 if (hasExistingValue)
@@ -27,7 +42,7 @@ namespace HassClient.Serialization
                     var rgbColor = existingValue as RGBColor;
                     rgbColor.R = (byte)values[0];
                     rgbColor.G = (byte)values[1];
-                    rgbColor.B = (byte)values[1];
+                    rgbColor.B = (byte)values[2];
                     return rgbColor;
                 }
 

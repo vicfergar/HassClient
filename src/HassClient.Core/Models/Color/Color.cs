@@ -1,4 +1,4 @@
-﻿namespace HassClient.Core.Models
+﻿namespace HassClient.Models
 {
     /// <summary>
     /// Represents a Home Assistant color.
@@ -15,6 +15,19 @@
         public static RGBColor FromRGB(byte red, byte green, byte blue)
         {
             return new RGBColor(red, green, blue);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="RGBWColor"/> with the given values.
+        /// </summary>
+        /// <param name="red">The red color component value.</param>
+        /// <param name="green">The green color component value.</param>
+        /// <param name="blue">The blue color component value.</param>
+        /// <param name="white">The white color component value.</param>
+        /// <returns>A <see cref="RGBWColor"/> with the given values.</returns>
+        public static RGBWColor FromRGBW(byte red, byte green, byte blue, byte white)
+        {
+            return new RGBWColor(red, green, blue, white);
         }
 
         /// <summary>
