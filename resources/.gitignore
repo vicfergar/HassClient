@@ -1,0 +1,7 @@
+## Ignore Home Assistant config temporary files.
+
+tests/config/.storage
+*.HA_VERSION
+home-assistant.log*
+home-assistant_v*
+known_devices.yaml
