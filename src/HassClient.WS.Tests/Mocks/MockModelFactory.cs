@@ -63,7 +63,7 @@ namespace HassClient.WS.Tests.Mocks
             .RuleFor(x => x.State, "RUNNING")
             .RuleFor(x => x.TimeZone, f => f.Date.TimeZoneString())
             .RuleFor(x => x.UnitSystem, UnitSystemFaker.Generate())
-            .RuleFor(x => x.Version, CalVer.Parse("2022.1.0"));
+            .RuleFor(x => x.Version, CalVer.Create("2022.1.0"));
 
         public static readonly Faker<Context> ContextFaker =
             new Faker<Context>()

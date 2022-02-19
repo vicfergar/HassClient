@@ -19,7 +19,9 @@ namespace HassClient.Serialization
         public override CalVer ReadJson(JsonReader reader, Type objectType, CalVer existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var versionStr = serializer.Deserialize<string>(reader);
-            return CalVer.Parse(versionStr);
+            existingValue = existingValue ?? new CalVer();
+            existingValue.Parse(versionStr);
+            return existingValue;
         }
     }
 }

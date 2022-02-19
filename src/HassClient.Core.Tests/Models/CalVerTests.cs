@@ -8,37 +8,37 @@ namespace HassClient.Core.Tests
     public class CalVerTests
     {
         [Test]
-        public void ParseWithNullThrows()
+        public void CreateWithNullThrows()
         {
             var version = new CalVer();
-            Assert.Throws<ArgumentNullException>(() => CalVer.Parse(null));
+            Assert.Throws<ArgumentNullException>(() => CalVer.Create(null));
         }
 
         [Test]
-        public void ParseWithInvalidYearThrows()
+        public void CreateWithInvalidYearThrows()
         {
             var version = new CalVer();
-            Assert.Throws<ArgumentException>(() => CalVer.Parse("invalid"));
+            Assert.Throws<ArgumentException>(() => CalVer.Create("invalid"));
         }
 
         [Test]
-        public void ParseWithInvalidMonthThrows()
+        public void CreateWithInvalidMonthThrows()
         {
             var version = new CalVer();
-            Assert.Throws<ArgumentException>(() => CalVer.Parse("2022.invalid"));
+            Assert.Throws<ArgumentException>(() => CalVer.Create("2022.invalid"));
         }
 
         [Test]
-        public void ParseWithInvalidMicroAndModifierThrows()
+        public void CreateWithInvalidMicroAndModifierThrows()
         {
             var version = new CalVer();
-            Assert.Throws<ArgumentException>(() => CalVer.Parse("2022.02.''"));
+            Assert.Throws<ArgumentException>(() => CalVer.Create("2022.02.''"));
         }
 
         [Test]
-        public void ParseWithYearAndMonth()
+        public void CreateWithYearAndMonth()
         {
-            var version = CalVer.Parse("2022.02");
+            var version = CalVer.Create("2022.02");
 
             Assert.AreEqual(2022, version.Year);
             Assert.AreEqual(2, version.Month);
@@ -47,9 +47,9 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void ParseWithYearAndMonthAndMicro()
+        public void CreateWithYearAndMonthAndMicro()
         {
-            var version = CalVer.Parse("2022.02.13");
+            var version = CalVer.Create("2022.02.13");
 
             Assert.AreEqual(2022, version.Year);
             Assert.AreEqual(2, version.Month);
@@ -58,9 +58,9 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void ParseWithYearAndMonthAndModifier()
+        public void CreateWithYearAndMonthAndModifier()
         {
-            var version = CalVer.Parse("2022.02.b3");
+            var version = CalVer.Create("2022.02.b3");
 
             Assert.AreEqual(2022, version.Year);
             Assert.AreEqual(2, version.Month);
@@ -69,9 +69,9 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void ParseWithYearAndMonthMicroAndModifier()
+        public void CreateWithYearAndMonthMicroAndModifier()
         {
-            var version = CalVer.Parse("2022.02.4b3");
+            var version = CalVer.Create("2022.02.4b3");
 
             Assert.AreEqual(2022, version.Year);
             Assert.AreEqual(2, version.Month);
@@ -80,9 +80,9 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void ReleaseDateIsCorrect()
+        public void CreateDateIsCorrect()
         {
-            var version = CalVer.Parse("2022.02.4b3");
+            var version = CalVer.Create("2022.02.4b3");
 
             Assert.AreEqual(2022, version.ReleaseDate.Year);
             Assert.AreEqual(2, version.ReleaseDate.Month);
@@ -92,7 +92,7 @@ namespace HassClient.Core.Tests
         public void ToStringIsCorrect()
         {
             var expectedVersionString = "2022.2.4b3";
-            var version = CalVer.Parse(expectedVersionString);
+            var version = CalVer.Create(expectedVersionString);
 
             Assert.AreEqual(expectedVersionString, version.ToString());
         }

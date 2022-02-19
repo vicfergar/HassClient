@@ -17,7 +17,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         private MockHassServerRequestContext activeRequestContext;
 
-        public CalVer HAVersion => CalVer.Parse("2022.1.0");
+        public CalVer HAVersion => CalVer.Create("2022.1.0");
 
         public ConnectionParameters ConnectionParameters { get; private set; }
 

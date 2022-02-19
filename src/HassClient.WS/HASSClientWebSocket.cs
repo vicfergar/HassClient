@@ -316,7 +316,7 @@ namespace HassClient.WS
                         }
                         else if (incomingMsg is AuthenticationOkMessage authenticationOk)
                         {
-                            this.HAVersion = CalVer.Parse(authenticationOk.HAVersion);
+                            this.HAVersion = CalVer.Create(authenticationOk.HAVersion);
 
                             if (this.IsReconnecting)
                             {

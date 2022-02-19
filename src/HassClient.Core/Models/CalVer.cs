@@ -37,13 +37,26 @@ namespace HassClient.Models
         public override string ToString() => $"{this.Year}.{this.Month}.{this.Micro}{this.Modifier}";
 
         /// <summary>
-        /// Converts the string representation of a version number to an equivalent <see cref="CalVer"/> object.
+        /// Converts an string representation of a version number to an equivalent <see cref="CalVer"/> object.
         /// </summary>
         /// <param name="input">An string representing a calendar version (eg: 2021.12.0b3).</param>
         /// <exception cref="ArgumentNullException"><paramref name="input"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="input"/> has fewer than two or more than three version components.</exception>
         /// <returns>An object that is equivalent to the version specified in the <paramref name="input"/> parameter.</returns>
-        public static CalVer Parse(string input)
+        public static CalVer Create(string input)
+        {
+            var value = new CalVer();
+            value.Parse(input);
+            return value;
+        }
+
+        /// <summary>
+        /// Parse <see cref="CalVer"/> properties from an string representation.
+        /// </summary>
+        /// <param name="input">An string representing a calendar version (eg: 2021.12.0b3).</param>
+        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="input"/> has fewer than two or more than three version components.</exception>
+        public void Parse(string input)
         {
             if (input is null)
             {
@@ -59,13 +72,13 @@ namespace HassClient.Models
             var yearPart = parts[0];
             if (!int.TryParse(yearPart, out var year))
             {
-                throw new ArgumentException($"Unexpected version format. {nameof(Year)} cannot be parsed from '{yearPart}'", nameof(input));
+                throw new ArgumentException($"Unexpected version format. {nameof(this.Year)} cannot be parsed from '{yearPart}'", nameof(input));
             }
 
             var monthPart = parts[1];
             if (!int.TryParse(monthPart, out var month))
             {
-                throw new ArgumentException($"Unexpected version format. {nameof(Month)} cannot be parsed from '{monthPart}'", nameof(input));
+                throw new ArgumentException($"Unexpected version format. {nameof(this.Month)} cannot be parsed from '{monthPart}'", nameof(input));
             }
 
             var micro = 0;
@@ -79,20 +92,17 @@ namespace HassClient.Models
 
                 if (string.IsNullOrEmpty(microStr) && string.IsNullOrEmpty(modifierStr))
                 {
-                    throw new ArgumentException($"Unexpected version format. {nameof(Micro)} and {nameof(Modifier)} cannot be parsed from '{microModifierPart}'", nameof(input));
+                    throw new ArgumentException($"Unexpected version format. {nameof(this.Micro)} and {nameof(this.Modifier)} cannot be parsed from '{microModifierPart}'", nameof(input));
                 }
 
                 micro = !string.IsNullOrEmpty(microStr) ? int.Parse(microStr) : 0;
                 modifier = modifierStr;
             }
 
-            return new CalVer
-            {
-                Year = year,
-                Month = month,
-                Micro = micro,
-                Modifier = modifier,
-            };
+            this.Year = year;
+            this.Month = month;
+            this.Micro = micro;
+            this.Modifier = modifier;
         }
     }
 }
