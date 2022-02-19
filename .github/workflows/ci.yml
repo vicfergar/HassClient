@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     env:
       solution-path: ./src/HassClient.sln
@@ -20,48 +19,24 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup .NET Core 3.1
+    - name: Setup .NET 6.0
       uses: actions/setup-dotnet@v1.7.2
       with:
-        dotnet-version: 3.1.x
-    - name: Setup .NET 5.0
-      uses: actions/setup-dotnet@v1.7.2
-      with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
 
     - name: Install trx2junit
       run: |
         export PATH="$PATH:/root/.dotnet/tools"
-        dotnet tool install --global trx2junit --version 1.5.0
+        dotnet tool install --global trx2junit --version 2.0.0
 
     - name: Restore dependencies
       run: dotnet restore ${{env.solution-path}}
+      
     - name: Build
       run: dotnet build --no-restore --configuration ${{env.build-config}} ${{env.solution-path}}
-      
-    - name: 👷 Setup Home Assistant
-      id: homeassistant
-      uses: ludeeus/setup-homeassistant@main
-      with:
-          tag: ${{ matrix.channel }}
-          config-dir: ./resources/Tests/config
-
-    - name: ✅ Verify API Access
-      run: | 
-        curl -sSL -f -X GET \
-          -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
-          -H "Content-Type: application/json" \
-          ${{ steps.homeassistant.outputs.url }}/api/states
 
     - name: Test
       run: dotnet test --no-build --configuration ${{env.build-config}} --logger "trx" ${{env.solution-path}}
-      env:
-          TestsInstanceBaseUrl: ${{ steps.homeassistant.outputs.url }}
-          TestsAccessToken: ${{ steps.homeassistant.outputs.token }}
-
-    - name: 📜 Get logs
-      if: always()
-      run: docker logs ${{ steps.homeassistant.outputs.containername }}
 
     - name: Convert to JUnit format
       if: always()
