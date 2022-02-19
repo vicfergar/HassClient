@@ -13,7 +13,7 @@ namespace HassClient.Serialization
         /// <inheritdoc />
         public override void WriteJson(JsonWriter writer, Dictionary<string, string> value, JsonSerializer serializer)
         {
-            var valueDic = value as Dictionary<string, string>;
+            var valueDic = value;
             var array = valueDic.Select(x => new[] { x.Key, x.Value }).ToArray();
             serializer.Serialize(writer, array);
         }
