@@ -22,5 +22,8 @@ namespace HassClient.Models
         {
             this.Mireds = Math.Min(Math.Max(mireds, 153), 500);
         }
+
+        /// <inheritdoc />
+        public override string ToString() => this.Mireds.ToString();
     }
 }

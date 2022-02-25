@@ -35,6 +35,7 @@ namespace HassClient.Core.Tests
 
             yield return createData(new RGBColor(10, 20, 30));
             yield return createData(new RGBWColor(10, 20, 30, 255));
+            yield return createData(new RGBWWColor(10, 20, 30, 128, 255));
             yield return createData(new HSColor(10, 20));
             yield return createData(new XYColor(0.2f, 0.6f));
             yield return createData(new NameColor("test_color"));
@@ -51,7 +52,7 @@ namespace HassClient.Core.Tests
             var serializer = JsonSerializer.Create();
             converter.WriteJson(jsonWriter, color, serializer);
 
-            Assert.AreEqual($"\"{color}\"", textWriter.ToString());
+            Assert.AreEqual(GetJsonRepresentation(color), textWriter.ToString());
         }
 
         [Test]
@@ -74,6 +75,7 @@ namespace HassClient.Core.Tests
 
             yield return createData(new RGBColor(10, 20, 30), new RGBColor(40, 50, 60));
             yield return createData(new RGBWColor(10, 20, 30, 255), new RGBWColor(40, 50, 60, 128));
+            yield return createData(new RGBWWColor(10, 20, 30, 128, 255), new RGBWWColor(40, 50, 60, 64, 128));
             yield return createData(new HSColor(10, 20), new HSColor(30, 40));
             yield return createData(new XYColor(0.2f, 0.6f), new XYColor(0.4f, 0.8f));
             yield return createData(new NameColor("test_color"), new NameColor("new_color"));
@@ -111,7 +113,7 @@ namespace HassClient.Core.Tests
             }
             else
             {
-                return color.ToString();
+                return color.ToString().Replace(" ", string.Empty);
             }
         }
     }

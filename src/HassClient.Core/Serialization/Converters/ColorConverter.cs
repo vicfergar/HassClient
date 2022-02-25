@@ -13,7 +13,22 @@ namespace HassClient.Serialization
         /// <inheritdoc />
         public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value.ToString());
+            if (value is NameColor)
+            {
+                serializer.Serialize(writer, value.ToString());
+            }
+            else if (value is KelvinTemperatureColor kelvinColor)
+            {
+                serializer.Serialize(writer, kelvinColor.Kelvins);
+            }
+            else if (value is MiredsTemperatureColor miredsColor)
+            {
+                serializer.Serialize(writer, miredsColor.Mireds);
+            }
+            else
+            {
+                serializer.Serialize(writer, JArray.Parse(value.ToString()));
+            }
         }
 
         /// <inheritdoc />
@@ -33,6 +48,22 @@ namespace HassClient.Serialization
                 }
 
                 return Color.FromRGBW((byte)values[0], (byte)values[1], (byte)values[2], (byte)values[3]);
+            }
+            else if (objectType == typeof(RGBWWColor))
+            {
+                var values = serializer.Deserialize<JArray>(reader);
+                if (hasExistingValue)
+                {
+                    var rgbwwColor = existingValue as RGBWWColor;
+                    rgbwwColor.R = (byte)values[0];
+                    rgbwwColor.G = (byte)values[1];
+                    rgbwwColor.B = (byte)values[2];
+                    rgbwwColor.CW = (byte)values[3];
+                    rgbwwColor.WW = (byte)values[4];
+                    return rgbwwColor;
+                }
+
+                return Color.FromRGBWW((byte)values[0], (byte)values[1], (byte)values[2], (byte)values[3], (byte)values[4]);
             }
             else if (objectType == typeof(RGBColor))
             {

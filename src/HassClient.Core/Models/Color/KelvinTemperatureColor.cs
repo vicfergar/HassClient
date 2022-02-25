@@ -22,5 +22,8 @@ namespace HassClient.Models
         {
             this.Kelvins = Math.Min(Math.Max(kelvins, 1000), 40000);
         }
+
+        /// <inheritdoc />
+        public override string ToString() => this.Kelvins.ToString();
     }
 }

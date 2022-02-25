@@ -37,6 +37,24 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
+        public void FromRGBWW()
+        {
+            byte red = 10;
+            byte green = 20;
+            byte blue = 30;
+            byte coldWhite = 128;
+            byte warmWhite = 255;
+
+            var color = Color.FromRGBWW(red, green, blue, coldWhite, warmWhite);
+
+            Assert.AreEqual(red, color.R);
+            Assert.AreEqual(green, color.G);
+            Assert.AreEqual(blue, color.B);
+            Assert.AreEqual(coldWhite, color.CW);
+            Assert.AreEqual(warmWhite, color.WW);
+        }
+
+        [Test]
         public void FromHS()
         {
             uint hue = 10;

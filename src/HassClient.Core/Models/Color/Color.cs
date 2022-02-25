@@ -31,6 +31,20 @@
         }
 
         /// <summary>
+        /// Creates a <see cref="RGBWWColor"/> with the given values.
+        /// </summary>
+        /// <param name="red">The red color component value.</param>
+        /// <param name="green">The green color component value.</param>
+        /// <param name="blue">The blue color component value.</param>
+        /// <param name="coldWhite">The cold white color component value.</param>
+        /// <param name="warmWhite">The warm white color component value.</param>
+        /// <returns>A <see cref="RGBWWColor"/> with the given values.</returns>
+        public static RGBWWColor FromRGBWW(byte red, byte green, byte blue, byte coldWhite, byte warmWhite)
+        {
+            return new RGBWWColor(red, green, blue, coldWhite, warmWhite);
+        }
+
+        /// <summary>
         /// Creates a <see cref="HSColor"/> with the given values.
         /// </summary>
         /// <param name="hue">The hue value in the range [0, 360].</param>
