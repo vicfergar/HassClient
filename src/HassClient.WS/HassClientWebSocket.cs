@@ -20,9 +20,9 @@ namespace HassClient.WS
 {
     /// <summary>
     /// Represents an abstraction layer over <see cref="ClientWebSocket"/> used by
-    /// <see cref="HassWSApi"/> to send commands and subscribe for events.
+    /// <see cref="IHassWSApi"/> to send commands and subscribe for events.
     /// </summary>
-    public class HassClientWebSocket : IDisposable
+    public class HassClientWebSocket : IHassClientWebSocket
     {
         private const string TAG = "[" + nameof(HassClientWebSocket) + "]";
 
@@ -51,20 +51,13 @@ namespace HassClient.WS
         private Task eventListenerTask;
         private ConnectionStates connectionState;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the client will try to reconnect when connection is lost.
-        /// Default: <see langword="true"/>.
-        /// </summary>
+        /// <inheritdoc />
         public bool AutomaticReconnection { get; set; } = true;
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is disposed.
-        /// </summary>
+        /// <inheritdoc />
         public bool IsDiposed { get; private set; }
 
-        /// <summary>
-        /// Gets the current connection state of the web socket.
-        /// </summary>
+        /// <inheritdoc />
         public ConnectionStates ConnectionState
         {
             get => this.connectionState;
@@ -83,30 +76,19 @@ namespace HassClient.WS
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the connection with the server has been
-        /// lost and the client is trying to reconnect.
-        /// </summary>
+        /// <inheritdoc />
         public bool IsReconnecting { get; private set; }
 
-        /// <summary>
-        /// Gets the connected Home Assistant instance version.
-        /// </summary>
+        /// <inheritdoc />
         public CalVer HAVersion { get; private set; }
 
-        /// <summary>
-        /// Gets the number of requests that are pending to be attended by the server.
-        /// </summary>
+        /// <inheritdoc />
         public int PendingRequestsCount => this.incomingMessageAwaitersById.Count;
 
-        /// <summary>
-        /// Gets the number of event handler subscriptions.
-        /// </summary>
+        /// <inheritdoc />
         public int SubscriptionsCount => (int)this.socketEventSubscriptionIdByEventType.Values.Sum(x => x.SubscriptionCount);
 
-        /// <summary>
-        /// Occurs when the <see cref="ConnectionState"/> is changed.
-        /// </summary>
+        /// <inheritdoc />
         public event EventHandler<ConnectionStates> ConnectionStateChanged;
 
         static HassClientWebSocket()
@@ -118,28 +100,7 @@ namespace HassClient.WS
             }
         }
 
-        /// <summary>
-        /// Connects to a Home Assistant instance using the specified connection parameters.
-        /// </summary>
-        /// <param name="connectionParameters">The connection parameters.</param>
-        /// <param name="retries">
-        /// Number of retries if connection failed. Default: 0.
-        /// <para>
-        /// Retries will only be performed if Home Assistant instance cannot be reached and not if:
-        /// authentication fails OR
-        /// invalid response from server OR
-        /// connection refused by server.
-        /// </para>
-        /// <para>
-        /// If set to <c>-1</c>, this method will try indefinitely until connection succeed or
-        /// cancellation is requested. Therefore, <paramref name="cancellationToken"/> must be set
-        /// to a value different to <see cref="CancellationToken.None"/> in that case.
-        /// </para>
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <inheritdoc />
         public async Task ConnectAsync(ConnectionParameters connectionParameters, int retries = 0, CancellationToken cancellationToken = default)
         {
             this.CheckIsDiposed();
@@ -167,13 +128,7 @@ namespace HassClient.WS
             this.eventListenerTask = Task.Factory.StartNew(this.CreateEventListenerTask, TaskCreationOptions.LongRunning);
         }
 
-        /// <summary>
-        /// Close the Home Assistant connection as an asynchronous operation.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <inheritdoc />
         public async Task CloseAsync(CancellationToken cancellationToken = default)
         {
             this.CheckIsDiposed();
@@ -192,14 +147,7 @@ namespace HassClient.WS
             this.connectionSemaphore.Release();
         }
 
-        /// <summary>
-        /// Waits until the client state changed to connected.
-        /// </summary>
-        /// <param name="timeout">The maximum time to wait for connection.</param>
-        /// <returns>
-        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
-        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
-        /// </returns>
+        /// <inheritdoc />
         public Task<bool> WaitForConnectionAsync(TimeSpan timeout)
         {
             if (timeout <= TimeSpan.Zero)
@@ -210,16 +158,7 @@ namespace HassClient.WS
             return this.WaitForConnectionAsync(timeout, CancellationToken.None);
         }
 
-        /// <summary>
-        /// Waits until the client state changed to connected.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
-        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
-        /// </returns>
+        /// <inheritdoc />
         public Task<bool> WaitForConnectionAsync(CancellationToken cancellationToken)
         {
             if (cancellationToken == CancellationToken.None)
@@ -230,20 +169,7 @@ namespace HassClient.WS
             return this.WaitForConnectionAsync(TimeSpan.Zero, cancellationToken);
         }
 
-        /// <summary>
-        /// Waits until the client state changed to connected.
-        /// <para>
-        /// Either <paramref name="timeout"/> or <paramref name="cancellationToken"/> must be set to avoid never ending wait.
-        /// </para>
-        /// </summary>
-        /// <param name="timeout">The maximum time to wait for connection.</param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// The task object representing the asynchronous operation. The result of the task is <see langword="true"/>
-        /// if the client has been connected or <see langword="false"/> if the connection has been closed.
-        /// </returns>
+        /// <inheritdoc />
         public Task<bool> WaitForConnectionAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             if (timeout <= TimeSpan.Zero && cancellationToken == CancellationToken.None)
@@ -262,6 +188,63 @@ namespace HassClient.WS
             }
 
             return Task.Run(() => this.connectionTCS.Task, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
+            }
+
+            this.CheckIsDiposed();
+
+            // TODO: Make AddEventHandlerSubscriptionAsync and RemoveEventHandlerSubscriptionAsync thread-safe
+            if (!this.socketEventSubscriptionIdByEventType.ContainsKey(eventType))
+            {
+                var subscribeMessage = new SubscribeEventsMessage(eventType);
+                if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
+                {
+                    return false;
+                }
+
+                this.socketEventSubscriptionIdByEventType.Add(eventType, new SocketEventSubscription(subscribeMessage.Id));
+            }
+
+            this.socketEventSubscriptionIdByEventType[eventType].AddSubscription(value);
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
+            }
+
+            this.CheckIsDiposed();
+
+            if (!this.socketEventSubscriptionIdByEventType.TryGetValue(eventType, out var socketEventSubscription))
+            {
+                return false;
+            }
+
+            socketEventSubscription.RemoveSubscription(value);
+
+            if (socketEventSubscription.SubscriptionCount == 0)
+            {
+                var subscribeMessage = new UnsubscribeEventsMessage() { SubscriptionId = socketEventSubscription.SubscriptionId };
+                if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
+                {
+                    return false;
+                }
+
+                this.socketEventSubscriptionIdByEventType.Remove(eventType);
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
@@ -715,91 +698,6 @@ namespace HassClient.WS
         {
             var resultMessage = await this.SendCommandWithResultAsync(commandMessage, cancellationToken);
             return resultMessage.Success;
-        }
-
-        /// <summary>
-        /// Adds an <see cref="EventHandler{TEventArgs}"/> to an event subscription.
-        /// </summary>
-        /// <param name="value">The event handler to subscribe.</param>
-        /// <param name="eventType">The event type to subscribe to.</param>
-        /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
-        /// <returns>
-        /// A task representing the asynchronous operation.
-        /// The result of the task is a value indicating whether the subscription was successful.
-        /// </returns>
-        internal async Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(eventType))
-            {
-                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
-            }
-
-            this.CheckIsDiposed();
-
-            // TODO: Make AddEventHandlerSubscriptionAsync and RemoveEventHandlerSubscriptionAsync thread-safe
-            if (!this.socketEventSubscriptionIdByEventType.ContainsKey(eventType))
-            {
-                var subscribeMessage = new SubscribeEventsMessage(eventType);
-                if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
-                {
-                    return false;
-                }
-
-                this.socketEventSubscriptionIdByEventType.Add(eventType, new SocketEventSubscription(subscribeMessage.Id));
-            }
-
-            this.socketEventSubscriptionIdByEventType[eventType].AddSubscription(value);
-            return true;
-        }
-
-        internal async Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrWhiteSpace(eventType))
-            {
-                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
-            }
-
-            this.CheckIsDiposed();
-
-            if (!this.socketEventSubscriptionIdByEventType.TryGetValue(eventType, out var socketEventSubscription))
-            {
-                return false;
-            }
-
-            socketEventSubscription.RemoveSubscription(value);
-
-            if (socketEventSubscription.SubscriptionCount == 0)
-            {
-                var subscribeMessage = new UnsubscribeEventsMessage() { SubscriptionId = socketEventSubscription.SubscriptionId };
-                if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
-                {
-                    return false;
-                }
-
-                this.socketEventSubscriptionIdByEventType.Remove(eventType);
-            }
-
-            return true;
-        }
-
-        internal Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType, CancellationToken cancellationToken)
-        {
-            return this.AddEventHandlerSubscriptionAsync(value, eventType.ToEventTypeString(), cancellationToken);
-        }
-
-        internal Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType, CancellationToken cancellationToken)
-        {
-            return this.RemoveEventHandlerSubscriptionAsync(value, eventType.ToEventTypeString(), cancellationToken);
-        }
-
-        internal Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, CancellationToken cancellationToken)
-        {
-            return this.AddEventHandlerSubscriptionAsync(value, Event.AnyEventFilter, cancellationToken);
-        }
-
-        internal Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, CancellationToken cancellationToken)
-        {
-            return this.RemoveEventHandlerSubscriptionAsync(value, Event.AnyEventFilter, cancellationToken);
         }
     }
 }

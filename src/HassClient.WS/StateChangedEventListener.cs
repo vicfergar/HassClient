@@ -1,4 +1,5 @@
-﻿using HassClient.Models;
+﻿using HassClient.Helpers;
+using HassClient.Models;
 using HassClient.WS.Messages;
 using System;
 using System.Collections.Generic;
@@ -15,27 +16,22 @@ namespace HassClient.WS
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByEntityId = new Dictionary<string, EventHandler<StateChangedEvent>>();
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByDomain = new Dictionary<string, EventHandler<StateChangedEvent>>();
 
+        private static readonly string StateChangedEventType = KnownEventTypes.StateChanged.ToEventTypeString();
+
         private bool isStateChangedSubscriptionActive;
 
         private readonly SemaphoreSlim refreshSubscriptionsSemahore = new SemaphoreSlim(0);
 
-        private HassClientWebSocket clientWebSocket;
-
-        private Task refreshSubscriptionsTask;
+        private IHassClientWebSocket clientWebSocket;
 
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
-        /// Initialization method of the <see cref="StateChangedEventListener"/>.
+        /// Initializes a new instance of the <see cref="StateChangedEventListener"/> class.
         /// </summary>
         /// <param name="clientWebSocket">The Home Assistant Web Socket client instance.</param>
-        public void Initialize(HassClientWebSocket clientWebSocket)
+        public StateChangedEventListener(IHassClientWebSocket clientWebSocket)
         {
-            if (this.clientWebSocket != null)
-            {
-                throw new InvalidOperationException($"{nameof(StateChangedEventListener)} is already initialized");
-            }
-
             if (clientWebSocket == null)
             {
                 throw new ArgumentNullException(nameof(clientWebSocket));
@@ -44,7 +40,7 @@ namespace HassClient.WS
             this.clientWebSocket = clientWebSocket;
             this.cancellationTokenSource = new CancellationTokenSource();
 
-            this.refreshSubscriptionsTask = Task.Factory.StartNew(
+            Task.Factory.StartNew(
                 async () =>
                 {
                     while (true)
@@ -148,11 +144,11 @@ namespace HassClient.WS
                 var succeed = false;
                 if (!this.isStateChangedSubscriptionActive)
                 {
-                    succeed = await this.clientWebSocket.AddEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
+                    succeed = await this.clientWebSocket.AddEventHandlerSubscriptionAsync(this.OnStateChangeEvent, StateChangedEventType, cancellationToken);
                 }
                 else if (this.isStateChangedSubscriptionActive)
                 {
-                    succeed = await this.clientWebSocket.RemoveEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
+                    succeed = await this.clientWebSocket.RemoveEventHandlerSubscriptionAsync(this.OnStateChangeEvent, StateChangedEventType, cancellationToken);
                 }
 
                 if (succeed)

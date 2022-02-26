@@ -198,7 +198,7 @@ namespace HassClient.WS.Tests
             this.wsClient.Dispose();
 
             Assert.IsTrue(this.wsClient.IsDiposed);
-            Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.AddEventHandlerSubscriptionAsync(default, default));
+            Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.AddEventHandlerSubscriptionAsync(default, "*", default));
         }
 
         [Test]
@@ -207,7 +207,7 @@ namespace HassClient.WS.Tests
             this.wsClient.Dispose();
 
             Assert.IsTrue(this.wsClient.IsDiposed);
-            Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.RemoveEventHandlerSubscriptionAsync(default, default));
+            Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.RemoveEventHandlerSubscriptionAsync(default, "*", default));
         }
 
         [Test]
@@ -218,7 +218,7 @@ namespace HassClient.WS.Tests
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.Cancel();
             var eventSubscriber = new MockEventSubscriber();
-            var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, cancellationTokenSource.Token);
+            var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, "*", cancellationTokenSource.Token);
 
             Assert.Zero(this.wsClient.SubscriptionsCount);
             Assert.Zero(this.wsClient.PendingRequestsCount);
@@ -232,7 +232,7 @@ namespace HassClient.WS.Tests
             this.mockServer.ResponseSimulatedDelay = TimeSpan.MaxValue;
             var cancellationTokenSource = new CancellationTokenSource();
             var eventSubscriber = new MockEventSubscriber();
-            var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, cancellationTokenSource.Token);
+            var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, "*", cancellationTokenSource.Token);
             Assert.NotZero(this.wsClient.PendingRequestsCount);
 
             cancellationTokenSource.Cancel();
@@ -288,7 +288,7 @@ namespace HassClient.WS.Tests
         {
             var eventSubscriber = new MockEventSubscriber();
             await this.StartMockServerAndConnectClientAsync();
-            var result = await this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, default);
+            var result = await this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, "*", default);
             Assert.IsTrue(result, "SetUp failed");
 
             await this.mockServer.CloseActiveClientsAsync();

@@ -13,7 +13,7 @@ namespace HassClient.WS.Tests
 
         private readonly ConnectionParameters connectionParameters;
 
-        protected HassWSApi hassWSApi;
+        protected IHassWSApi hassWSApi;
 
         public BaseHassWSApiTest()
         {
