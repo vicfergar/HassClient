@@ -387,6 +387,41 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Fires an event on the Home Assistant event bus.
+        /// </summary>
+        /// <param name="eventType">The event type.</param>
+        /// <param name="data">The event optional data.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
+        /// </returns>
+        public Task<bool> FireEventAsync(string eventType, object data = null, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new FireEventMessage(eventType, data);
+            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Fires an event on the Home Assistant event bus.
+        /// </summary>
+        /// <param name="eventType">The event type.</param>
+        /// <param name="data">The event optional data.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// service invocation was successfully done.
+        /// </returns>
+        public Task<bool> FireEventAsync(KnownEventTypes eventType, object data = null, CancellationToken cancellationToken = default)
+        {
+            return this.FireEventAsync(eventType.ToEventTypeString(), data, cancellationToken);
+        }
+
+        /// <summary>
         /// Renders a string using the template feature of Home Assistant.
         /// <para>
         /// More information at <see href="https://www.home-assistant.io/docs/configuration/templating/"/>.

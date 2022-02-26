@@ -255,7 +255,7 @@ namespace HassClient.WS.Tests
             Assert.CatchAsync<OperationCanceledException>(() => sendTask);
         }
 
-        [Test, Repeat(200)]
+        [Test]
         public async Task CancelAfterSendingCommandThrows()
         {
             await this.StartMockServerAndConnectClientAsync();

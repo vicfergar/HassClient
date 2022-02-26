@@ -40,13 +40,13 @@ The `KnownDomains` and `KnownServices` enums are available to reduce the use of 
 IEnumerable<ServiceDomain> serviceDomains = await hassWSApi.GetServicesAsync();
 
 // This will call a service from the Home Assistant instance.
-await hassWSApi.CallServiceAsync("homeassistant", "check_config");
+bool succeed = await hassWSApi.CallServiceAsync("homeassistant", "check_config");
 
 // Optional data can be passed to the call operation.
-await hassWSApi.CallServiceAsync(KnownDomains.Light, KnownServices.TurnOn, data: new { entity_id = "light.my_light", brightness_pct = 20});
+bool succeed = await hassWSApi.CallServiceAsync(KnownDomains.Light, KnownServices.TurnOn, data: new { entity_id = "light.my_light", brightness_pct = 20});
 
 // When only entity_id is needed for the invocation this overload can be used.
-await hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Light, KnownServices.Toggle, "light.my_light1", "light.my_light2");
+bool succeed = await hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Light, KnownServices.Toggle, "light.my_light1", "light.my_light2");
 ```
 
  ### Fetching states
@@ -90,10 +90,17 @@ Configuration config = await hassWSApi.GetConfigurationAsync();
 IEnumerable<PanelInfo> panels = await hassWSApi.GetPanelsAsync();
 ```
 
-### Event subscription
-The WS Client provides some methods to subscribe and unsubscribe to Home Assistant events.
+### Fire event
+
+```csharp
+// Fires an event on the Home Assistant event bus.
+bool succeed = await hassWSApi.FireEventAsync("mydomain_event", data: new { entity_id = "my-device-id" });
+```
 
 Even any `eventType` can be specified as a string. The [KnownEventTypes](https://github.com/vicfergar/HassClient/blob/main/src/HassClient.Core/Models/Events/KnownEventTypes.cs) enum is available to reduce the use of strings.
+
+### Event subscription
+The WS Client provides some methods to subscribe and unsubscribe to Home Assistant events.
 
  ```csharp
 // Subscribe to every event type
