@@ -1,7 +1,7 @@
 ﻿using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using NUnit.Framework;
 using HassClient.WS.Tests.Extensions;
+using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
@@ -12,24 +12,24 @@ namespace HassClient.WS.Tests
     [SetUpFixture]
     public class EnvironmentSetup
     {
-        private TestcontainersContainer hassContainer;
+        private IContainer hassContainer;
 
         [OneTimeSetUp]
         public async Task GlobalSetupAsync()
         {
-            var instanceBaseUrl = Environment.GetEnvironmentVariable(BaseHassWSApiTest.TestsInstanceBaseUrlVar);
+            string instanceBaseUrl = Environment.GetEnvironmentVariable(BaseHassWSApiTest.TestsInstanceBaseUrlVar);
 
             if (instanceBaseUrl == null)
             {
                 // Create temporary directory with tests resources
-                var tmpDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                string tmpDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                 Directory.CreateDirectory(tmpDirectory);
                 DirectoryExtensions.CopyFilesRecursively("./resources", tmpDirectory);
 
                 const int HassPort = 8123;
                 const string HassVersion = "latest";
                 const string tokenFilename = "TOKEN";
-                var testcontainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+                ContainerBuilder testcontainersBuilder = new ContainerBuilder()
                       .WithImage($"homeassistant/home-assistant:{HassVersion}")
                       .WithPortBinding(HassPort, assignRandomHostPort: true)
                       .WithExposedPort(HassPort)
@@ -43,9 +43,9 @@ namespace HassClient.WS.Tests
                 this.hassContainer = testcontainersBuilder.Build();
                 await this.hassContainer.StartAsync();
 
-                var mappedPort = this.hassContainer.GetMappedPublicPort(HassPort);
-                var hostTokenPath = Path.Combine(tmpDirectory, "scripts", tokenFilename);
-                var accessToken = File.ReadLines(hostTokenPath).First();
+                ushort mappedPort = this.hassContainer.GetMappedPublicPort(HassPort);
+                string hostTokenPath = Path.Combine(tmpDirectory, "scripts", tokenFilename);
+                string accessToken = File.ReadLines(hostTokenPath).First();
 
                 Environment.SetEnvironmentVariable(BaseHassWSApiTest.TestsInstanceBaseUrlVar, $"http://localhost:{mappedPort}");
                 Environment.SetEnvironmentVariable(BaseHassWSApiTest.TestsAccessTokenVar, accessToken);
