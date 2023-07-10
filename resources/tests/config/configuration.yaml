@@ -1,4 +1,9 @@
 default_config:
+homeassistant:
+  country: ES
+  latitude: 37.3886303
+  longitude: -5.9953403
+  elevation: 17
 
 group: !include groups.yaml
 automation: !include automations.yaml

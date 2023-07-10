@@ -61,6 +61,7 @@ namespace HassClient.WS.Tests
             Assert.NotNull(this.configuration.LocationName);
             Assert.NotZero(this.configuration.Latitude);
             Assert.NotZero(this.configuration.Longitude);
+            Assert.NotZero(this.configuration.Elevation);
         }
 
         [Test]
@@ -90,6 +91,24 @@ namespace HassClient.WS.Tests
         public void ConfigurationHasVersion()
         {
             Assert.NotNull(this.configuration.Version);
+        }
+
+        [Test]
+        public void ConfigurationHasCurrency()
+        {
+            Assert.NotNull(this.configuration.Currency);
+        }
+
+        [Test]
+        public void ConfigurationHasLanguage()
+        {
+            Assert.NotNull(this.configuration.Language);
+        }
+
+        [Test]
+        public void ConfigurationHasCountry()
+        {
+            Assert.NotNull(this.configuration.Country);
         }
     }
 }

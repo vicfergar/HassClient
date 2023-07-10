@@ -125,7 +125,20 @@ namespace HassClient.Models
         /// <summary>
         /// Gets the currency code according to ISO 4217 (column "Code" from <see href="https://en.wikipedia.org/wiki/ISO_4217#Active_codes"/>).
         /// </summary>
+        [JsonProperty]
         public string Currency { get; private set; }
+
+        /// <summary>
+        /// Gets the country code according to ISO 3166.1 alpha-2 (column "Code" from <see href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements"/>).
+        /// </summary>
+        [JsonProperty]
+        public string Country { get; private set; }
+
+        /// <summary>
+        /// Gets the language code according to RFC 5646 language tag (column "639-1" from <see href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes"/>).
+        /// </summary>
+        [JsonProperty]
+        public string Language { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => this.LocationName;
