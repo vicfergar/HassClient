@@ -7,7 +7,7 @@
 [![HassClient.Core](https://img.shields.io/nuget/v/HassClient.Core?style=flat&label=HassClient.Core)](https://www.nuget.org/packages/HassClient.Core)
 [![HassClient.WS](https://img.shields.io/nuget/v/HassClient.WS?style=flat&label=HassClient.WS)](https://www.nuget.org/packages/HassClient.WS)
 
-A Home Assistant .NET client using [Web Sockect API](https://developers.home-assistant.io/docs/api/websocket).
+A Home Assistant .NET client using [Web Socket API](https://developers.home-assistant.io/docs/api/websocket).
 
 ---
 
@@ -15,7 +15,7 @@ A Home Assistant .NET client using [Web Sockect API](https://developers.home-ass
 `HassWSApi` provides access to Web Socket communication and a multitude of common operations:
 
 ### Connection
-To start using the Web Socket API client, it should be connected a Home Assistant instance.
+To start using the Web Socket API client, it should be connected to a Home Assistant instance.
 
 The method `ConnectAsync` with `ConnectionParameters` will be used:
 
@@ -58,7 +58,7 @@ IEnumerable<StateModel> states = await hassWSApi.GetStatesAsync();
 An event is produced by the Home Assistant instance every time a `change_state` occurs. To simplify the subscription to these events the `StateChagedEventListener` can be used:
 
 ```csharp
-// Subscribe to changes of specific entity.
+// Subscribe to changes of a specific entity.
 hassWSApi.StateChagedEventListener.SubscribeEntityStatusChanged("light.my_light1", this.my_light1_StateChanged);
 
 [...]
@@ -122,7 +122,7 @@ string result = await hassWSApi.RenderTemplateAsync("Paulus is at {{ states('sun
 ### RegistryEntry Collections
 Home Assistant defines a `Registry Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
 
-At the momment only `Area`, `Device`, `RegistryEntry` and `User` entries are defined.
+At the moment only `Area`, `Device`, `RegistryEntry`, and `User` entries are defined.
 
 ```csharp
 // List
@@ -141,9 +141,9 @@ bool deleteResult = await hassWSApi.DeleteAreaAsync(hallArea);
 ```
 
 #### Storage Collections
-A `Storage Collection` constains a special registry entry type to store entities. The Web Socket API exposes four methods to `list`, `create`, `update` and `delete` this type of entries.
+A `Storage Collection` contains a special registry entry type to store entities. The Web Socket API exposes four methods to `list`, `create`, `update` and `delete` these types of entries.
 
-At the momment only `InputBoolean`, `Person` and `Zone` entity models are defined.
+At the moment only `InputBoolean`, `Person`, and `Zone` entity models are defined.
 
 ```csharp
 // List
@@ -162,13 +162,13 @@ bool deleteResult = await hassWSApi.DeleteAreaAsync(alarmInputBoolean);
 ```
 
 ### Search related
-All data stored in Home Assistant is interconnected, making it a graph. The client allows to search related items for a given `ItemTypes` and `itemId`.
+All data stored in Home Assistant is interconnected, making it a graph. The client allows searching related items for a given `ItemTypes` and `itemId`.
 ```csharp
 SearchRelatedResponse result = await hassWSApi.SearchRelated(ItemTypes.Entity, "weather.home");
 ```
 
 ### Raw Commands
-Even many commands are implemented natively by this API client, some may not. For this purpose, a raw command API is available to send custom commands and receive raw results.
+Even though many commands are implemented natively by this API client, some may not. For this purpose, a raw command API is available to send custom commands and receive raw results.
 ```csharp
 // Send raw command message with raw result
 RawCommandResult rawResult = await hassWSApi.SendRawCommandWithResultAsync(new RawCommandMessage("get_config"));
