@@ -9,16 +9,17 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task GetServices()
         {
-            var services = await this.hassWSApi.GetServicesAsync();
+            System.Collections.Generic.IEnumerable<ServiceDomain> services = await this.hassWSApi.GetServicesAsync();
 
             Assert.NotNull(services);
             Assert.IsNotEmpty(services);
+            CollectionAssert.AllItemsAreNotNull(services);
         }
 
         [Test]
         public async Task CallService()
         {
-            var result = await this.hassWSApi.CallServiceAsync("homeassistant", "check_config");
+            Context result = await this.hassWSApi.CallServiceAsync("homeassistant", "check_config");
 
             Assert.NotNull(result);
         }
@@ -26,7 +27,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task CallServiceForEntities()
         {
-            var result = await this.hassWSApi.CallServiceForEntitiesAsync("homeassistant", "update_entity", "sun.sun");
+            bool result = await this.hassWSApi.CallServiceForEntitiesAsync("homeassistant", "update_entity", "sun.sun");
 
             Assert.NotNull(result);
         }
@@ -34,7 +35,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task CallServiceWithKnwonDomain()
         {
-            var result = await this.hassWSApi.CallServiceAsync(KnownDomains.Homeassistant, KnownServices.CheckConfig);
+            bool result = await this.hassWSApi.CallServiceAsync(KnownDomains.Homeassistant, KnownServices.CheckConfig);
 
             Assert.IsTrue(result);
         }
@@ -42,7 +43,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task CallServiceForEntitiesWithKnwonDomain()
         {
-            var result = await this.hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Homeassistant, KnownServices.UpdateEntity, "sun.sun");
+            bool result = await this.hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Homeassistant, KnownServices.UpdateEntity, "sun.sun");
 
             Assert.IsTrue(result);
         }

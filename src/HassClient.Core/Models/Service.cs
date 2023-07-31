@@ -31,5 +31,11 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public Dictionary<string, ServiceField> Fields { get; private set; }
+
+        /// <summary>
+        /// Gets the fields/parameters that the service supports.
+        /// </summary>
+        [JsonProperty]
+        public ServiceResponse Response { get; private set; }
     }
 }
