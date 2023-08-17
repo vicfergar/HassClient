@@ -12,7 +12,7 @@ namespace HassClient.WS.Tests
     [SetUpFixture]
     public class EnvironmentSetup
     {
-        private TestcontainersContainer hassContainer;
+        private IContainer hassContainer;
 
         [OneTimeSetUp]
         public async Task GlobalSetupAsync()
@@ -29,7 +29,7 @@ namespace HassClient.WS.Tests
                 const int HassPort = 8123;
                 const string HassVersion = "latest";
                 const string tokenFilename = "TOKEN";
-                var testcontainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+                var testcontainersBuilder = new ContainerBuilder()
                       .WithImage($"homeassistant/home-assistant:{HassVersion}")
                       .WithPortBinding(HassPort, assignRandomHostPort: true)
                       .WithExposedPort(HassPort)
