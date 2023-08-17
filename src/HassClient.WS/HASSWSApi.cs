@@ -978,6 +978,76 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Performs a pipeline run starting with a <see cref="StageTypes.Intent"/> stage.
+        /// </summary>
+        /// <param name="endStage">The last stage to run.</param>
+        /// <param name="text">The text to be used as input.</param>
+        /// <param name="pipeline">ID of the pipeline.</param> ijdkj
+        /// <param name="conversationId">Unique id for conversation. <see href="https://developers.home-assistant.io/docs/intent_conversation_api#conversation-id"/>.</param>
+        /// <param name="timeout">Amount of time before pipeline times out (default: 30 seconds).</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// The result of the task is a list of the received event results.
+        /// </returns>
+        public async Task<IEnumerable<PipelineEventResultInfo>> RunIntentPipeline(
+            StageTypes endStage,
+            string text,
+            string pipeline = null,
+            string conversationId = null,
+            TimeSpan? timeout = default,
+            CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new PipelineRunMessage()
+            {
+                StartStage = StageTypes.Intent,
+                EndStage = endStage,
+                Input = new PipelineRunTextInput(text),
+                Pipeline = pipeline,
+                ConversationId = conversationId,
+                Timeout = (float?)timeout?.TotalSeconds,
+            };
+            return await this.hassClientWebSocket.SendPipelineRunCommandAsync(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Performs a pipeline run starting with a <see cref="StageTypes.TTS"/> stage.
+        /// </summary>
+        /// <param name="endStage">The last stage to run.</param>
+        /// <param name="text">The text to be used as input.</param>
+        /// <param name="pipeline">ID of the pipeline.</param> ijdkj
+        /// <param name="conversationId">Unique id for conversation. <see href="https://developers.home-assistant.io/docs/intent_conversation_api#conversation-id"/>.</param>
+        /// <param name="timeout">Amount of time before pipeline times out (default: 30 seconds).</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// The result of the task is a list of the received event results.
+        /// </returns>
+        public async Task<IEnumerable<PipelineEventResultInfo>> RunTTSPipeline(
+            StageTypes endStage,
+            string text,
+            string pipeline = null,
+            string conversationId = null,
+            TimeSpan? timeout = default,
+            CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new PipelineRunMessage()
+            {
+                StartStage = StageTypes.TTS,
+                EndStage = endStage,
+                Input = new PipelineRunTextInput(text),
+                Pipeline = pipeline,
+                ConversationId = conversationId,
+                Timeout = (float?)timeout?.TotalSeconds,
+            };
+            return await this.hassClientWebSocket.SendPipelineRunCommandAsync(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
         /// Sends a customized command to the Home Assistant instance. This is useful when a command is not defined by the <see cref="HassWSApi"/>.
         /// </summary>
         /// <param name="rawCommandMessage">The raw command message to send.</param>

@@ -48,7 +48,7 @@ namespace HassClient.Helpers
         private static KnownEnumCache<KnownEventTypes> knownEventTypesCache = new KnownEnumCache<KnownEventTypes>();
 
         /// <summary>
-        /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownDomains"/>.
+        /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownEventTypes"/>.
         /// </summary>
         /// <param name="eventType">
         /// The event type as a snake case <see cref="string"/>. (e.g. <c>state_changed</c>).
@@ -76,6 +76,39 @@ namespace HassClient.Helpers
         public static string ToEventTypeString(this KnownEventTypes eventType)
         {
             return knownEventTypesCache.AsString(eventType);
+        }
+
+        private static KnownEnumCache<KnownPipelineEventTypes> knownPipelineEventTypesCache = new KnownEnumCache<KnownPipelineEventTypes>();
+
+        /// <summary>
+        /// Converts a given snake case <paramref name="eventType"/> to <see cref="KnownPipelineEventTypes"/>.
+        /// </summary>
+        /// <param name="eventType">
+        /// The event type as a snake case <see cref="string"/>. (e.g. <c>state_changed</c>).
+        /// </param>
+        /// <returns>
+        /// The event type as a <see cref="KnownPipelineEventTypes"/> if defined; otherwise, <see cref="KnownPipelineEventTypes.Undefined"/>.
+        /// </returns>
+        public static KnownPipelineEventTypes AsKnownPipelineEventType(this string eventType)
+        {
+            if (string.IsNullOrEmpty(eventType))
+            {
+                throw new ArgumentException($"'{nameof(eventType)}' cannot be null or empty", nameof(eventType));
+            }
+
+            return knownPipelineEventTypesCache.AsEnum(eventType);
+        }
+
+        /// <summary>
+        /// Converts a given <see cref="KnownPipelineEventTypes"/> to a snake case <see cref="string"/>.
+        /// </summary>
+        /// <param name="eventType">A <see cref="KnownPipelineEventTypes"/>.</param>
+        /// <returns>
+        /// The service as a <see cref="string"/>.
+        /// </returns>
+        public static string ToEventTypeString(this KnownPipelineEventTypes eventType)
+        {
+            return knownPipelineEventTypesCache.AsString(eventType);
         }
 
         private static KnownEnumCache<KnownServices> knownServicesCache = new KnownEnumCache<KnownServices>();

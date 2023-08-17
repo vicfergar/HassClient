@@ -54,6 +54,34 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
+        [TestCase("run-start")]
+        [TestCase("run-end")]
+        [TestCase("stt-start")]
+        [TestCase("stt-end")]
+        [TestCase("intent-start")]
+        [TestCase("intent-end")]
+        [TestCase("tts-start")]
+        [TestCase("tts-end")]
+        [TestCase("error")]
+        public void AllKnownPipelineEventTypesCanBeParsed(string snakeCaseValue)
+        {
+            var result = snakeCaseValue.AsKnownPipelineEventType();
+            Assert.AreNotEqual(KnownPipelineEventTypes.Undefined, result);
+        }
+
+        [Test]
+        public void NullStringAsPipelineEventTypeThrows()
+        {
+            Assert.Throws<ArgumentException>(() => ((string)null).AsKnownPipelineEventType());
+        }
+
+        [Test]
+        public void EmptyStringAsPipelineEventTypeThrows()
+        {
+            Assert.Throws<ArgumentException>(() => string.Empty.AsKnownPipelineEventType());
+        }
+
+        [Test]
         [TestCase("adguard")]
         [TestCase("air_quality")]
         [TestCase("alarm_control_panel")]

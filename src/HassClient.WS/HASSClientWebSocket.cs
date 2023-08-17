@@ -2,6 +2,7 @@
 using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
+using HassClient.WS.Messages.Response;
 using HassClient.WS.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -403,6 +404,7 @@ namespace HassClient.WS
 
                     if (incomingMessage is EventResultMessage eventResultMessage)
                     {
+                        Debug.WriteLine($"{TAG} Event message received {eventResultMessage}");
                         if (!this.receivedEventsChannel.Writer.TryWrite(eventResultMessage))
                         {
                             Trace.TraceWarning($"{TAG} {nameof(this.receivedEventsChannel)} is full. One event message will discarded.");
@@ -715,6 +717,51 @@ namespace HassClient.WS
         {
             var resultMessage = await this.SendCommandWithResultAsync(commandMessage, cancellationToken);
             return resultMessage.Success;
+        }
+
+        /// <summary>
+        /// Sends a pipeline run command and returns a list of the received event results.
+        /// </summary>
+        /// <param name="commandMessage">The command message to be sent.</param>
+        /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
+        /// <returns>
+        /// A task representing the asynchronous operation.
+        /// The result of the task is a list of the received event results.
+        /// </returns>
+        internal async Task<IEnumerable<PipelineEventResultInfo>> SendPipelineRunCommandAsync(PipelineRunMessage commandMessage, CancellationToken cancellationToken)
+        {
+            var result = await this.SendCommandWithResultAsync(commandMessage, cancellationToken);
+
+            if (!result.Success)
+            {
+                Enumerable.Empty<PipelineEventResultInfo>();
+            }
+
+            var receivedEvents = new List<PipelineEventResultInfo>();
+            try
+            {
+                var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.closeConnectionCTS.Token, cancellationToken);
+                var responseTCS = new TaskCompletionSource<bool>(linkedCTS.Token);
+                var eventCallback = new Action<EventResultMessage>(eventResultMessage =>
+                {
+                    var eventResultInfo = eventResultMessage.DeserializeEvent<PipelineEventResultInfo>();
+                    receivedEvents.Add(eventResultInfo);
+
+                    if (eventResultInfo.KnownType == KnownPipelineEventTypes.RunEnd)
+                    {
+                        responseTCS.SetResult(true);
+                    }
+                });
+
+                this.socketEventCallbacksBySubsciptionId.Add(result.Id, eventCallback);
+                await responseTCS.Task;
+            }
+            finally
+            {
+                this.socketEventCallbacksBySubsciptionId.Remove(result.Id);
+            }
+
+            return receivedEvents;
         }
 
         /// <summary>
