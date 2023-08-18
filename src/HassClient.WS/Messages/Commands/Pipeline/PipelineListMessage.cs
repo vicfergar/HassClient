@@ -3,7 +3,7 @@
     internal class PipelineListMessage : BaseOutgoingMessage
     {
         public PipelineListMessage()
-            : base("assist_pipeline / pipeline / list")
+            : base("assist_pipeline/pipeline/list")
         {
         }
     }
