@@ -33,11 +33,13 @@ namespace HassClient.WS.Messages
         /// <summary>
         /// ID of the pipeline.
         /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Pipeline { get; set; }
 
         /// <summary>
         /// Unique id for conversation. <see href="https://developers.home-assistant.io/docs/intent_conversation_api#conversation-id"/>.
         /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ConversationId { get; set; }
 
         /// <summary>

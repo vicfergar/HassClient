@@ -2,7 +2,6 @@
 using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
-using HassClient.WS.Messages.Response;
 using HassClient.WS.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
