@@ -978,6 +978,22 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Gets a pipelines list item with the <see cref="PipelineList"/> for defined Home Assistant Assist Pipelines.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a
+        /// <see cref="PipelineList"/> of all Home Assistant instance defined 'Assist Pipelines' and the preferred pipeline.
+        /// </returns>
+        public async Task<PipelineList> GetPipelinesListAsync(CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new PipelineListMessage();
+            return await this.hassClientWebSocket.SendCommandWithResultAsync<PipelineList>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
         /// Performs a pipeline run starting with a <see cref="StageTypes.Intent"/> stage.
         /// </summary>
         /// <param name="endStage">The last stage to run.</param>
