@@ -16,8 +16,7 @@ CONFIG_DIR = "/config"
 async def create_token():
     """Create token."""
     logging.getLogger("homeassistant").setLevel(logging.CRITICAL)
-    hass = HomeAssistant()
-    hass.config.config_dir = CONFIG_DIR
+    hass = HomeAssistant(config_dir=CONFIG_DIR)
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
     hass.auth._store._set_defaults()
     provider = hass.auth.auth_providers[0]

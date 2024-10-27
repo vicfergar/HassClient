@@ -26,7 +26,7 @@ namespace HassClient.WS
     {
         private const string TAG = "[" + nameof(HassClientWebSocket) + "]";
 
-        private const int INCONMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
+        private const int INCOMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
 
         private readonly TimeSpan RetryingInterval = TimeSpan.FromSeconds(5);
 
@@ -159,7 +159,7 @@ namespace HassClient.WS
 
             this.closeConnectionCTS = new CancellationTokenSource();
 
-            this.receivingBuffer = new ArraySegment<byte>(new byte[INCONMING_BUFFER_SIZE]);
+            this.receivingBuffer = new ArraySegment<byte>(new byte[INCOMING_BUFFER_SIZE]);
             var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(this.closeConnectionCTS.Token, cancellationToken);
             await this.InternalConnect(connectionParameters, retries, linkedCTS.Token).ConfigureAwait(false);
             this.connectionParameters = connectionParameters;

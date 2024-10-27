@@ -30,15 +30,15 @@ namespace HassClient.WS.Tests
                 const string HassVersion = "latest";
                 const string tokenFilename = "TOKEN";
                 var testcontainersBuilder = new ContainerBuilder()
-                      .WithImage($"homeassistant/home-assistant:{HassVersion}")
-                      .WithPortBinding(HassPort, assignRandomHostPort: true)
-                      .WithExposedPort(HassPort)
-                      .WithBindMount(Path.Combine(tmpDirectory, "config"), "/config")
-                      .WithBindMount(Path.Combine(tmpDirectory, "scripts"), "/app")
-                      .WithWaitStrategy(Wait.ForUnixContainer()
+                    .WithImage($"homeassistant/home-assistant:{HassVersion}")
+                    .WithPortBinding(HassPort, assignRandomHostPort: true)
+                    .WithExposedPort(HassPort)
+                    .WithBindMount(Path.Combine(tmpDirectory, "config"), "/config")
+                    .WithBindMount(Path.Combine(tmpDirectory, "scripts"), "/app")
+                    .WithWaitStrategy(Wait.ForUnixContainer()
                                             .UntilPortIsAvailable(HassPort))
-                      .WithEntrypoint("/bin/bash", "-c")
-                      .WithCommand($"python3 /app/create_token.py >/app/{tokenFilename} && /init");
+                    .WithEntrypoint("/bin/sh", "-c")
+                    .WithCommand($"python3 /app/create_token.py >/app/{tokenFilename} && /init");
 
                 this.hassContainer = testcontainersBuilder.Build();
                 await this.hassContainer.StartAsync();
