@@ -14,6 +14,11 @@ namespace HassClient.Models
         private readonly ModifiableProperty<string> icon = new ModifiableProperty<string>(nameof(Icon));
 
         /// <summary>
+        /// Gets a value indicating whether this entity supports partial updates.
+        /// </summary>
+        public virtual bool SupportsPartialUpdates => true;
+
+        /// <summary>
         /// Gets a value indicating that the name of the entity registry entry can be
         /// <see langword="null"/> or whitespace. It is <see langword="false"/> by default.
         /// </summary>

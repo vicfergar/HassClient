@@ -536,7 +536,8 @@ namespace HassClient.WS
         /// <param name="newEntityId">If not <see langword="null"/>, it will update the current entity id.</param>
         /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
         /// <param name="forceUpdate">
-        /// Indicates if the update operation should force the update of every modifiable property.
+        /// Indicates if the update operation should force the update of every modifiable property. If the entity
+        /// does not support partial updates, this parameter is ignored.
         /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
@@ -877,7 +878,8 @@ namespace HassClient.WS
         /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
         /// <param name="storageEntity">The storage entity registry entry with the updated values.</param>
         /// <param name="forceUpdate">
-        /// Indicates if the update operation should force the update of every modifiable property.
+        /// Indicates if the update operation should force the update of every modifiable property. If the entity
+        /// does not support partial updates, this parameter is ignored.
         /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
