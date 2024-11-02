@@ -445,53 +445,18 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Gets the <see cref="EntitySource"/> of a specified entity.
-        /// </summary>
-        /// <param name="entityId">The entity id.</param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is the <see cref="EntitySource"/>.
-        /// </returns>
-        public async Task<EntitySource> GetEntitySourceAsync(string entityId, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrEmpty(entityId))
-            {
-                throw new ArgumentNullException(nameof(entityId));
-            }
-
-            var result = await this.GetEntitySourcesAsync(cancellationToken, entityId);
-            return result.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Gets a collection with the <see cref="EntitySource"/> of the specified entities.
-        /// </summary>
-        /// <param name="entityIds">The entities ids.</param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a collection of
-        /// <see cref="EntitySource"/> of the specified entities.
-        /// </returns>
-        public Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(params string[] entityIds)
-        {
-            return this.GetEntitySourcesAsync(CancellationToken.None, entityIds);
-        }
-
-        /// <summary>
         /// Gets a collection with the <see cref="EntitySource"/> of the specified entities.
         /// </summary>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
-        /// <param name="entityIds">The entities ids.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The result of the task is a collection of
         /// <see cref="EntitySource"/> of the specified entities.
         /// </returns>
-        public async Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(CancellationToken cancellationToken, params string[] entityIds)
+        public async Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = new EntitySourceMessage { EntityIds = entityIds.Length > 0 ? entityIds : null };
+            var commandMessage = new EntitySourceMessage();
             var dict = await this.hassClientWebSocket.SendCommandWithResultAsync<Dictionary<string, EntitySource>>(commandMessage, cancellationToken);
             return dict?.Select(x =>
                 {

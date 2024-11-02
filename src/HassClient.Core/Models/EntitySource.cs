@@ -21,12 +21,6 @@ namespace HassClient.Models
         public string Domain { get; private set; }
 
         /// <summary>
-        /// Gets the source from which the entity comes from. Usually <c>platform_config</c> or <c>config_entry</c>.
-        /// </summary>
-        [JsonProperty(Required = Required.Always)]
-        public string Source { get; private set; }
-
-        /// <summary>
         /// Gets the configuration entry id associated with this entity.
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
@@ -39,6 +33,6 @@ namespace HassClient.Models
         public bool IsCustomComponent { get; private set; }
 
         /// <inheritdoc />
-        public override string ToString() => $"Id: {this.EntityId} Domain: {this.Domain} Source: {this.Source} ";
+        public override string ToString() => $"Id: {this.EntityId} Domain: {this.Domain} ";
     }
 }

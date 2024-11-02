@@ -35,8 +35,7 @@ namespace HassClient.WS.Tests.Mocks
             new Faker<EntitySource>()
             .RuleFor(x => x.ConfigEntry, f => f.RandomUUID())
             .RuleFor(x => x.EntityId, f => f.RandomEntityId())
-            .RuleFor(x => x.Domain, (f, x) => x.EntityId.GetDomain())
-            .RuleFor(x => x.Source, "config_entry");
+            .RuleFor(x => x.Domain, (f, x) => x.EntityId.GetDomain());
 
         public static readonly Faker<UnitSystemModel> UnitSystemFaker =
             new Faker<UnitSystemModel>()
