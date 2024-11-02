@@ -659,9 +659,17 @@ namespace HassClient.WS
                     throw new InvalidOperationException($"{errorInfo.Code}: {errorInfo.Message}");
                 case ErrorCodes.Unauthorized: throw new UnauthorizedAccessException(errorInfo.Message);
                 case ErrorCodes.Timeout: throw new TimeoutException(errorInfo.Message);
+                case ErrorCodes.UnknownError:
+                    throw new Exception($"Unknown error occurred: {errorInfo.Message}");
+                case ErrorCodes.NotFound:
+                    // Handle NotFound without throwing an exception
+                    Trace.TraceWarning($"NotFound error for command [{commandMessage}]: {errorInfo.Message}");
+                    break;
+                default:
+                    Trace.TraceWarning($"Unhandled error code [{errorInfo.Code}] for command [{commandMessage}]: {errorInfo.Message}");
+                    break;
             }
 
-            Trace.TraceWarning($"Error response received for command [{commandMessage}] => {resultMessage.Error}");
             Debugger.Break();
         }
 
