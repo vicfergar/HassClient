@@ -518,6 +518,7 @@ namespace HassClient.WS
             try
             {
                 var rcvMsg = receivedString.ToString();
+                Debug.WriteLine($"{TAG} Raw message received: {rcvMsg}");
                 return HassSerializer.DeserializeObject<TMessage>(rcvMsg);
             }
             catch (JsonException)
@@ -569,6 +570,7 @@ namespace HassClient.WS
                 var sendBuffer = new ArraySegment<byte>(sendBytes);
                 await this.socket.SendAsync(sendBuffer, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
                 Trace.WriteLine($"{TAG} Message sent: {toSerialize}");
+                Debug.WriteLine($"{TAG} Raw message sent: {sendMsg}");
             }
             finally
             {
