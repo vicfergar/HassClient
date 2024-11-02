@@ -53,12 +53,14 @@ namespace HassClient.WS.Tests
         public void ConfigurationHasConfigSource()
         {
             Assert.NotNull(this.configuration.ConfigSource);
+            Assert.IsNotEmpty(this.configuration.ConfigSource);
         }
 
         [Test]
         public void ConfigurationHasLocation()
         {
             Assert.NotNull(this.configuration.LocationName);
+            Assert.IsNotEmpty(this.configuration.LocationName);
             Assert.NotZero(this.configuration.Latitude);
             Assert.NotZero(this.configuration.Longitude);
         }
@@ -66,13 +68,13 @@ namespace HassClient.WS.Tests
         [Test]
         public void ConfigurationHasState()
         {
-            Assert.NotNull(this.configuration.State);
+            Assert.AreEqual("RUNNING", this.configuration.State);
         }
 
         [Test]
         public void ConfigurationHasTimeZone()
         {
-            Assert.NotNull(this.configuration.TimeZone);
+            Assert.AreEqual("UTC", this.configuration.TimeZone);
         }
 
         [Test]
@@ -90,6 +92,41 @@ namespace HassClient.WS.Tests
         public void ConfigurationHasVersion()
         {
             Assert.NotNull(this.configuration.Version);
+            Assert.NotZero(this.configuration.Version.Month);
+            Assert.NotZero(this.configuration.Version.Year);
+        }
+
+        [Test]
+        public void ConfigurationHasCurrency()
+        {
+            Assert.AreEqual("EUR", this.configuration.Currency);
+        }
+
+        [Test]
+        public void ConfigurationHasCountry()
+        {
+            if (this.configuration.Country != null)
+            {
+                Assert.IsNotEmpty(this.configuration.Country);
+            }
+        }
+
+        [Test]
+        public void ConfigurationHasLanguage()
+        {
+            Assert.AreEqual("en", this.configuration.Language);
+        }
+
+        [Test]
+        public void ConfigurationHasDebug()
+        {
+            Assert.IsFalse(this.configuration.Debug);
+        }
+
+        [Test]
+        public void ConfigurationHasRadius()
+        {
+            Assert.AreEqual(100, this.configuration.Radius);
         }
     }
 }
