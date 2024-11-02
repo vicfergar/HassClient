@@ -127,6 +127,8 @@ namespace HassClient.Core.Tests
         {
             var testEntry = this.CreateTestEntry(out _, out var initialName, out var initialUser, out var initialPicture, out var initialDeviceTrackers);
 
+            var initialDeviceTrackersSet = new HashSet<string>(initialDeviceTrackers);
+
             testEntry.Name = MockHelpers.GetRandomTestName();
             testEntry.ChangeUser(this.testUser);
             testEntry.Picture = $"/test/{MockHelpers.GetRandomTestName()}.png";
@@ -138,7 +140,8 @@ namespace HassClient.Core.Tests
             Assert.AreEqual(initialName, testEntry.Name);
             Assert.AreEqual(initialUser.Id, testEntry.UserId);
             Assert.AreEqual(initialPicture, testEntry.Picture);
-            Assert.AreEqual(initialDeviceTrackers, testEntry.DeviceTrackers);
+            
+            Assert.That(testEntry.DeviceTrackers, Is.EquivalentTo(initialDeviceTrackersSet));
         }
 
         private Person CreateTestEntry(out string entityId, out string name, out User user, out string picture, out IEnumerable<string> deviceTrackers)
