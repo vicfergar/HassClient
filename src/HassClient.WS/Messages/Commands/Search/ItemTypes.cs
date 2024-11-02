@@ -11,7 +11,7 @@
         Area,
 
         /// <summary>
-        /// Home Assistant automations.
+        /// Home Assistant automation.
         /// </summary>
         Automation,
 

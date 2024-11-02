@@ -22,7 +22,7 @@
         /// of a device but does not allow changing it, for example a sensor
         /// showing RSSI or MAC-address.
         /// </summary>
-        Diasnogtic,
+        Diagnostic,
 
         /// <summary>
         /// Entity which is not useful for the user to interact with.

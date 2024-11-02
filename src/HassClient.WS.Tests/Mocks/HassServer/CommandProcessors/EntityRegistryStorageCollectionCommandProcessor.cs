@@ -54,12 +54,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                    commandType.EndsWith("remove");
         }
 
-        protected override object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessListCommand(MockHassServerRequestContext context, JToken merged)
         {
             return context.HassDB.GetAllEntityEntries().Select(x => x as EntityRegistryEntry ?? EntityRegistryEntry.CreateFromEntry(x));
         }
 
-        protected override object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessUpdateCommand(MockHassServerRequestContext context, JToken merged)
         {
             var newEntityIdProperty = merged.FirstOrDefault(x => (x is JProperty property) && property.Name == "new_entity_id");
             var newEntityId = (string)newEntityIdProperty;
@@ -87,7 +87,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             return new EntityEntryResponse() { EntityEntryRaw = new JRaw(HassSerializer.SerializeObject(result)) };
         }
 
-        protected override object ProccessUnknownCommand(string commandType, MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessUnknownCommand(string commandType, MockHassServerRequestContext context, JToken merged)
         {
             var entityId = merged.Value<string>("entity_id");
             if (string.IsNullOrEmpty(entityId))
@@ -112,7 +112,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 return result ? null : (object)ErrorCodes.NotFound;
             }
 
-            return base.ProccessUnknownCommand(commandType, context, merged);
+            return base.ProcessUnknownCommand(commandType, context, merged);
         }
 
         private MockRegistryEntity FindRegistryEntry(MockHassServerRequestContext context, string entityId, bool createIfNotFound)

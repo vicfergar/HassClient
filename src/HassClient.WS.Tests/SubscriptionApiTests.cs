@@ -10,12 +10,12 @@ namespace HassClient.WS.Tests
 {
     public class SubscriptionApiTests : BaseHassWSApiTest
     {
-        private const string testEntitytId = "light.ceiling_lights";
+        private const string testEntityId = "light.ceiling_lights";
 
         private async Task<StateChangedEvent> ForceStateChangedAndGetEventData(MockEventSubscriber subscriber)
         {
-            var domain = testEntitytId.GetDomain();
-            var update = await this.hassWSApi.CallServiceForEntitiesAsync(domain, "toggle", testEntitytId);
+            var domain = testEntityId.GetDomain();
+            var update = await this.hassWSApi.CallServiceForEntitiesAsync(domain, "toggle", testEntityId);
             Assert.NotNull(update, "SetUp failed");
 
             var eventResultInfo = await subscriber.WaitFirstEventArgWithTimeoutAsync<EventResultInfo>(
@@ -47,7 +47,7 @@ namespace HassClient.WS.Tests
 
             Assert.NotZero(subscriber1.HitCount);
             Assert.AreEqual(subscriber1.HitCount, subscriber2.HitCount);
-            Assert.IsTrue(eventData.EntityId == testEntitytId);
+            Assert.IsTrue(eventData.EntityId == testEntityId);
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace HassClient.WS.Tests
             var eventData = await this.ForceStateChangedAndGetEventData(subscriber);
 
             Assert.NotZero(subscriber.HitCount);
-            Assert.IsTrue(eventData.EntityId == testEntitytId);
+            Assert.IsTrue(eventData.EntityId == testEntityId);
             Assert.NotNull(eventData.NewState.State);
         }
     }

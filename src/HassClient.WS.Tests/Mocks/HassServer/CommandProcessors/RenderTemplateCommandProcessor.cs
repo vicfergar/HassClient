@@ -17,7 +17,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public override bool CanProcess(BaseIdentifiableMessage receivedCommand) => receivedCommand is RenderTemplateMessage;
 
-        public override BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
+        public override BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
         {
             var commandRenderTemplate = receivedCommand as RenderTemplateMessage;
 

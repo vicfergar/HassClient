@@ -8,7 +8,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
     {
         public override bool CanProcess(BaseIdentifiableMessage receivedCommand) => receivedCommand is GetPanelsMessage;
 
-        public override BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
+        public override BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
         {
             var objs = MockHassModelFactory.PanelInfoFaker.Generate(10).ToDistinctDictionary(x => x.ComponentName);
             var resultObject = new JRaw(HassSerializer.SerializeObject(objs));

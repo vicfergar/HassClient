@@ -33,7 +33,7 @@ namespace HassClient.Models
         public string ConfigEntry { get; private set; }
 
         /// <summary>
-        /// Gets a value indicathing whether the entity uses a custom component platform.
+        /// Gets a value indicating whether the entity uses a custom component platform.
         /// </summary>
         [JsonProperty("custom_component")]
         public bool IsCustomComponent { get; private set; }

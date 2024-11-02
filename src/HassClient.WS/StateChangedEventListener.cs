@@ -17,7 +17,7 @@ namespace HassClient.WS
 
         private bool isStateChangedSubscriptionActive;
 
-        private readonly SemaphoreSlim refreshSubscriptionsSemahore = new SemaphoreSlim(0);
+        private readonly SemaphoreSlim refreshSubscriptionsSemaphore = new SemaphoreSlim(0);
 
         private HassClientWebSocket clientWebSocket;
 
@@ -49,7 +49,7 @@ namespace HassClient.WS
                 {
                     while (true)
                     {
-                        await this.refreshSubscriptionsSemahore.WaitAsync(this.cancellationTokenSource.Token);
+                        await this.refreshSubscriptionsSemaphore.WaitAsync(this.cancellationTokenSource.Token);
                         await this.UpdateStateChangeSockedSubscription(this.cancellationTokenSource.Token);
                     }
                 }, TaskCreationOptions.LongRunning);
@@ -115,7 +115,7 @@ namespace HassClient.WS
 
                 if (register.Count == 1)
                 {
-                    this.refreshSubscriptionsSemahore.Release();
+                    this.refreshSubscriptionsSemaphore.Release();
                 }
             }
 
@@ -133,7 +133,7 @@ namespace HassClient.WS
 
                     if (register.Count == 0)
                     {
-                        this.refreshSubscriptionsSemahore.Release();
+                        this.refreshSubscriptionsSemaphore.Release();
                     }
                 }
             }
@@ -141,8 +141,8 @@ namespace HassClient.WS
 
         private async Task UpdateStateChangeSockedSubscription(CancellationToken cancellationToken)
         {
-            var needsSubcription = this.stateChangedSubscriptionsByEntityId.Count > 0 || this.stateChangedSubscriptionsByDomain.Count > 0;
-            var toggleRequired = this.isStateChangedSubscriptionActive ^ needsSubcription;
+            var needsSubscription = this.stateChangedSubscriptionsByEntityId.Count > 0 || this.stateChangedSubscriptionsByDomain.Count > 0;
+            var toggleRequired = this.isStateChangedSubscriptionActive ^ needsSubscription;
             if (toggleRequired)
             {
                 var succeed = false;
@@ -162,7 +162,7 @@ namespace HassClient.WS
                 else
                 {
                     // Retry
-                    this.refreshSubscriptionsSemahore.Release();
+                    this.refreshSubscriptionsSemaphore.Release();
                     await Task.Delay(100);
                 }
             }

@@ -9,7 +9,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
     {
         public override bool CanProcess(BaseIdentifiableMessage receivedCommand) => receivedCommand is GetServicesMessage;
 
-        public override BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
+        public override BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
         {
             using (var stream = this.GetResourceStream("GetServicesResponse.json"))
             using (var sr = new StreamReader(stream))

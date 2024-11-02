@@ -14,7 +14,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public class MockHassServerRequestContext
     {
-        private const int INCONMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
+        private const int INCOMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
 
         private readonly List<BaseCommandProcessor> commandProcessors;
 
@@ -36,7 +36,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             this.LastReceivedID = 0;
             this.HassDB = hassDB;
             this.WebSocket = webSocket;
-            this.receivingBuffer = new ArraySegment<byte>(new byte[INCONMING_BUFFER_SIZE]);
+            this.receivingBuffer = new ArraySegment<byte>(new byte[INCOMING_BUFFER_SIZE]);
             this.EventSubscriptionsProcessor = new EventSubscriptionsProcessor();
             this.commandProcessors = new List<BaseCommandProcessor>()
             {
@@ -59,7 +59,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             };
         }
 
-        public bool TryProccesMessage(BaseIdentifiableMessage receivedCommand, out BaseIdentifiableMessage result)
+        public bool TryProcessMessage(BaseIdentifiableMessage receivedCommand, out BaseIdentifiableMessage result)
         {
             var processor = this.commandProcessors.FirstOrDefault(x => x.CanProcess(receivedCommand));
             if (processor == null)
@@ -69,7 +69,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 return false;
             }
 
-            result = processor.ProccessCommand(this, receivedCommand);
+            result = processor.ProcessCommand(this, receivedCommand);
             return true;
         }
 

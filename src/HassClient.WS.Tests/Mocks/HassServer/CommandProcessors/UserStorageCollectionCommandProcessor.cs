@@ -8,22 +8,22 @@ namespace HassClient.WS.Tests.Mocks.HassServer
     internal class UserStorageCollectionCommandProcessor
         : RegistryEntryCollectionCommandProcessor<UserMessagesFactory, User>
     {
-        protected override object ProccessCreateCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessCreateCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var user = (User)base.ProccessCreateCommand(context, merged);
+            var user = (User)base.ProcessCreateCommand(context, merged);
             user.SetIsActive(true);
             return new UserResponse() { UserRaw = new JRaw(HassSerializer.SerializeObject(user)) };
         }
 
-        protected override object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessUpdateCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var user = base.ProccessUpdateCommand(context, merged);
+            var user = base.ProcessUpdateCommand(context, merged);
             return new UserResponse() { UserRaw = new JRaw(HassSerializer.SerializeObject(user)) };
         }
 
-        protected override object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessListCommand(MockHassServerRequestContext context, JToken merged)
         {
-            return base.ProccessListCommand(context, merged);
+            return base.ProcessListCommand(context, merged);
         }
 
         protected override void PrepareHassContext(MockHassServerRequestContext context)

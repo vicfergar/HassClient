@@ -42,7 +42,7 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void EnumToSnakeCasePriorizesEnumMemberAttribute()
+        public void EnumToSnakeCasePrioritizesEnumMemberAttribute()
         {
             var value = TestEnum.EnumMemberTestValue;
             var memInfo = typeof(TestEnum).GetMember(value.ToString());
@@ -92,7 +92,7 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void EnumValuesAreConvertedToSnakeCasePriorizingEnumMemberAttribute()
+        public void EnumValuesAreConvertedToSnakeCasePrioritizingEnumMemberAttribute()
         {
 
             var value = TestEnum.EnumMemberTestValue;
@@ -114,7 +114,7 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        public void EnumValuesAreConvertedFromSnakeCasePriorizingEnumMemberAttribute()
+        public void EnumValuesAreConvertedFromSnakeCasePrioritizingEnumMemberAttribute()
         {
 
             var value = TestEnum.EnumMemberTestValue;

@@ -120,7 +120,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                             {
                                 response = new PongMessage();
                             }
-                            else if (!context.TryProccesMessage(receivedMessage, out response))
+                            else if (!context.TryProcessMessage(receivedMessage, out response))
                             {
                                 response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.UnknownCommand) };
                             }
@@ -133,7 +133,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             }
             catch
             {
-                Trace.WriteLine("A problem occured while attending client. Closing connection.");
+                Trace.WriteLine("A problem occurred while attending client. Closing connection.");
                 await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, string.Empty, default);
             }
         }

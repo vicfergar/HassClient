@@ -41,7 +41,7 @@ namespace HassClient.Models
         /// returns <see langword="false" />.
         /// </summary>
         /// <param name="serviceName">The relative name of the service to look up in this service domain.</param>
-        /// <param name="fullServiceName">Upon successful match, will be set to the fullly qualified service name (domain.service). Otherwise, <see langword="null" />.</param>
+        /// <param name="fullServiceName">Upon successful match, will be set to the fully qualified service name (domain.service). Otherwise, <see langword="null" />.</param>
         /// <returns><see langword="true" /> if a match was found, otherwise <see langword="false" />.</returns>
         public bool TryGetService(string serviceName, out string fullServiceName)
         {

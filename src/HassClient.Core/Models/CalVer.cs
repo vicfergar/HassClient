@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace HassClient.Models
 {
     /// <summary>
-    /// Calendar versioning representation used by Home Assitant.
+    /// Calendar versioning representation used by Home Assistant.
     /// </summary>
     public class CalVer
     {

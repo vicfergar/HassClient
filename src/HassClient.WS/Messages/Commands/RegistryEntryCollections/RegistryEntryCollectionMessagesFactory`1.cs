@@ -18,7 +18,7 @@ namespace HassClient.WS.Messages.Commands
         private readonly string modelName;
 
         /// <summary>
-        /// Gets the API prefix used in underlaying message types.
+        /// Gets the API prefix used in underlying message types.
         /// </summary>
         public string ApiPrefix => this.apiPrefix;
 
@@ -30,7 +30,7 @@ namespace HassClient.WS.Messages.Commands
         /// <summary>
         /// Initializes a new instance of the <see cref="RegistryEntryCollectionMessagesFactory{TModel}"/> class.
         /// </summary>
-        /// <param name="apiPrefix">The API prefix used in underlaying message types.</param>
+        /// <param name="apiPrefix">The API prefix used in underlying message types.</param>
         /// <param name="modelName">The name used to generate model identifier property.</param>
         protected RegistryEntryCollectionMessagesFactory(string apiPrefix, string modelName)
         {

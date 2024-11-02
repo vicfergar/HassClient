@@ -35,7 +35,7 @@ namespace HassClient.WS
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
 
         private readonly Dictionary<string, SocketEventSubscription> socketEventSubscriptionIdByEventType = new Dictionary<string, SocketEventSubscription>();
-        private readonly Dictionary<uint, Action<EventResultMessage>> socketEventCallbacksBySubsciptionId = new Dictionary<uint, Action<EventResultMessage>>();
+        private readonly Dictionary<uint, Action<EventResultMessage>> socketEventCallbacksBySubscriptionId = new Dictionary<uint, Action<EventResultMessage>>();
         private readonly ConcurrentDictionary<uint, TaskCompletionSource<BaseIncomingMessage>> incomingMessageAwaitersById = new ConcurrentDictionary<uint, TaskCompletionSource<BaseIncomingMessage>>();
 
         private ConnectionParameters connectionParameters;
@@ -60,7 +60,7 @@ namespace HassClient.WS
         /// <summary>
         /// Gets a value indicating whether this instance is disposed.
         /// </summary>
-        public bool IsDiposed { get; private set; }
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets the current connection state of the web socket.
@@ -142,7 +142,7 @@ namespace HassClient.WS
         /// <returns>The task object representing the asynchronous operation.</returns>
         public async Task ConnectAsync(ConnectionParameters connectionParameters, int retries = 0, CancellationToken cancellationToken = default)
         {
-            this.CheckIsDiposed();
+            this.CheckIsDisposed();
 
             if (retries < 0 &&
                 cancellationToken == CancellationToken.None)
@@ -176,7 +176,7 @@ namespace HassClient.WS
         /// <returns>The task object representing the asynchronous operation.</returns>
         public async Task CloseAsync(CancellationToken cancellationToken = default)
         {
-            this.CheckIsDiposed();
+            this.CheckIsDisposed();
 
             if (this.ConnectionState == ConnectionStates.Disconnected)
             {
@@ -267,9 +267,9 @@ namespace HassClient.WS
         /// <inheritdoc />
         public void Dispose()
         {
-            if (!this.IsDiposed)
+            if (!this.IsDisposed)
             {
-                this.IsDiposed = true;
+                this.IsDisposed = true;
                 this.ClearSocketResources();
 
                 foreach (var item in this.socketEventSubscriptionIdByEventType.Values)
@@ -368,7 +368,7 @@ namespace HassClient.WS
 
         private async Task RestoreEventsSubscriptionsAsync(CancellationToken closeCancellationToken)
         {
-            this.socketEventCallbacksBySubsciptionId.Clear();
+            this.socketEventCallbacksBySubscriptionId.Clear();
 
             foreach (var item in this.socketEventSubscriptionIdByEventType)
             {
@@ -463,7 +463,7 @@ namespace HassClient.WS
             {
                 while (channelReader.TryRead(out var incomingMessage))
                 {
-                    if (this.socketEventCallbacksBySubsciptionId.TryGetValue(incomingMessage.Id, out var callback))
+                    if (this.socketEventCallbacksBySubscriptionId.TryGetValue(incomingMessage.Id, out var callback))
                     {
                         callback(incomingMessage);
                     }
@@ -471,9 +471,9 @@ namespace HassClient.WS
             }
         }
 
-        private void CheckIsDiposed()
+        private void CheckIsDisposed()
         {
-            if (this.IsDiposed)
+            if (this.IsDisposed)
             {
                 throw new ObjectDisposedException(nameof(HassClientWebSocket));
             }
@@ -496,7 +496,7 @@ namespace HassClient.WS
                 this.socket.Abort();
                 this.socket.Dispose();
 
-                this.socketEventCallbacksBySubsciptionId.Clear();
+                this.socketEventCallbacksBySubscriptionId.Clear();
                 this.incomingMessageAwaitersById.Clear();
                 this.receivedEventsChannel?.Writer.Complete();
             }
@@ -544,11 +544,11 @@ namespace HassClient.WS
 
                     if (message is SubscribeEventsMessage)
                     {
-                        this.socketEventCallbacksBySubsciptionId.Add(identifiableMessage.Id, this.ProcessReceivedEventSubscriptionMessage);
+                        this.socketEventCallbacksBySubscriptionId.Add(identifiableMessage.Id, this.ProcessReceivedEventSubscriptionMessage);
                     }
                     else if (message is RenderTemplateMessage renderTemplateMessage)
                     {
-                        this.socketEventCallbacksBySubsciptionId.Add(identifiableMessage.Id, renderTemplateMessage.ProcessEventReceivedMessage);
+                        this.socketEventCallbacksBySubscriptionId.Add(identifiableMessage.Id, renderTemplateMessage.ProcessEventReceivedMessage);
                     }
                     else if (message is RawCommandMessage rawCommand &&
                              rawCommand.MergedObject != null)
@@ -634,7 +634,7 @@ namespace HassClient.WS
                 if (commandMessage.Id > 0)
                 {
                     this.incomingMessageAwaitersById.TryRemove(commandMessage.Id, out var _);
-                    this.socketEventCallbacksBySubsciptionId.Remove(commandMessage.Id);
+                    this.socketEventCallbacksBySubscriptionId.Remove(commandMessage.Id);
                 }
 
                 throw;
@@ -675,7 +675,7 @@ namespace HassClient.WS
         /// </returns>
         internal async Task<ResultMessage> SendCommandWithResultAsync(BaseOutgoingMessage commandMessage, CancellationToken cancellationToken)
         {
-            this.CheckIsDiposed();
+            this.CheckIsDisposed();
 
             var resultMessage = await this.SendCommandAsync(commandMessage, cancellationToken);
             this.CheckResultMessageError(commandMessage, resultMessage);
@@ -736,7 +736,7 @@ namespace HassClient.WS
                 throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
             }
 
-            this.CheckIsDiposed();
+            this.CheckIsDisposed();
 
             // TODO: Make AddEventHandlerSubscriptionAsync and RemoveEventHandlerSubscriptionAsync thread-safe
             if (!this.socketEventSubscriptionIdByEventType.ContainsKey(eventType))
@@ -761,7 +761,7 @@ namespace HassClient.WS
                 throw new ArgumentException($"'{nameof(eventType)}' cannot be null or whitespace", nameof(eventType));
             }
 
-            this.CheckIsDiposed();
+            this.CheckIsDisposed();
 
             if (!this.socketEventSubscriptionIdByEventType.TryGetValue(eventType, out var socketEventSubscription))
             {

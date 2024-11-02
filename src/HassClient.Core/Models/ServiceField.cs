@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 namespace HassClient.Models
 {
     /// <summary>
-    /// Represents a signle field in a service call.
+    /// Represents a single field in a service call.
     /// </summary>
     public class ServiceField
     {

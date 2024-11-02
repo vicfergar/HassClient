@@ -16,9 +16,9 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         {
         }
 
-        protected override object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected override object ProcessListCommand(MockHassServerRequestContext context, JToken merged)
         {
-            var result = base.ProccessListCommand(context, merged);
+            var result = base.ProcessListCommand(context, merged);
             if (typeof(TModel) == typeof(Person))
             {
                 var persons = (IEnumerable<Person>)result;

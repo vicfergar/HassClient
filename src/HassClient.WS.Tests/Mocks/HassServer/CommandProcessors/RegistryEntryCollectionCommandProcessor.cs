@@ -49,7 +49,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             receivedCommand.Type.StartsWith(this.apiPrefix) &&
             this.IsValidCommandType(receivedCommand.Type);
 
-        public override BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
+        public override BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
         {
             try
             {
@@ -65,23 +65,23 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
                 if (commandType.EndsWith("list"))
                 {
-                    result = this.ProccessListCommand(context, merged);
+                    result = this.ProcessListCommand(context, merged);
                 }
                 else if (commandType.EndsWith("create"))
                 {
-                    result = this.ProccessCreateCommand(context, merged);
+                    result = this.ProcessCreateCommand(context, merged);
                 }
                 else if (commandType.EndsWith("delete"))
                 {
-                    result = this.ProccessDeleteCommand(context, merged);
+                    result = this.ProcessDeleteCommand(context, merged);
                 }
                 else if (commandType.EndsWith("update"))
                 {
-                    result = (object)this.ProccessUpdateCommand(context, merged) ?? ErrorCodes.NotFound;
+                    result = (object)this.ProcessUpdateCommand(context, merged) ?? ErrorCodes.NotFound;
                 }
                 else
                 {
-                    result = this.ProccessUnknownCommand(commandType, context, merged);
+                    result = this.ProcessUnknownCommand(commandType, context, merged);
                 }
 
                 if (result is ErrorCodes errorCode)
@@ -140,12 +140,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             HassSerializer.PopulateObject(modelSerialized, target);
         }
 
-        protected virtual object ProccessListCommand(MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProcessListCommand(MockHassServerRequestContext context, JToken merged)
         {
             return context.HassDB.GetObjects<TModel>();
         }
 
-        protected virtual object ProccessCreateCommand(MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProcessCreateCommand(MockHassServerRequestContext context, JToken merged)
         {
             var model = this.DeserializeModel(merged, out var _);
             this.idPropertyInfo.SetValue(model, this.faker.RandomUUID());
@@ -153,20 +153,20 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             return model;
         }
 
-        protected virtual object ProccessUpdateCommand(MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProcessUpdateCommand(MockHassServerRequestContext context, JToken merged)
         {
             var model = this.DeserializeModel(merged, out var modelSerialized);
             return context.HassDB.UpdateObject(model, new JRaw(modelSerialized));
         }
 
-        protected virtual object ProccessDeleteCommand(MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProcessDeleteCommand(MockHassServerRequestContext context, JToken merged)
         {
             var model = this.DeserializeModel(merged, out var _);
             context.HassDB.DeleteObject(model);
             return null;
         }
 
-        protected virtual object ProccessUnknownCommand(string commandType, MockHassServerRequestContext context, JToken merged)
+        protected virtual object ProcessUnknownCommand(string commandType, MockHassServerRequestContext context, JToken merged)
         {
             return ErrorCodes.NotSupported;
         }
