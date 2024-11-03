@@ -122,7 +122,15 @@ string result = await hassWSApi.RenderTemplateAsync("Paulus is at {{ states('sun
 ### RegistryEntry Collections
 Home Assistant defines a `Registry Collection` as a registry of items identified by a unique id. Some common operations like `list`, `create`, `update` and `delete` are exposed through the Web Socket API and can be consumed using this client.
 
-At the moment only `Area`, `Device`, `RegistryEntry`, and `User` entries are defined.
+The following registry entries are supported:
+- `Area`
+- `Category`
+- `Device`
+- `EntityRegistryEntry`
+- `Floor`
+- `Label`
+- `User`
+- `Zone`
 
 ```csharp
 // List
@@ -134,7 +142,12 @@ bool createResult = await this.hassWSApi.CreateAreaAsync(hallArea);
 
 // Update
 hallArea.Name = "Hall_1";
-bool updateResult = await hassWSApi.UpdateArea(hallArea);
+hallArea.Labels.Add("ground_floor");
+bool updateResult = await hassWSApi.UpdateAreaAsync(hallArea);
+
+// Pending changes
+bool hasChanges = hallArea.HasPendingChanges;
+hallArea.DiscardPendingChanges();
 
 // Delete
 bool deleteResult = await hassWSApi.DeleteAreaAsync(hallArea);
@@ -155,11 +168,24 @@ bool createResult = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(a
 
 // Update
 alarmInputBoolean.Name = "Alarm_1";
-bool updateResult = await hassWSApi.UpdateArea(alarmInputBoolean);
+alarmInputBoolean.Icon = "mdi:alarm";
+bool updateResult = await hassWSApi.UpdateStorageEntityRegistryEntryAsync(alarmInputBoolean);
+
+// Pending changes
+bool hasChanges = alarmInputBoolean.HasPendingChanges;
+alarmInputBoolean.DiscardPendingChanges();
 
 // Delete
-bool deleteResult = await hassWSApi.DeleteAreaAsync(alarmInputBoolean);
+bool deleteResult = await hassWSApi.DeleteStorageEntityRegistryEntryAsync(alarmInputBoolean);
 ```
+
+Key features of registry entries:
+
+- **Pending Changes**: All registry entries track their modifications through the `HasPendingChanges` property
+- **Force Update**: The update methods support a `forceUpdate` parameter to update all properties, not just the modified ones
+- **Discard Changes**: You can revert pending changes using the `DiscardPendingChanges()` method
+- **Property Tracking**: Properties like Name, Icon, Aliases, Labels, etc. are automatically tracked for changes
+
 
 ### Search related
 All data stored in Home Assistant is interconnected, making it a graph. The client allows searching related items for a given `ItemTypes` and `itemId`.
