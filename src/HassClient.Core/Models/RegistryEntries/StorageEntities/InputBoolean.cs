@@ -54,7 +54,8 @@ namespace HassClient.Models
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            return base.GetModifiableProperties().Append(this.initial);
+            return base.GetModifiableProperties()
+                       .Append(this.initial);
         }
 
         /// <inheritdoc />

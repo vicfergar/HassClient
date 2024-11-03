@@ -1,4 +1,5 @@
-﻿using HassClient.Helpers;
+﻿using HassClient.Converters;
+using HassClient.Helpers;
 using HassClient.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -27,6 +28,7 @@ namespace HassClient.Serialization
                 new ModifiablePropertyConverter(),
                 new StringEnumConverter(namingStrategy),
                 new TupleSetToDictionaryConverter(),
+                new UnixTimestampConverter(),
             },
         };
 

@@ -11,7 +11,7 @@ namespace HassClient.WS.Messages.Commands
     /// </summary>
     /// <typeparam name="TModel">The modifiable model type associated with the Storage Collection.</typeparam>
     public abstract class RegistryEntryCollectionMessagesFactory<TModel>
-        where TModel : RegistryEntryBase
+        where TModel : ModifiableModelBase
     {
         private readonly string apiPrefix;
 
@@ -61,7 +61,19 @@ namespace HassClient.WS.Messages.Commands
         /// </returns>
         public BaseOutgoingMessage CreateListMessage()
         {
-            return new RawCommandMessage($"{this.apiPrefix}/list");
+            return this.CreateListMessage(mergedObject: null);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="BaseOutgoingMessage"/> used to add a new item in the collection registry.
+        /// </summary>
+        /// <param name="mergedObject">Object containing additional fields that will be merged to the create message.</param>
+        /// <returns>
+        /// A <see cref="BaseOutgoingMessage"/> used to add a new item in the collection registry.
+        /// </returns>
+        protected BaseOutgoingMessage CreateListMessage(object mergedObject = null)
+        {
+            return new RawCommandMessage($"{this.apiPrefix}/list", mergedObject);
         }
 
         /// <summary>
@@ -97,12 +109,13 @@ namespace HassClient.WS.Messages.Commands
         /// Creates a <see cref="BaseOutgoingMessage"/> used to delete an existing item from the collection registry.
         /// </summary>
         /// <param name="model">The model for the generation of the message.</param>
+        /// <param name="mergedObject">Object containing additional fields that will be merged to the delete message.</param>
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used to delete an existing item from the collection registry.
         /// </returns>
-        protected BaseOutgoingMessage CreateDeleteMessage(TModel model)
+        protected BaseOutgoingMessage CreateDeleteMessage(TModel model, object mergedObject = null)
         {
-            return this.CreateDeleteMessage(model.UniqueId);
+            return this.CreateDeleteMessage(model.UniqueId, mergedObject);
         }
 
         /// <summary>
@@ -141,14 +154,15 @@ namespace HassClient.WS.Messages.Commands
         /// Creates a <see cref="BaseOutgoingMessage"/> used to delete an existing item from the collection registry.
         /// </summary>
         /// <param name="modelId">The unique identifier of the collection registry item to delete.</param>
+        /// <param name="mergedObject">Object containing additional fields that will be merged to the delete message.</param>
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used to delete an existing item from the collection registry.
         /// </returns>
-        protected BaseOutgoingMessage CreateDeleteMessage(string modelId)
+        protected BaseOutgoingMessage CreateDeleteMessage(string modelId, object mergedObject = null)
         {
-            var mergedObject = new JObject();
-            this.AddModelIdProperty(mergedObject, modelId);
-            return new RawCommandMessage($"{this.apiPrefix}/delete", mergedObject);
+            var mergedObjectWithModelId = mergedObject != null ? HassSerializer.CreateJObject(mergedObject) : new JObject();
+            this.AddModelIdProperty(mergedObjectWithModelId, modelId);
+            return new RawCommandMessage($"{this.apiPrefix}/delete", mergedObjectWithModelId);
         }
 
         /// <summary>

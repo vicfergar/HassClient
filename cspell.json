@@ -2,6 +2,7 @@
   "version": "0.2",
   "language": "en",
   "words": [
+    "Aliasable",
     "automations",
     "Codeowners",
     "Esphome",
@@ -11,6 +12,7 @@
     "homeassistant",
     "Hvac",
     "Instantiator",
+    "Labelable",
     "livingroom",
     "Miio",
     "mireds",

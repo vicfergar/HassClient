@@ -10,8 +10,12 @@ namespace HassClient.Models
     /// The Entity Registry keeps a registry of entities. Entities are uniquely identified by their domain, platform and
     /// an unique id provided by that platform.
     /// </summary>
-    public class EntityRegistryEntry : EntityRegistryEntryBase
+    public class EntityRegistryEntry : RegistryEntryBase, IEntityEntry, IAliasable, ILabelable
     {
+        private readonly AliasesModifiableProperty aliases = new AliasesModifiableProperty();
+
+        private readonly LabelsModifiableProperty labels = new LabelsModifiableProperty();
+
         [JsonProperty]
         private readonly ModifiableProperty<DisabledByEnum?> disabledBy = new ModifiableProperty<DisabledByEnum?>(nameof(disabledBy));
 
@@ -42,7 +46,20 @@ namespace HassClient.Models
         protected override bool AcceptsNullOrWhiteSpaceName => true;
 
         /// <inheritdoc />
-        public override string EntityId => this.entityId;
+        public string EntityId => this.entityId;
+
+        /// <inheritdoc />
+        public ICollection<string> Aliases
+        {
+            get => this.aliases.Value;
+        }
+
+        /// <inheritdoc />
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public ICollection<string> Labels
+        {
+            get => this.labels.Value;
+        }
 
         /// <summary>
         /// Gets the original friendly name of this entity.
@@ -144,6 +161,42 @@ namespace HassClient.Models
         [JsonIgnore]
         public string Domain => EntityIdHelpers.GetDomain(this.EntityId);
 
+        /// <summary>
+        /// Gets a value indicating whether the entity has a name provided by the device.
+        /// </summary>
+        [JsonProperty("has_entity_name")]
+        public bool HasEntityName { get; private set; }
+
+        /// <summary>
+        /// Gets the source that hides this entity, if any.
+        /// </summary>
+        [JsonProperty("hidden_by")]
+        public string HiddenBy { get; private set; }
+
+        /// <summary>
+        /// Gets the unique identifier for this registry entry.
+        /// </summary>
+        [JsonProperty("id")]
+        public string Id { get; private set; }
+
+        /// <summary>
+        /// Gets the entity options.
+        /// </summary>
+        [JsonProperty("options")]
+        public Dictionary<string, JObject> Options { get; private set; }
+
+        /// <summary>
+        /// Gets the translation key for this entity.
+        /// </summary>
+        [JsonProperty("translation_key")]
+        public string TranslationKey { get; private set; }
+
+        /// <summary>
+        /// Gets the categories configuration for this entity.
+        /// </summary>
+        [JsonProperty("categories")]
+        public Dictionary<string, object> Categories { get; private set; }
+
         [JsonConstructor]
         private EntityRegistryEntry()
         {
@@ -176,7 +229,8 @@ namespace HassClient.Models
         }
 
         // Used for testing purposes.
-        internal static EntityRegistryEntry CreateFromEntry(EntityRegistryEntryBase entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+        internal static EntityRegistryEntry CreateFromEntry<T>(T entry, DisabledByEnum disabledBy = DisabledByEnum.None)
+            where T : NamedEntryBase, IEntityEntry
         {
             return new EntityRegistryEntry(entry.EntityId, entry.Name, entry.Icon, disabledBy);
         }
@@ -184,7 +238,10 @@ namespace HassClient.Models
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            return base.GetModifiableProperties().Append(this.disabledBy);
+            return base.GetModifiableProperties()
+                .Append(this.disabledBy)
+                .Append(this.aliases)
+                .Append(this.labels);
         }
 
         /// <inheritdoc />
@@ -206,6 +263,12 @@ namespace HassClient.Models
             result.Platform = this.Platform;
             result.SupportedFeatures = this.SupportedFeatures;
             result.UnitOfMeasurement = this.UnitOfMeasurement;
+            result.HasEntityName = this.HasEntityName;
+            result.HiddenBy = this.HiddenBy;
+            result.Id = this.Id;
+            result.Options = this.Options;
+            result.TranslationKey = this.TranslationKey;
+            result.Categories = this.Categories;
             return result;
         }
     }

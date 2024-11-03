@@ -1,17 +1,21 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HassClient.Models
 {
     /// <summary>
     /// Represents an area.
     /// </summary>
-    public class Area : RegistryEntryBase
+    public class Area : RegistryEntryBase, IAliasable, ILabelable
     {
-        private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
+        private readonly AliasesModifiableProperty aliases = new AliasesModifiableProperty();
+
+        private readonly LabelsModifiableProperty labels = new LabelsModifiableProperty();
 
         private readonly ModifiableProperty<string> picture = new ModifiableProperty<string>(nameof(Picture));
+
+        private readonly ModifiableProperty<string> floorId = new ModifiableProperty<string>(nameof(FloorId));
 
         /// <inheritdoc />
         internal protected override string UniqueId
@@ -20,29 +24,17 @@ namespace HassClient.Models
             set => this.Id = value;
         }
 
+        /// <inheritdoc />
+        public ICollection<string> Aliases => this.aliases.Value;
+
+        /// <inheritdoc />
+        public ICollection<string> Labels => this.labels.Value;
+
         /// <summary>
         /// Gets the ID of this area.
         /// </summary>
         [JsonProperty(PropertyName = "area_id")]
         public string Id { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the name of this area.
-        /// </summary>
-        [JsonProperty]
-        public string Name
-        {
-            get => this.name.Value;
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new InvalidOperationException($"'{nameof(this.Name)}' cannot be null or whitespace.");
-                }
-
-                this.name.Value = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets a URL (relative or absolute) to a picture for this area.
@@ -54,6 +46,16 @@ namespace HassClient.Models
             set => this.picture.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the ID of the floor this area is on.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string FloorId
+        {
+            get => this.floorId.Value;
+            set => this.floorId.Value = value;
+        }
+
         [JsonConstructor]
         private Area()
         {
@@ -63,22 +65,32 @@ namespace HassClient.Models
         /// Initializes a new instance of the <see cref="Area"/> class.
         /// </summary>
         /// <param name="name">The name of the area.</param>
+        /// <param name="icon">The icon to display in front of the area in the front-end.</param>
         /// <param name="picture">a URL (relative or absolute) to a picture for this area.</param>
-        public Area(string name, string picture = null)
+        /// <param name="floorId">The ID of the floor this area is on.</param>
+        /// <param name="aliases">The aliases for this area.</param>
+        /// <param name="labels">The labels for this area.</param>
+        public Area(string name, string icon = null, string picture = null, string floorId = null, IEnumerable<string> aliases = null, IEnumerable<string> labels = null)
+            : base(name, icon)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            this.Picture = picture;
+            this.FloorId = floorId;
+
+            if (aliases != null)
             {
-                throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace", nameof(name));
+                this.aliases.AddRange(aliases);
             }
 
-            this.Name = name;
-            this.Picture = picture;
+            if (labels != null)
+            {
+                this.labels.AddRange(labels);
+            }
         }
 
         // Used for testing purposes.
-        internal static Area CreateUnmodified(string name, string picture)
+        internal static Area CreateUnmodified(string name, string icon, string picture, string floorId, IEnumerable<string> aliases = null, IEnumerable<string> labels = null)
         {
-            var result = new Area(name, picture);
+            var result = new Area(name, icon, picture, floorId, aliases, labels);
             result.SaveChanges();
             return result;
         }
@@ -86,8 +98,11 @@ namespace HassClient.Models
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            yield return this.name;
-            yield return this.picture;
+            return base.GetModifiableProperties()
+                       .Append(this.picture)
+                       .Append(this.floorId)
+                       .Append(this.aliases)
+                       .Append(this.labels);
         }
 
         /// <inheritdoc />
@@ -109,7 +124,7 @@ namespace HassClient.Models
         // Used for testing purposes.
         internal Area Clone()
         {
-            var result = CreateUnmodified(this.Name, this.Picture);
+            var result = CreateUnmodified(this.Name, this.Icon, this.Picture, this.FloorId, this.Aliases, this.Labels);
             result.UniqueId = this.UniqueId;
             return result;
         }

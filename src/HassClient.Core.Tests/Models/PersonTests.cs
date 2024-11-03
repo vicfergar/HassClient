@@ -47,7 +47,7 @@ namespace HassClient.Core.Tests
             Assert.AreEqual(testEntry.UserId, this.testUser.Id);
         }
 
-        private static IEnumerable<string> NullOrWhiteSpaceStringValues() => RegistryEntryBaseTests.NullOrWhiteSpaceStringValues();
+        private static IEnumerable<string> NullOrWhiteSpaceStringValues() => NamedEntryBaseTests.NullOrWhiteSpaceStringValues();
 
         [Test]
         [TestCaseSource(nameof(NullOrWhiteSpaceStringValues))]

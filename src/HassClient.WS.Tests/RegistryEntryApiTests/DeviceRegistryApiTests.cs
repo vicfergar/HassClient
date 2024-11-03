@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using HassClient.Models;
+using NUnit.Framework;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +15,17 @@ namespace HassClient.WS.Tests
 
             Assert.NotNull(devices);
             Assert.IsNotEmpty(devices);
+
+            Assert.IsTrue(devices.All(d => d.Id != null));
+            Assert.IsTrue(devices.Any(d => d.Name != null));
+            Assert.IsTrue(devices.All(d => d.OriginalName != null));            
+            Assert.IsTrue(devices.Any(d => d.EntryType == DeviceEntryTypes.Service));
+            Assert.IsTrue(devices.All(d => d.Connections != null));
+            Assert.IsTrue(devices.All(d => d.Labels != null));
         }
 
         [Test]
-        public async Task UpdateNameDevice()
+        public async Task UpdateDeviceName()
         {
             var devices = await this.hassWSApi.GetDevicesAsync();
             var testDevice = devices.FirstOrDefault();
@@ -25,15 +33,17 @@ namespace HassClient.WS.Tests
 
             var newName = $"TestDevice_{DateTime.Now.Ticks}";
             testDevice.Name = newName;
+            var originalModificationDate = testDevice.ModifiedAt;
             var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
 
             Assert.IsTrue(result);
             Assert.IsFalse(testDevice.HasPendingChanges);
             Assert.AreEqual(newName, testDevice.Name);
+            Assert.Greater(testDevice.ModifiedAt, originalModificationDate);
         }
 
         [Test]
-        public async Task UpdateAreaIdDevice()
+        public async Task UpdateDeviceAreaId()
         {
             var devices = await this.hassWSApi.GetDevicesAsync();
             var testDevice = devices.FirstOrDefault();
@@ -41,11 +51,31 @@ namespace HassClient.WS.Tests
 
             var newAreaId = $"{DateTime.Now.Ticks}";
             testDevice.AreaId = newAreaId;
+            var originalModificationDate = testDevice.ModifiedAt;
             var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
 
             Assert.IsTrue(result);
             Assert.IsFalse(testDevice.HasPendingChanges);
             Assert.AreEqual(newAreaId, testDevice.AreaId);
+            Assert.Greater(testDevice.ModifiedAt, originalModificationDate);
+        }
+
+        [Test]
+        public async Task UpdateDeviceLabels()
+        {
+            var devices = await this.hassWSApi.GetDevicesAsync();
+            var testDevice = devices.FirstOrDefault();
+            Assert.NotNull(testDevice, "SetUp failed");
+
+            var newLabel = $"TestLabel_{DateTime.Now.Ticks}";
+            testDevice.Labels.Add(newLabel);
+            var originalModificationDate = testDevice.ModifiedAt;
+            var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
+
+            Assert.IsTrue(result);
+            Assert.IsFalse(testDevice.HasPendingChanges);
+            Assert.IsTrue(testDevice.Labels.Contains(newLabel));
+            Assert.Greater(testDevice.ModifiedAt, originalModificationDate);
         }
     }
 }

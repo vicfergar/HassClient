@@ -31,7 +31,7 @@ namespace HassClient.Core.Tests
             Assert.False(testEntry.IsTracked);
         }
 
-        private static IEnumerable<string> NullOrWhiteSpaceStringValues() => RegistryEntryBaseTests.NullOrWhiteSpaceStringValues();
+        private static IEnumerable<string> NullOrWhiteSpaceStringValues() => NamedEntryBaseTests.NullOrWhiteSpaceStringValues();
 
         [Test]
         [TestCaseSource(nameof(NullOrWhiteSpaceStringValues))]

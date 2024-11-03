@@ -8,7 +8,7 @@ namespace HassClient.Models
     /// <summary>
     /// Represents an input boolean.
     /// </summary>
-    public abstract class StorageEntityRegistryEntryBase : EntityRegistryEntryBase
+    public abstract class StorageEntityRegistryEntryBase : NamedEntryBase, IEntityEntry
     {
         private KnownDomains domain;
 
@@ -26,7 +26,7 @@ namespace HassClient.Models
         public string Id { get; protected set; }
 
         /// <inheritdoc />
-        public override string EntityId => $"{this.domain.ToDomainString()}.{this.UniqueId}";
+        public string EntityId => $"{this.domain.ToDomainString()}.{this.UniqueId}";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StorageEntityRegistryEntryBase"/> class.

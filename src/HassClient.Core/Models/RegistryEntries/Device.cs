@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace HassClient.Models
@@ -9,8 +10,10 @@ namespace HassClient.Models
     /// More information at <see href="https://developers.home-assistant.io/docs/device_registry_index/"/>.
     /// </para>
     /// </summary>
-    public class Device : RegistryEntryBase
+    public class Device : ModifiableModelBase, ITimeTracked, ILabelable
     {
+        private readonly LabelsModifiableProperty labels = new LabelsModifiableProperty();
+
         private readonly ModifiableProperty<string> areaId = new ModifiableProperty<string>(nameof(AreaId));
 
         [JsonProperty]
@@ -28,6 +31,15 @@ namespace HassClient.Models
             get => this.Id;
             set => this.Id = value;
         }
+
+        /// <inheritdoc />
+        public DateTimeOffset CreatedAt { get; private set; }
+
+        /// <inheritdoc />
+        public DateTimeOffset ModifiedAt { get; private set; }
+
+        /// <inheritdoc />
+        public ICollection<string> Labels => this.labels.Value;
 
         /// <summary>
         /// Gets the ID of this device.
@@ -93,6 +105,12 @@ namespace HassClient.Models
         public string Model { get; private set; }
 
         /// <summary>
+        /// Gets the ID of the model of the device.
+        /// </summary>
+        [JsonProperty]
+        public string ModelId { get; private set; }
+
+        /// <summary>
         /// Gets the firmware version of the device.
         /// </summary>
         [JsonProperty]
@@ -119,8 +137,21 @@ namespace HassClient.Models
         public string ViaDeviceId { get; private set; }
 
         /// <summary>
+        /// Gets the primary configuration entry id.
+        /// </summary>
+        [JsonProperty]
+        public string PrimaryConfigEntry { get; private set; }
+
+        /// <summary>
+        /// Gets the serial number of the device.
+        /// </summary>
+        [JsonProperty]
+        public string SerialNumber { get; private set; }
+
+        /// <summary>
         /// Gets the area id which the device is placed in.
         /// </summary>
+        [JsonProperty]
         public string AreaId
         {
             get => this.areaId.Value;
@@ -172,6 +203,7 @@ namespace HassClient.Models
             yield return this.areaId;
             yield return this.disabledBy;
             yield return this.nameByUser;
+            yield return this.labels;
         }
 
         /// <inheritdoc />

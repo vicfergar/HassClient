@@ -79,7 +79,7 @@ namespace HassClient.WS.Messages
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used delete an existing registry entry from the storage collection.
         /// </returns>
-        public new BaseOutgoingMessage CreateDeleteMessage(TStorageEntity entry)
+        public BaseOutgoingMessage CreateDeleteMessage(TStorageEntity entry)
         {
             return base.CreateDeleteMessage(entry);
         }
