@@ -1,5 +1,4 @@
-﻿using HassClient.Models;
-using HassClient.Serialization;
+﻿using HassClient.Serialization;
 using HassClient.WS.Messages;
 using System;
 using System.Collections.Generic;
@@ -20,8 +19,6 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         private readonly ArraySegment<byte> receivingBuffer;
 
-        public readonly MockHassDB HassDB;
-
         public readonly EventSubscriptionsProcessor EventSubscriptionsProcessor;
 
         public bool IsAuthenticating { get; set; }
@@ -29,12 +26,10 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public WebSocket WebSocket { get; private set; }
 
-        public MockHassServerRequestContext(MockHassDB hassDB, WebSocket webSocket)
-           : base()
+        public MockHassServerRequestContext(WebSocket webSocket)
         {
             this.IsAuthenticating = true;
             this.LastReceivedID = 0;
-            this.HassDB = hassDB;
             this.WebSocket = webSocket;
             this.receivingBuffer = new ArraySegment<byte>(new byte[INCOMING_BUFFER_SIZE]);
             this.EventSubscriptionsProcessor = new EventSubscriptionsProcessor();
@@ -42,20 +37,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             {
                 this.EventSubscriptionsProcessor,
                 new PingCommandProcessor(),
-                new GetConfigurationCommandProcessor(),
-                new EntitySourceCommandProcessor(),
-                new PanelsCommandProcessor(),
-                new RenderTemplateCommandProcessor(),
-                new SearchCommandProcessor(),
                 new CallServiceCommandProcessor(),
-                new GetServicesCommandProcessor(),
-                new GetStatesCommandProcessor(),
-                new RegistryEntryCollectionCommandProcessor<AreaRegistryMessagesFactory, Area>(),
-                new DeviceStorageCollectionCommandProcessor(),
-                new UserStorageCollectionCommandProcessor(),
-                new EntityRegistryStorageCollectionCommandProcessor(),
-                new StorageCollectionCommandProcessor<InputBoolean>(),
-                new StorageCollectionCommandProcessor<Zone>(),
             };
         }
 

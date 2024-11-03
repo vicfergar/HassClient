@@ -13,8 +13,6 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public class MockHassServerWebSocket : MockServerWebSocket
     {
-        private readonly MockHassDB hassDB = new MockHassDB();
-
         private MockHassServerRequestContext activeRequestContext;
 
         public CalVer HAVersion => CalVer.Create("2022.1.0");
@@ -71,7 +69,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         protected override async Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken cancellationToken)
         {
-            var context = new MockHassServerRequestContext(this.hassDB, webSocket);
+            var context = new MockHassServerRequestContext(webSocket);
 
             await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
 
