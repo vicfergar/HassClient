@@ -33,8 +33,8 @@ namespace HassClient.Models
         /// Initializes a new instance of the <see cref="ModifiableProperty{T}"/> class.
         /// </summary>
         /// <inheritdoc/>
-        public ModifiableProperty(string name)
-            : base(name)
+        public ModifiableProperty(string name, bool alwaysIncludeInUpdate = false)
+            : base(name, alwaysIncludeInUpdate)
         {
         }
 
@@ -42,8 +42,8 @@ namespace HassClient.Models
         /// Initializes a new instance of the <see cref="ModifiableProperty{T}"/> class.
         /// </summary>
         /// <inheritdoc/>
-        public ModifiableProperty(string name, Func<T, bool> validationFunc, string validationExceptionMessage = null)
-            : base(name, validationFunc, validationExceptionMessage)
+        public ModifiableProperty(string name, Func<T, bool> validationFunc, string validationExceptionMessage = null, bool alwaysIncludeInUpdate = false)
+            : base(name, validationFunc, validationExceptionMessage, alwaysIncludeInUpdate)
         {
         }
 
