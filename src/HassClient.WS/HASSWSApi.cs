@@ -766,6 +766,95 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Gets a collection with every registered <see cref="Label"/> in the Home Assistant instance.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <see cref="Label"/> in the Home Assistant instance.
+        /// </returns>
+        public Task<IEnumerable<Label>> GetLabelsAsync(CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateListMessage();
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Label>>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> with the new values.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// create operation was successfully done.
+        /// </returns>
+        public async Task<bool> CreateLabelAsync(Label label, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateCreateMessage(label);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(label);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Updates an existing <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateLabelAsync(Label label, bool forceUpdate = false, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateUpdateMessage(label, forceUpdate);
+
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(label);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Deletes an existing <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> to delete.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// delete operation was successfully done.
+        /// </returns>
+        public async Task<bool> DeleteLabelAsync(Label label, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateDeleteMessage(label);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                label.Untrack();
+            }
+
+            return success;
+        }
+
+        /// <summary>
         /// Gets a collection with every registered <see cref="Category"/> in the Home Assistant instance.
         /// </summary>
         /// <param name="scope">The scope of the categories to retrieve.</param>
