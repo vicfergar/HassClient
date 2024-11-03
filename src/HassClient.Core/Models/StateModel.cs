@@ -56,6 +56,24 @@ namespace HassClient.Models
         public DateTimeOffset LastUpdated { get; private set; }
 
         /// <summary>
+        /// Gets the UTC date and time that this state was last reported.
+        /// </summary>
+        [JsonProperty]
+        public DateTimeOffset LastReported { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the friendly name of the entity from its attributes.
+        /// </summary>
+        [JsonIgnore]
+        public string FriendlyName => this.GetAttributeValue<string>("friendly_name");
+
+        /// <summary>
+        /// Gets or sets the supported features flags from its attributes.
+        /// </summary>
+        [JsonIgnore]
+        public int? SupportedFeatures => this.GetAttributeValue<int?>("supported_features");
+
+        /// <summary>
         /// Attempts to get the value of the specified attribute by <paramref name="name"/>,
         /// and cast the value to type <typeparamref name="T" />.
         /// </summary>

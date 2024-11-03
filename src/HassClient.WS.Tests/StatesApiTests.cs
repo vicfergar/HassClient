@@ -1,5 +1,6 @@
 ﻿using HassClient.Models;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,31 +35,50 @@ namespace HassClient.WS.Tests
         [Test]
         public void GetStatesHasLastChanged()
         {
-            Assert.IsTrue(this.states.All(x => x.LastChanged != default));
+            Assert.IsTrue(this.states.All(x => x.LastChanged > DateTimeOffset.MinValue));
         }
 
         [Test]
         public void GetStatesHasLastUpdated()
         {
-            Assert.IsTrue(this.states.All(x => x.LastUpdated != default));
+            Assert.IsTrue(this.states.All(x => x.LastUpdated > DateTimeOffset.MinValue));
+        }
+
+        [Test]
+        public void GetStatesHasLastReported()
+        {
+            Assert.IsTrue(this.states.All(x => x.LastReported > DateTimeOffset.MinValue));
         }
 
         [Test]
         public void GetStatesHasState()
         {
-            Assert.IsTrue(this.states.All(x => x.State != default));
+            Assert.IsTrue(this.states.All(x => !string.IsNullOrEmpty(x.State)));
         }
 
         [Test]
         public void GetStatesHasEntityId()
         {
-            Assert.IsTrue(this.states.All(x => x.EntityId != default));
+            Assert.IsTrue(this.states.All(x => !string.IsNullOrEmpty(x.EntityId)));
         }
 
         [Test]
         public void GetStatesHasContext()
         {
-            Assert.IsTrue(this.states.All(x => x.Context != default));
+            Assert.IsTrue(this.states.All(x => x.Context != null));
+            Assert.IsTrue(this.states.All(x => !string.IsNullOrEmpty(x.Context.Id)));
+        }
+
+        [Test]
+        public void GetStatesHasFriendlyName()
+        {
+            Assert.IsTrue(this.states.Any(x => !string.IsNullOrEmpty(x.FriendlyName)));
+        }
+
+        [Test]
+        public void GetStatesHasSupportedFeatures()
+        {
+            Assert.IsTrue(this.states.Any(x => x.SupportedFeatures != null && x.SupportedFeatures > 0)); 
         }
     }
 }
