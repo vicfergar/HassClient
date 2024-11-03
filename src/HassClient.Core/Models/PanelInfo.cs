@@ -46,6 +46,12 @@ namespace HassClient.Models
         public bool RequireAdmin { get; private set; }
 
         /// <summary>
+        /// Gets the domain of the panel.
+        /// </summary>
+        [JsonProperty]
+        public string ConfigPanelDomain { get; private set; }
+
+        /// <summary>
         /// Deserializes the <see cref="Configuration"/> object with the specified type.
         /// </summary>
         /// <typeparam name="T">The type of the object to deserialize to.</typeparam>
