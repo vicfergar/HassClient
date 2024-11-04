@@ -16,7 +16,7 @@ namespace HassClient.WS
     /// </summary>
     public class HassWSApi
     {
-        private HassClientWebSocket hassClientWebSocket = new HassClientWebSocket();
+        private readonly HassClientWebSocket hassClientWebSocket = new HassClientWebSocket();
 
         /// <summary>
         /// Gets the current connection state of the web socket.
@@ -36,6 +36,11 @@ namespace HassClient.WS
         /// Gets the <see cref="StateChangedEventListener"/> instance of this client instance.
         /// </summary>
         public StateChangedEventListener StateChangedEventListener { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="HassClientWebSocket"/> instance of this client instance.
+        /// </summary>
+        public HassClientWebSocket WebSocket => this.hassClientWebSocket;
 
         /// <summary>
         /// Connects to a Home Assistant instance using the specified connection parameters.

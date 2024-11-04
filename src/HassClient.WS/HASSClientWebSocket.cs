@@ -755,7 +755,7 @@ namespace HassClient.WS
                     return false;
                 }
 
-                this.socketEventSubscriptionIdByEventType.Add(eventType, new SocketEventSubscription(subscribeMessage.Id));
+                this.socketEventSubscriptionIdByEventType.Add(eventType, new SocketEventSubscription(this, subscribeMessage.Id));
             }
 
             this.socketEventSubscriptionIdByEventType[eventType].AddSubscription(value);

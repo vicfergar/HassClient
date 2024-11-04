@@ -14,16 +14,16 @@ namespace HassClient.WS.Tests
         private MockHassServerWebSocket mockServer;
         private HassClientWebSocket wsClient;
         private CancellationTokenSource connectionCTS;
-        private MockEventSubscriber connectionChangedSubscriber;
+        private MockEventListener connectionChangedListener;
 
         [SetUp]
         public void SetUp()
         {
             this.mockServer = new MockHassServerWebSocket();
-            this.connectionChangedSubscriber = new MockEventSubscriber();
+            this.connectionChangedListener = new MockEventListener();
             this.connectionCTS = new CancellationTokenSource();
             this.wsClient = new HassClientWebSocket();
-            this.wsClient.ConnectionStateChanged += connectionChangedSubscriber.Handle;
+            this.wsClient.ConnectionStateChanged += this.connectionChangedListener.Handle;
         }
 
         private async Task StartMockServerAsync()
@@ -49,30 +49,33 @@ namespace HassClient.WS.Tests
         {
             await this.StartMockServerAndConnectClientAsync();
 
-            Assert.AreEqual(3, connectionChangedSubscriber.HitCount);
-            Assert.AreEqual(new[] { ConnectionStates.Connecting, ConnectionStates.Authenticating, ConnectionStates.Connected }, connectionChangedSubscriber.ReceivedEventArgs);
+            Assert.AreEqual(3, connectionChangedListener.HitCount);
+            Assert.AreEqual(new[] { ConnectionStates.Connecting, ConnectionStates.Authenticating, ConnectionStates.Connected }, connectionChangedListener.ReceivedEventArgs);
+            Assert.IsTrue(connectionChangedListener.ReceivedEvents.All(e => this.wsClient == e.Sender));
         }
 
         [Test]
         public async Task ConnectionStatusChangedRaisedWhenClosing()
         {
             await this.StartMockServerAndConnectClientAsync();
-            connectionChangedSubscriber.Reset();
+            connectionChangedListener.Reset();
             await this.wsClient.CloseAsync();
 
-            Assert.AreEqual(1, connectionChangedSubscriber.HitCount);
-            Assert.AreEqual(new[] { ConnectionStates.Disconnected }, connectionChangedSubscriber.ReceivedEventArgs);
+            Assert.AreEqual(1, connectionChangedListener.HitCount);
+            Assert.AreEqual(ConnectionStates.Disconnected, connectionChangedListener.ReceivedEventArgs.FirstOrDefault());
+            Assert.AreEqual(this.wsClient, connectionChangedListener.ReceivedEvents.FirstOrDefault().Sender);
         }
 
         [Test]
         public async Task ConnectionStatusChangedWithDisconnectedRaisedWhenServerCloses()
         {
             await this.StartMockServerAndConnectClientAsync();
-            connectionChangedSubscriber.Reset();
+            connectionChangedListener.Reset();
             await this.mockServer.CloseActiveClientsAsync();
 
-            Assert.GreaterOrEqual(connectionChangedSubscriber.HitCount, 1);
-            Assert.AreEqual(ConnectionStates.Disconnected, connectionChangedSubscriber.ReceivedEventArgs.FirstOrDefault());
+            Assert.GreaterOrEqual(connectionChangedListener.HitCount, 1);
+            Assert.AreEqual(ConnectionStates.Disconnected, connectionChangedListener.ReceivedEventArgs.FirstOrDefault());
+            Assert.AreEqual(this.wsClient, connectionChangedListener.ReceivedEvents.FirstOrDefault().Sender);
         }
 
         [Test]
@@ -98,7 +101,7 @@ namespace HassClient.WS.Tests
             await this.StartMockServerAsync();
 
             var connectTask = this.ConnectClientAsync();
-            await this.connectionChangedSubscriber.WaitEventArgWithTimeoutAsync(ConnectionStates.Authenticating, 1000);
+            await this.connectionChangedListener.WaitEventArgWithTimeoutAsync(ConnectionStates.Authenticating, 1000);
 
             Assert.AreEqual(ConnectionStates.Authenticating, this.wsClient.ConnectionState, "SetUp Failed");
 
@@ -217,7 +220,7 @@ namespace HassClient.WS.Tests
             this.mockServer.IgnoreAuthenticationMessages = true;
             var cancellationTokenSource = new CancellationTokenSource();
             cancellationTokenSource.Cancel();
-            var eventSubscriber = new MockEventSubscriber();
+            var eventSubscriber = new MockEventListener();
             var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, cancellationTokenSource.Token);
 
             Assert.Zero(this.wsClient.SubscriptionsCount);
@@ -231,7 +234,7 @@ namespace HassClient.WS.Tests
             await this.StartMockServerAndConnectClientAsync();
             this.mockServer.ResponseSimulatedDelay = TimeSpan.MaxValue;
             var cancellationTokenSource = new CancellationTokenSource();
-            var eventSubscriber = new MockEventSubscriber();
+            var eventSubscriber = new MockEventListener();
             var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, cancellationTokenSource.Token);
             Assert.NotZero(this.wsClient.PendingRequestsCount);
 
@@ -286,7 +289,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task AddedEventHandlerSubscriptionsAreRestoredAfterReconnection()
         {
-            var eventSubscriber = new MockEventSubscriber();
+            var eventSubscriber = new MockEventListener();
             await this.StartMockServerAndConnectClientAsync();
             var result = await this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, default);
             Assert.IsTrue(result, "SetUp failed");
@@ -296,7 +299,7 @@ namespace HassClient.WS.Tests
 
             var entityId = "test.mock";
             await this.mockServer.RaiseStateChangedEventAsync(entityId);
-            var eventResult = await eventSubscriber.WaitFirstEventArgWithTimeoutAsync<EventResultInfo>(500);
+            var eventResult = await eventSubscriber.WaitFirstEventWithTimeoutAsync<EventResultInfo>(500);
 
             Assert.AreEqual(1, eventSubscriber.HitCount);
             Assert.AreEqual(1, eventSubscriber.ReceivedEventArgs.Count());
