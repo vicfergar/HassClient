@@ -5,9 +5,9 @@ using System.Collections.Generic;
 namespace HassClient.Models
 {
     /// <summary>
-    /// Base class that defines a entity registry entry.
+    /// Base class that defines a entry with a name and an icon.
     /// </summary>
-    public abstract class EntityRegistryEntryBase : RegistryEntryBase
+    public abstract class NamedEntryBase : ModifiableModelBase
     {
         private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
 
@@ -18,12 +18,6 @@ namespace HassClient.Models
         /// <see langword="null"/> or whitespace. It is <see langword="false"/> by default.
         /// </summary>
         protected virtual bool AcceptsNullOrWhiteSpaceName => false;
-
-        /// <summary>
-        /// Gets the entity identifier of the entity.
-        /// </summary>
-        [JsonIgnore]
-        public abstract string EntityId { get; }
 
         /// <summary>
         /// Gets or sets the friendly name of this entity.
@@ -54,16 +48,16 @@ namespace HassClient.Models
         }
 
         [JsonConstructor]
-        private protected EntityRegistryEntryBase()
+        private protected NamedEntryBase()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityRegistryEntryBase"/> class.
+        /// Initializes a new instance of the <see cref="NamedEntryBase"/> class.
         /// </summary>
-        /// <param name="name">The entity name.</param>
-        /// <param name="icon">The entity icon.</param>
-        protected EntityRegistryEntryBase(string name, string icon)
+        /// <param name="name">The entry name.</param>
+        /// <param name="icon">The entry icon.</param>
+        protected NamedEntryBase(string name, string icon)
         {
             if (!this.AcceptsNullOrWhiteSpaceName &&
                 string.IsNullOrWhiteSpace(name))
@@ -93,8 +87,8 @@ namespace HassClient.Models
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is EntityRegistryEntryBase registryEntryBase &&
-                   this.UniqueId == registryEntryBase.UniqueId;
+            return obj is NamedEntryBase namedEntryBase &&
+                   this.UniqueId == namedEntryBase.UniqueId;
         }
 
         /// <inheritdoc />

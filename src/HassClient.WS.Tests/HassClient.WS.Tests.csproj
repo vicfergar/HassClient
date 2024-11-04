@@ -7,15 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Mocks\Data\GetServicesResponse.json" />
 	<Content Include="..\..\resources\tests\**\*">
 		<Link>resources\%(RecursiveDir)\%(Filename)%(Extension)</Link>
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	</Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Mocks\Data\GetServicesResponse.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,7 +19,7 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
-    <PackageReference Include="Testcontainers" Version="3.4.0" />
+    <PackageReference Include="Testcontainers" Version="3.10.0" />
   </ItemGroup>
 
   <ItemGroup>

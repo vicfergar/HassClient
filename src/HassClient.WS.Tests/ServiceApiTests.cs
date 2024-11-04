@@ -32,7 +32,7 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        public async Task CallServiceWithKnwonDomain()
+        public async Task CallServiceWithKnownDomain()
         {
             var result = await this.hassWSApi.CallServiceAsync(KnownDomains.Homeassistant, KnownServices.CheckConfig);
 
@@ -40,7 +40,7 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        public async Task CallServiceForEntitiesWithKnwonDomain()
+        public async Task CallServiceForEntitiesWithKnownDomain()
         {
             var result = await this.hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Homeassistant, KnownServices.UpdateEntity, "sun.sun");
 

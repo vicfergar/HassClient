@@ -20,7 +20,8 @@ namespace HassClient.WS.Messages
 
         public BaseOutgoingMessage CreateUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable, bool forceUpdate)
         {
-            var model = this.CreateDefaultUpdateObject(entity, forceUpdate);
+            var shouldForceUpdate = !entity.SupportsPartialUpdates || forceUpdate;
+            var model = this.CreateDefaultUpdateObject(entity, shouldForceUpdate);
 
             if (newEntityId != null)
             {
@@ -37,7 +38,7 @@ namespace HassClient.WS.Messages
             return this.CreateUpdateMessage(entity.EntityId, model);
         }
 
-        public new BaseOutgoingMessage CreateDeleteMessage(EntityRegistryEntry entity)
+        public BaseOutgoingMessage CreateDeleteMessage(EntityRegistryEntry entity)
         {
             return this.CreateCustomOperationMessage("remove", entity.EntityId);
         }

@@ -46,7 +46,7 @@ namespace HassClient.Core.Tests
             Assert.AreEqual(testVersion.ToString(), result.ToString());
         }
 
-        public void ReadJsonWithExisingValue()
+        public void ReadJsonWithExistingValue()
         {
             var existingVersion = CalVer.Create("2021.05.7b1");
 

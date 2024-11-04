@@ -8,7 +8,7 @@ namespace HassClient.Models
     /// <summary>
     /// Represents a Home Assistant user.
     /// </summary>
-    public class User : RegistryEntryBase
+    public class User : ModifiableModelBase
     {
         private readonly ModifiableProperty<string> name = new ModifiableProperty<string>(nameof(Name));
 
@@ -147,10 +147,7 @@ namespace HassClient.Models
             this.Name = name;
             if (groupIds != null)
             {
-                foreach (var item in groupIds)
-                {
-                    this.groupIds.Value.Add(item);
-                }
+                this.groupIds.AddRange(groupIds);
             }
         }
 

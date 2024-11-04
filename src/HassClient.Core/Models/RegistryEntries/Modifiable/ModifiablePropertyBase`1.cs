@@ -22,13 +22,20 @@ namespace HassClient.Models
         /// <inheritdoc />
         public abstract bool HasPendingChanges { get; }
 
+        /// <inheritdoc />
+        public bool AlwaysIncludeInUpdate { get; private set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ModifiablePropertyBase{T}"/> class.
         /// </summary>
         /// <param name="name">The property name.</param>
-        public ModifiablePropertyBase(string name)
+        /// <param name="alwaysIncludeInUpdate">
+        /// Indicates if the property should always be included in server updates, even when unchanged.
+        /// </param>
+        public ModifiablePropertyBase(string name, bool alwaysIncludeInUpdate = false)
         {
             this.Name = name;
+            this.AlwaysIncludeInUpdate = alwaysIncludeInUpdate;
         }
 
         /// <summary>
@@ -41,8 +48,11 @@ namespace HassClient.Models
         /// <param name="validationExceptionMessage">
         /// An error message used for the exception thew when validation fails.
         /// </param>
-        public ModifiablePropertyBase(string name, Func<T, bool> validationFunc, string validationExceptionMessage = null)
-            : this(name)
+        /// <param name="alwaysIncludeInUpdate">
+        /// Indicates if the property should always be included in server updates, even when unchanged.
+        /// </param>
+        public ModifiablePropertyBase(string name, Func<T, bool> validationFunc, string validationExceptionMessage = null, bool alwaysIncludeInUpdate = false)
+            : this(name, alwaysIncludeInUpdate)
         {
             this.validationFunc = validationFunc;
             this.validationExceptionMessage = validationExceptionMessage;

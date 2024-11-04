@@ -170,7 +170,7 @@ namespace HassClient.WS.Tests
         {
             this.wsClient.Dispose();
 
-            Assert.IsTrue(this.wsClient.IsDiposed);
+            Assert.IsTrue(this.wsClient.IsDisposed);
             Assert.ThrowsAsync<ObjectDisposedException>(() => this.StartMockServerAndConnectClientAsync());
         }
 
@@ -179,7 +179,7 @@ namespace HassClient.WS.Tests
         {
             this.wsClient.Dispose();
 
-            Assert.IsTrue(this.wsClient.IsDiposed);
+            Assert.IsTrue(this.wsClient.IsDisposed);
             Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.CloseAsync());
         }
 
@@ -188,7 +188,7 @@ namespace HassClient.WS.Tests
         {
             this.wsClient.Dispose();
 
-            Assert.IsTrue(this.wsClient.IsDiposed);
+            Assert.IsTrue(this.wsClient.IsDisposed);
             Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.SendCommandWithSuccessAsync(default, default));
         }
 
@@ -197,7 +197,7 @@ namespace HassClient.WS.Tests
         {
             this.wsClient.Dispose();
 
-            Assert.IsTrue(this.wsClient.IsDiposed);
+            Assert.IsTrue(this.wsClient.IsDisposed);
             Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.AddEventHandlerSubscriptionAsync(default, default));
         }
 
@@ -206,7 +206,7 @@ namespace HassClient.WS.Tests
         {
             this.wsClient.Dispose();
 
-            Assert.IsTrue(this.wsClient.IsDiposed);
+            Assert.IsTrue(this.wsClient.IsDisposed);
             Assert.ThrowsAsync<ObjectDisposedException>(() => this.wsClient.RemoveEventHandlerSubscriptionAsync(default, default));
         }
 

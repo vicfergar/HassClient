@@ -42,6 +42,18 @@ namespace HassClient.Models
             this.currentValues = new ObservableHashSet<T>(this.ValidateValue);
         }
 
+        /// <summary>
+        /// Adds a range of items to the collection.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
+        public void AddRange(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                this.currentValues.Add(item);
+            }
+        }
+
         /// <inheritdoc />
         public override void SaveChanges()
         {

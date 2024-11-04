@@ -1,5 +1,4 @@
-﻿using HassClient.Models;
-using HassClient.Serialization;
+﻿using HassClient.Serialization;
 using HassClient.WS.Messages;
 using System;
 using System.Collections.Generic;
@@ -14,13 +13,11 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public class MockHassServerRequestContext
     {
-        private const int INCONMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
+        private const int INCOMING_BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
 
         private readonly List<BaseCommandProcessor> commandProcessors;
 
         private readonly ArraySegment<byte> receivingBuffer;
-
-        public readonly MockHassDB HassDB;
 
         public readonly EventSubscriptionsProcessor EventSubscriptionsProcessor;
 
@@ -29,37 +26,22 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public WebSocket WebSocket { get; private set; }
 
-        public MockHassServerRequestContext(MockHassDB hassDB, WebSocket webSocket)
-           : base()
+        public MockHassServerRequestContext(WebSocket webSocket)
         {
             this.IsAuthenticating = true;
             this.LastReceivedID = 0;
-            this.HassDB = hassDB;
             this.WebSocket = webSocket;
-            this.receivingBuffer = new ArraySegment<byte>(new byte[INCONMING_BUFFER_SIZE]);
+            this.receivingBuffer = new ArraySegment<byte>(new byte[INCOMING_BUFFER_SIZE]);
             this.EventSubscriptionsProcessor = new EventSubscriptionsProcessor();
             this.commandProcessors = new List<BaseCommandProcessor>()
             {
                 this.EventSubscriptionsProcessor,
                 new PingCommandProcessor(),
-                new GetConfigurationCommandProcessor(),
-                new EntitySourceCommandProcessor(),
-                new PanelsCommandProcessor(),
-                new RenderTemplateCommandProcessor(),
-                new SearchCommandProcessor(),
                 new CallServiceCommandProcessor(),
-                new GetServicesCommandProcessor(),
-                new GetStatesCommandProcessor(),
-                new RegistryEntryCollectionCommandProcessor<AreaRegistryMessagesFactory, Area>(),
-                new DeviceStorageCollectionCommandProcessor(),
-                new UserStorageCollectionCommandProcessor(),
-                new EntityRegistryStorageCollectionCommandProcessor(),
-                new StorageCollectionCommandProcessor<InputBoolean>(),
-                new StorageCollectionCommandProcessor<Zone>(),
             };
         }
 
-        public bool TryProccesMessage(BaseIdentifiableMessage receivedCommand, out BaseIdentifiableMessage result)
+        public bool TryProcessMessage(BaseIdentifiableMessage receivedCommand, out BaseIdentifiableMessage result)
         {
             var processor = this.commandProcessors.FirstOrDefault(x => x.CanProcess(receivedCommand));
             if (processor == null)
@@ -69,7 +51,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                 return false;
             }
 
-            result = processor.ProccessCommand(this, receivedCommand);
+            result = processor.ProcessCommand(this, receivedCommand);
             return true;
         }
 

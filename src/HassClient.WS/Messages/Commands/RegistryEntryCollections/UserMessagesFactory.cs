@@ -22,7 +22,7 @@ namespace HassClient.WS.Messages
             return base.CreateUpdateMessage(user, forceUpdate);
         }
 
-        public new BaseOutgoingMessage CreateDeleteMessage(User user)
+        public BaseOutgoingMessage CreateDeleteMessage(User user)
         {
             return base.CreateDeleteMessage(user);
         }

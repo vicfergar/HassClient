@@ -33,9 +33,9 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Gets the <see cref="StateChagedEventListener"/> instance of this client instance.
+        /// Gets the <see cref="StateChangedEventListener"/> instance of this client instance.
         /// </summary>
-        public StateChangedEventListener StateChagedEventListener { get; private set; }
+        public StateChangedEventListener StateChangedEventListener { get; private set; }
 
         /// <summary>
         /// Connects to a Home Assistant instance using the specified connection parameters.
@@ -63,8 +63,8 @@ namespace HassClient.WS
         {
             await this.hassClientWebSocket.ConnectAsync(connectionParameters, retries, cancellationToken);
 
-            this.StateChagedEventListener = new StateChangedEventListener();
-            this.StateChagedEventListener.Initialize(this.hassClientWebSocket);
+            this.StateChangedEventListener = new StateChangedEventListener();
+            this.StateChangedEventListener.Initialize(this.hassClientWebSocket);
         }
 
         /// <summary>
@@ -445,53 +445,18 @@ namespace HassClient.WS
         }
 
         /// <summary>
-        /// Gets the <see cref="EntitySource"/> of a specified entity.
-        /// </summary>
-        /// <param name="entityId">The entity id.</param>
-        /// <param name="cancellationToken">
-        /// A cancellation token used to propagate notification that this operation should be canceled.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is the <see cref="EntitySource"/>.
-        /// </returns>
-        public async Task<EntitySource> GetEntitySourceAsync(string entityId, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrEmpty(entityId))
-            {
-                throw new ArgumentNullException(nameof(entityId));
-            }
-
-            var result = await this.GetEntitySourcesAsync(cancellationToken, entityId);
-            return result.FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Gets a collection with the <see cref="EntitySource"/> of the specified entities.
-        /// </summary>
-        /// <param name="entityIds">The entities ids.</param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result of the task is a collection of
-        /// <see cref="EntitySource"/> of the specified entities.
-        /// </returns>
-        public Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(params string[] entityIds)
-        {
-            return this.GetEntitySourcesAsync(CancellationToken.None, entityIds);
-        }
-
-        /// <summary>
         /// Gets a collection with the <see cref="EntitySource"/> of the specified entities.
         /// </summary>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
         /// </param>
-        /// <param name="entityIds">The entities ids.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The result of the task is a collection of
         /// <see cref="EntitySource"/> of the specified entities.
         /// </returns>
-        public async Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(CancellationToken cancellationToken, params string[] entityIds)
+        public async Task<IEnumerable<EntitySource>> GetEntitySourcesAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = new EntitySourceMessage { EntityIds = entityIds.Length > 0 ? entityIds : null };
+            var commandMessage = new EntitySourceMessage();
             var dict = await this.hassClientWebSocket.SendCommandWithResultAsync<Dictionary<string, EntitySource>>(commandMessage, cancellationToken);
             return dict?.Select(x =>
                 {
@@ -571,7 +536,8 @@ namespace HassClient.WS
         /// <param name="newEntityId">If not <see langword="null"/>, it will update the current entity id.</param>
         /// <param name="disable">If not <see langword="null"/>, it will enable or disable the entity.</param>
         /// <param name="forceUpdate">
-        /// Indicates if the update operation should force the update of every modifiable property.
+        /// Indicates if the update operation should force the update of every modifiable property. If the entity
+        /// does not support partial updates, this parameter is ignored.
         /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.
@@ -705,6 +671,274 @@ namespace HassClient.WS
             if (success)
             {
                 area.Untrack();
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        /// Gets a collection with every registered <see cref="Floor"/> in the Home Assistant instance.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <see cref="Floor"/> in the Home Assistant instance.
+        /// </returns>
+        public Task<IEnumerable<Floor>> GetFloorsAsync(CancellationToken cancellationToken = default)
+        {
+            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateListMessage();
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Floor>>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Floor"/>.
+        /// </summary>
+        /// <param name="floor">The <see cref="Floor"/> with the new values.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// create operation was successfully done.
+        /// </returns>
+        public async Task<bool> CreateFloorAsync(Floor floor, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateCreateMessage(floor);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(floor);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Updates an existing <see cref="Floor"/>.
+        /// </summary>
+        /// <param name="floor">The <see cref="Floor"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateFloorAsync(Floor floor, bool forceUpdate = false, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateUpdateMessage(floor, forceUpdate);
+
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(floor);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Deletes an existing <see cref="Floor"/>.
+        /// </summary>
+        /// <param name="floor">The <see cref="Floor"/> to delete.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// delete operation was successfully done.
+        /// </returns>
+        public async Task<bool> DeleteFloorAsync(Floor floor, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateDeleteMessage(floor);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                floor.Untrack();
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        /// Gets a collection with every registered <see cref="Label"/> in the Home Assistant instance.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <see cref="Label"/> in the Home Assistant instance.
+        /// </returns>
+        public Task<IEnumerable<Label>> GetLabelsAsync(CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateListMessage();
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Label>>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> with the new values.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// create operation was successfully done.
+        /// </returns>
+        public async Task<bool> CreateLabelAsync(Label label, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateCreateMessage(label);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(label);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Updates an existing <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateLabelAsync(Label label, bool forceUpdate = false, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateUpdateMessage(label, forceUpdate);
+
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(label);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Deletes an existing <see cref="Label"/>.
+        /// </summary>
+        /// <param name="label">The <see cref="Label"/> to delete.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// delete operation was successfully done.
+        /// </returns>
+        public async Task<bool> DeleteLabelAsync(Label label, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = LabelRegistryMessagesFactory.Instance.CreateDeleteMessage(label);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                label.Untrack();
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        /// Gets a collection with every registered <see cref="Category"/> in the Home Assistant instance.
+        /// </summary>
+        /// <param name="scope">The scope of the categories to retrieve.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a collection with
+        /// every registered <see cref="Category"/> in the Home Assistant instance.
+        /// </returns>
+        public Task<IEnumerable<Category>> GetCategoriesAsync(string scope, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateListMessage(scope);
+            return this.hassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Category>>(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Category"/>.
+        /// </summary>
+        /// <param name="category">The <see cref="Category"/> with the new values.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// create operation was successfully done.
+        /// </returns>
+        public async Task<bool> CreateCategoryAsync(Category category, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateCreateMessage(category);
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(category);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Updates an existing <see cref="Category"/>.
+        /// </summary>
+        /// <param name="category">The <see cref="Category"/> with the new values.</param>
+        /// <param name="forceUpdate">
+        /// Indicates if the update operation should force the update of every modifiable property.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// update operation was successfully done.
+        /// </returns>
+        public async Task<bool> UpdateCategoryAsync(Category category, bool forceUpdate = false, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateUpdateMessage(category, forceUpdate);
+
+            var result = await this.hassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
+            if (result.Success)
+            {
+                result.PopulateResult(category);
+            }
+
+            return result.Success;
+        }
+
+        /// <summary>
+        /// Deletes an existing <see cref="Category"/>.
+        /// </summary>
+        /// <param name="category">The <see cref="Category"/> to delete.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
+        /// delete operation was successfully done.
+        /// </returns>
+        public async Task<bool> DeleteCategoryAsync(Category category, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateDeleteMessage(category);
+            var success = await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+            if (success)
+            {
+                category.Untrack();
             }
 
             return success;
@@ -912,7 +1146,8 @@ namespace HassClient.WS
         /// <typeparam name="TStorageEntity">The storage entity registry entry type.</typeparam>
         /// <param name="storageEntity">The storage entity registry entry with the updated values.</param>
         /// <param name="forceUpdate">
-        /// Indicates if the update operation should force the update of every modifiable property.
+        /// Indicates if the update operation should force the update of every modifiable property. If the entity
+        /// does not support partial updates, this parameter is ignored.
         /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token used to propagate notification that this operation should be canceled.

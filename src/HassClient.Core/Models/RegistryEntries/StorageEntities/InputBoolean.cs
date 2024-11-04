@@ -12,6 +12,9 @@ namespace HassClient.Models
     {
         private readonly ModifiableProperty<bool> initial = new ModifiableProperty<bool>(nameof(Initial));
 
+        /// <inheritdoc />
+        public override bool SupportsPartialUpdates => false;
+
         /// <summary>
         /// Gets or sets the initial value when Home Assistant starts.
         /// </summary>
@@ -51,7 +54,8 @@ namespace HassClient.Models
         /// <inheritdoc />
         protected override IEnumerable<IModifiableProperty> GetModifiableProperties()
         {
-            return base.GetModifiableProperties().Append(this.initial);
+            return base.GetModifiableProperties()
+                       .Append(this.initial);
         }
 
         /// <inheritdoc />

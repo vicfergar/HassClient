@@ -16,6 +16,12 @@
         bool HasPendingChanges { get; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this property should always be included
+        /// in server updates, even when unchanged.
+        /// </summary>
+        bool AlwaysIncludeInUpdate { get; }
+
+        /// <summary>
         /// Save pending change and clears the <see cref="HasPendingChanges"/> flag.
         /// </summary>
         void SaveChanges();

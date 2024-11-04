@@ -52,19 +52,19 @@ namespace HassClient.WS.Tests
         [Test]
         public void GetPanelsHasComponentName()
         {
-            Assert.IsTrue(this.panels.All(x => x.ComponentName != default));
+            Assert.IsTrue(this.panels.All(x => !string.IsNullOrEmpty(x.ComponentName)));
         }
 
         [Test]
         public void GetPanelsHasConfiguration()
         {
-            Assert.IsTrue(this.panels.All(x => x.Configuration != default));
+            Assert.IsTrue(this.panels.All(x => x.Configuration != null));
         }
 
         [Test]
         public void GetPanelsHasIcon()
         {
-            Assert.IsTrue(this.panels.Any(x => x.Icon != default));
+            Assert.IsTrue(this.panels.Any(x =>!string.IsNullOrEmpty(x.Icon)));
         }
 
         [Test]
@@ -76,13 +76,13 @@ namespace HassClient.WS.Tests
         [Test]
         public void GetPanelsHasTitle()
         {
-            Assert.IsTrue(this.panels.Any(x => x.Title != default));
+            Assert.IsTrue(this.panels.Any(x => !string.IsNullOrEmpty(x.Title)));
         }
 
         [Test]
         public void GetPanelsHasUrlPath()
         {
-            Assert.IsTrue(this.panels.All(x => x.UrlPath != default));
+            Assert.IsTrue(this.panels.All(x => !string.IsNullOrEmpty(x.UrlPath)));
         }
     }
 }

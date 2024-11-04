@@ -60,14 +60,16 @@ namespace HassClient.WS.Messages
         /// </summary>
         /// <param name="entry">The storage collection entry.</param>
         /// <param name="forceUpdate">
-        /// Indicates if the update message force the update of every modifiable property.
+        /// Indicates if the update message force the update of every modifiable property. If the entity does not
+        /// support partial updates, this parameter is ignored.
         /// </param>
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used update an existing registry entry in the storage collection.
         /// </returns>
         public new BaseOutgoingMessage CreateUpdateMessage(TStorageEntity entry, bool forceUpdate)
         {
-            return base.CreateUpdateMessage(entry, forceUpdate);
+            var shouldForceUpdate = !entry.SupportsPartialUpdates || forceUpdate;
+            return base.CreateUpdateMessage(entry, shouldForceUpdate);
         }
 
         /// <summary>
@@ -77,7 +79,7 @@ namespace HassClient.WS.Messages
         /// <returns>
         /// A <see cref="BaseOutgoingMessage"/> used delete an existing registry entry from the storage collection.
         /// </returns>
-        public new BaseOutgoingMessage CreateDeleteMessage(TStorageEntity entry)
+        public BaseOutgoingMessage CreateDeleteMessage(TStorageEntity entry)
         {
             return base.CreateDeleteMessage(entry);
         }

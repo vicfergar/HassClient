@@ -69,7 +69,7 @@ namespace HassClient.Core.Tests
             Assert.AreEqual(color.ToString(), result.ToString());
         }
 
-        public static IEnumerable<TestCaseData> ReadJsonWithExisingValueTestCases()
+        public static IEnumerable<TestCaseData> ReadJsonWithExistingValueTestCases()
         {
             var createData = (Color existing, Color color) => new TestCaseData(existing, color).SetName($"{{m}}{color.GetType().Name}");
 
@@ -84,8 +84,8 @@ namespace HassClient.Core.Tests
         }
 
         [Test]
-        [TestCaseSource(nameof(ReadJsonWithExisingValueTestCases))]
-        public void ReadJsonWithExisingValue(Color existing, Color color)
+        [TestCaseSource(nameof(ReadJsonWithExistingValueTestCases))]
+        public void ReadJsonWithExistingValue(Color existing, Color color)
         {
             var textReader = new StringReader(GetJsonRepresentation(color));
             var jsonReader = new JsonTextReader(textReader);

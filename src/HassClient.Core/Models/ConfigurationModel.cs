@@ -105,6 +105,12 @@ namespace HassClient.Models
         public bool SafeMode { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether Home Assistant is running in recovery mode.
+        /// </summary>
+        [JsonProperty]
+        public bool RecoveryMode { get; private set; }
+
+        /// <summary>
         /// Gets the current state of Home Assistant (usually "RUNNING").
         /// </summary>
         [JsonProperty]
@@ -125,7 +131,32 @@ namespace HassClient.Models
         /// <summary>
         /// Gets the currency code according to ISO 4217 (column "Code" from <see href="https://en.wikipedia.org/wiki/ISO_4217#Active_codes"/>).
         /// </summary>
+        [JsonProperty]
         public string Currency { get; private set; }
+
+        /// <summary>
+        /// Gets the country code according to ISO 3166-1 alpha-2.
+        /// </summary>
+        [JsonProperty]
+        public string Country { get; private set; }
+
+        /// <summary>
+        /// Gets the language code according to ISO 639-1.
+        /// </summary>
+        [JsonProperty]
+        public string Language { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether debug mode is enabled.
+        /// </summary>
+        [JsonProperty]
+        public bool Debug { get; private set; }
+
+        /// <summary>
+        /// Gets the radius of the home zone in meters.
+        /// </summary>
+        [JsonProperty]
+        public int Radius { get; private set; }
 
         /// <inheritdoc />
         public override string ToString() => this.LocationName;

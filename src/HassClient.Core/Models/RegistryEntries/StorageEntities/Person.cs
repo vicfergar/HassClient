@@ -21,8 +21,6 @@ namespace HassClient.Models
                 v => v.IsValidDomainEntityId(KnownDomains.DeviceTracker));
 
         private readonly ModifiableProperty<string> picture = new ModifiableProperty<string>(nameof(Picture));
-        //// "device_trackers":["device_tracker.demo_anne_therese","device_tracker.demo_paulus"],
-        //// "picture":"/api/image/serve/f986543a0ea7b88ebffcd1213aeffb32/512x512"}
 
         /// <summary>
         /// Gets a value indicating whether the <see cref="Person"/> entry is defined within the storage

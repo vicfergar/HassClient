@@ -8,7 +8,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
     {
         public abstract bool CanProcess(BaseIdentifiableMessage receivedCommand);
 
-        public abstract BaseIdentifiableMessage ProccessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand);
+        public abstract BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand);
 
         protected BaseIdentifiableMessage CreateResultMessageWithError(ErrorInfo errorInfo) => new ResultMessage() { Error = errorInfo };
 
@@ -17,8 +17,8 @@ namespace HassClient.WS.Tests.Mocks.HassServer
         protected Stream GetResourceStream(string filename)
         {
             var assembly = typeof(BaseCommandProcessor).Assembly;
-            var assemblyNamepace = Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name);
-            return assembly.GetManifestResourceStream($"{assemblyNamepace}.Mocks.Data.{filename}");
+            var assemblyNamespace = Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name);
+            return assembly.GetManifestResourceStream($"{assemblyNamespace}.Mocks.Data.{filename}");
         }
     }
 }

@@ -1,0 +1,46 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Aliasable",
+    "automations",
+    "Codeowners",
+    "Esphome",
+    "Filesize",
+    "Hass",
+    "Hassio",
+    "homeassistant",
+    "Hvac",
+    "Instantiator",
+    "Labelable",
+    "livingroom",
+    "Miio",
+    "mireds",
+    "Nabu",
+    "Newtonsoft",
+    "Parallelizable",
+    "partlycloudy",
+    "paulus",
+    "RGBW",
+    "RGBWW",
+    "RSSI",
+    "Speedtestdotnet",
+    "Testcontainers",
+    "Webos",
+    "zigbee"
+  ],
+  "ignorePaths": [
+    "bin",
+    "obj",
+    "**/*.csproj",
+    "**/*.sln",
+    "**/*.user",
+    "**/*.vsix",
+    "**/*.nupkg",
+    "**/*.dll",
+    "**/*.exe"
+  ],
+  "files": [
+    "src/**/*"
+  ]
+}

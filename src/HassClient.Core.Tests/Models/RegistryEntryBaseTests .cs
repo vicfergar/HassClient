@@ -6,12 +6,12 @@ using System.Collections.Generic;
 
 namespace HassClient.Core.Tests
 {
-    [TestFixture(TestOf = typeof(EntityRegistryEntryBase))]
-    public class RegistryEntryBaseTests
+    [TestFixture(TestOf = typeof(NamedEntryBase))]
+    public class NamedEntryBaseTests
     {
-        private class TestRegistryEntry : EntityRegistryEntryBase
+        private class TestRegistryEntry : NamedEntryBase, IEntityEntry
         {
-            public override string EntityId => MockHelpers.GetRandomEntityId(KnownDomains.Camera);
+            public string EntityId => MockHelpers.GetRandomEntityId(KnownDomains.Camera);
 
             internal protected override string UniqueId { get; set; }
 
