@@ -57,7 +57,6 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        [Retry(3)]
         public void ConfigurationHasLocation()
         {
             Assert.NotNull(this.configuration.LocationName);
@@ -67,7 +66,6 @@ namespace HassClient.WS.Tests
         }
 
         [Test]
-        [Retry(3)]
         public void ConfigurationHasState()
         {
             Assert.AreEqual("RUNNING", this.configuration.State);
