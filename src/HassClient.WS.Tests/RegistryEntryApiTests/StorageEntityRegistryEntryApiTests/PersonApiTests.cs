@@ -18,11 +18,11 @@ namespace HassClient.WS.Tests
             if (this.testPerson == null)
             {
                 var testUser = new User(MockHelpers.GetRandomTestName(), false);
-                var result = await this.hassWSApi.CreateUserAsync(testUser);
+                var result = await this.hassWSApi.Users.CreateAsync(testUser);
                 Assert.IsTrue(result, "SetUp failed");
 
                 this.testPerson = new Person(testUser.Name, testUser);
-                result = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(this.testPerson);
+                result = await this.hassWSApi.StorageEntities.CreateAsync(this.testPerson);
                 Assert.IsTrue(result, "SetUp failed");
                 return;
             }
@@ -37,7 +37,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetPersons()
         {
-            var result = await this.hassWSApi.GetStorageEntityRegistryEntriesAsync<Person>();
+            var result = await this.hassWSApi.StorageEntities.ListAsync<Person>();
 
             Assert.NotNull(result);
             Assert.IsNotEmpty(result);
@@ -53,7 +53,7 @@ namespace HassClient.WS.Tests
         public async Task UpdatePersonName()
         {
             this.testPerson.Name = $"{nameof(PersonApiTests)}_{DateTime.Now.Ticks}";
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testPerson);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testPerson);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testPerson.HasPendingChanges);
@@ -63,7 +63,7 @@ namespace HassClient.WS.Tests
         public async Task UpdatePersonPicture()
         {
             this.testPerson.Picture = "test/Picture.png";
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testPerson);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testPerson);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testPerson.HasPendingChanges);
@@ -73,7 +73,7 @@ namespace HassClient.WS.Tests
         public async Task UpdatePersonDeviceTrackers()
         {
             this.testPerson.DeviceTrackers.Add($"device_tracker.{MockHelpers.GetRandomTestName()}");
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testPerson);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testPerson);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testPerson.HasPendingChanges);
@@ -83,11 +83,11 @@ namespace HassClient.WS.Tests
         public async Task UpdatePersonUserId()
         {
             var testUser = new User(MockHelpers.GetRandomTestName(), false);
-            var result = await this.hassWSApi.CreateUserAsync(testUser);
+            var result = await this.hassWSApi.Users.CreateAsync(testUser);
             Assert.IsTrue(result, "SetUp failed");
 
             this.testPerson.ChangeUser(testUser);
-            result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testPerson);
+            result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testPerson);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testPerson.HasPendingChanges);
@@ -99,11 +99,11 @@ namespace HassClient.WS.Tests
             var initialName = this.testPerson.Name;
             var clonedEntry = this.testPerson.Clone();
             clonedEntry.Name = $"{initialName}_cloned";
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(clonedEntry);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(clonedEntry);
             Assert.IsTrue(result, "SetUp failed");
             Assert.False(this.testPerson.HasPendingChanges, "SetUp failed");
 
-            result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testPerson, forceUpdate: true);
+            result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testPerson, forceUpdate: true);
             Assert.IsTrue(result);
             Assert.AreEqual(initialName, this.testPerson.Name);
             Assert.IsFalse(this.testPerson.HasPendingChanges);
@@ -118,7 +118,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteStorageEntityRegistryEntryAsync(this.testPerson);
+            var result = await this.hassWSApi.StorageEntities.DeleteAsync(this.testPerson);
             var deletedPerson = this.testPerson;
             this.testPerson = null;
 

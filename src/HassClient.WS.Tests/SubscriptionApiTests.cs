@@ -16,7 +16,7 @@ namespace HassClient.WS.Tests
         private async Task<EventData<StateChangedEvent>> ForceStateChangedAndGetEventData(MockEventListener listener)
         {
             var domain = testEntityId.GetDomain();
-            var update = await this.hassWSApi.CallServiceForEntitiesAsync(domain, "toggle", testEntityId);
+            var update = await this.hassWSApi.Services.CallForEntitiesAsync(domain, "toggle", testEntityId);
             Assert.NotNull(update, "SetUp failed");
 
             var eventData = await listener.WaitFirstEventWithTimeoutAsync<EventResultInfo>(

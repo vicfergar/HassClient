@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests
             if (this.testArea == null)
             {
                 this.testArea = new Area(MockHelpers.GetRandomTestName(), icon: "mdi:home", aliases: new[] { "alias1", "alias2" }, labels: new[] { "label1", "label2" });
-                var result = await this.hassWSApi.CreateAreaAsync(testArea);
+                var result = await this.hassWSApi.Areas.CreateAsync(testArea);
                 Assert.IsTrue(result, "SetUp failed");
                 return;
             }
@@ -32,7 +32,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetAreas()
         {
-            var areas = await this.hassWSApi.GetAreasAsync();
+            var areas = await this.hassWSApi.Areas.ListAsync();
 
             Assert.NotNull(areas);
             Assert.IsNotEmpty(areas);
@@ -53,7 +53,7 @@ namespace HassClient.WS.Tests
             this.testArea.Aliases.Add("alias3");
             this.testArea.Labels.Add("label3");
             var originalModificationDate = this.testArea.ModifiedAt;
-            var result = await this.hassWSApi.UpdateAreaAsync(this.testArea);
+            var result = await this.hassWSApi.Areas.UpdateAsync(this.testArea);
 
             Assert.IsTrue(result);
             Assert.False(this.testArea.HasPendingChanges);
@@ -69,7 +69,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteAreaAsync(this.testArea);
+            var result = await this.hassWSApi.Areas.DeleteAsync(this.testArea);
             var deletedArea = this.testArea;
             this.testArea = null;
 

@@ -20,7 +20,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            this.states = await this.hassWSApi.GetStatesAsync();
+            this.states = await this.hassWSApi.ListStatesAsync();
 
             Assert.IsNotNull(this.states);
             Assert.IsNotEmpty(this.states);

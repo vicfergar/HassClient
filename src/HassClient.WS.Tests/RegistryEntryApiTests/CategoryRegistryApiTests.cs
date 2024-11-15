@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests
             if (this.testCategory == null)
             {
                 this.testCategory = new Category(MockHelpers.GetRandomTestName(), icon: "mdi:lamp", scope:  "test_scope");
-                var result = await this.hassWSApi.CreateCategoryAsync(this.testCategory);
+                var result = await this.hassWSApi.Categories.CreateAsync(this.testCategory);
                 Assert.IsTrue(result, "SetUp failed");
                 return;
             }
@@ -33,7 +33,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetCategories()
         {
-            var categories = await this.hassWSApi.GetCategoriesAsync("test_scope");
+            var categories = await this.hassWSApi.Categories.ListAsync("test_scope");
 
             Assert.NotNull(categories);
             Assert.IsNotEmpty(categories);
@@ -46,7 +46,7 @@ namespace HassClient.WS.Tests
             this.testCategory.Name = MockHelpers.GetRandomTestName();
             this.testCategory.Icon = "mdi:sofa";
             var originalModificationDate = this.testCategory.ModifiedAt;
-            var result = await this.hassWSApi.UpdateCategoryAsync(this.testCategory);
+            var result = await this.hassWSApi.Categories.UpdateAsync(this.testCategory);
 
             Assert.IsTrue(result);
             Assert.False(this.testCategory.HasPendingChanges);
@@ -62,7 +62,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteCategoryAsync(this.testCategory);
+            var result = await this.hassWSApi.Categories.DeleteAsync(this.testCategory);
             var deletedCategory = this.testCategory;
             this.testCategory = null;
 
