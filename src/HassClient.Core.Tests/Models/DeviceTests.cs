@@ -1,4 +1,5 @@
 ﻿using HassClient.Models;
+using HassClient.Serialization;
 using NUnit.Framework;
 using System.Linq;
 
@@ -69,6 +70,54 @@ namespace HassClient.Core.Tests
 
             testEntry.Name = null;
             Assert.AreEqual(testEntry.OriginalName, testEntry.Name);
+        }
+
+        [Test]
+        public void IdentifiersDeserializesRepeatedKeysCorrectly()
+        {
+            // Arrange
+            var json = @"{
+                ""identifiers"": [[""zwave_js"", ""3636836764-1-0:4:4""], [""zwave_js"", ""3636836764-1""]],
+                ""name"": ""Test Device"",
+                ""area_id"": ""test_area"",
+                ""disabled_by"": ""integration""
+            }";
+
+            // Act
+            var device = HassSerializer.DeserializeObject<Device>(json);
+
+            // Assert
+            Assert.That(device.Identifiers, Has.Count.EqualTo(1));
+            Assert.IsTrue(device.Identifiers.TryGetValue("zwave_js", out var identifiers));
+            Assert.That(identifiers, Is.EquivalentTo(new[]
+            {
+                "3636836764-1-0:4:4",
+                "3636836764-1"
+            }));
+        }
+
+        [Test]
+        public void ConnectionsDeserializesRepeatedKeysCorrectly()
+        {
+            // Arrange
+            var json = @"{
+                ""connections"": [[""mac"", ""00:11:22:33:44:55""], [""mac"", ""66:77:88:99:AA:BB""]],
+                ""name"": ""Test Device"",
+                ""area_id"": ""test_area"",
+                ""disabled_by"": ""integration""
+            }";
+
+            // Act
+            var device = HassSerializer.DeserializeObject<Device>(json);
+
+            // Assert
+            Assert.That(device.Connections, Has.Count.EqualTo(1));
+            Assert.IsTrue(device.Connections.TryGetValue("mac", out var connections));
+            Assert.That(connections, Is.EquivalentTo(new[]
+            {
+                "00:11:22:33:44:55",
+                "66:77:88:99:AA:BB"
+            }));
         }
 
         private Device CreateTestEntry(out string entityId, out string name, out string areaId, out DisabledByEnum disabledBy)
