@@ -83,14 +83,14 @@ namespace HassClient.Models
         /// Connection types are defined in the device registry module.
         /// </summary>
         [JsonProperty]
-        public Dictionary<string, string> Connections { get; private set; }
+        public IReadOnlyDictionary<string, string[]> Connections { get; private set; }
 
         /// <summary>
         /// Gets a set of identifiers. They identify the device in the outside world.
         /// An example is a serial number.
         /// </summary>
         [JsonProperty]
-        public Dictionary<string, string> Identifiers { get; private set; }
+        public IReadOnlyDictionary<string, string[]> Identifiers { get; private set; }
 
         /// <summary>
         /// Gets the manufacturer of the device.

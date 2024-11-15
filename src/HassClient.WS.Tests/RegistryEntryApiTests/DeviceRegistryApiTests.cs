@@ -19,9 +19,14 @@ namespace HassClient.WS.Tests
             Assert.IsTrue(devices.All(d => d.Id != null));
             Assert.IsTrue(devices.Any(d => d.Name != null));
             Assert.IsTrue(devices.All(d => d.OriginalName != null));            
-            Assert.IsTrue(devices.Any(d => d.EntryType == DeviceEntryTypes.Service));
+            Assert.IsTrue(devices.All(d => d.ConfigurationEntries != null));
+            Assert.IsTrue(devices.All(d => d.ConfigurationEntries.Any()));
             Assert.IsTrue(devices.All(d => d.Connections != null));
+            Assert.IsTrue(devices.All(d => d.Identifiers != null));
+            Assert.IsTrue(devices.All(d => d.Identifiers.Any()));
+            Assert.IsTrue(devices.Any(d => d.EntryType == DeviceEntryTypes.Service));
             Assert.IsTrue(devices.All(d => d.Labels != null));
+            Assert.IsTrue(devices.All(d => d.PrimaryConfigEntry != null));
         }
 
         [Test]
