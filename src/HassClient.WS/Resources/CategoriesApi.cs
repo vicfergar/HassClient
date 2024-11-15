@@ -29,7 +29,7 @@ namespace HassClient.WS
         /// </returns>
         public Task<IEnumerable<Category>> ListAsync(string scope, CancellationToken cancellationToken = default)
         {
-            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateListMessage(scope);
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.BuildListMessage(scope);
             return this.HassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Category>>(commandMessage, cancellationToken);
         }
 
@@ -46,7 +46,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> CreateAsync(Category category, CancellationToken cancellationToken = default)
         {
-            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateCreateMessage(category);
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.BuildCreateMessage(category);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -72,7 +72,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> UpdateAsync(Category category, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateUpdateMessage(category, forceUpdate);
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.BuildUpdateMessage(category, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -95,7 +95,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> DeleteAsync(Category category, CancellationToken cancellationToken = default)
         {
-            var commandMessage = CategoryRegistryMessagesFactory.Instance.CreateDeleteMessage(category);
+            var commandMessage = CategoryRegistryMessagesFactory.Instance.BuildDeleteMessage(category);
             var success = await this.HassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
             if (success)
             {

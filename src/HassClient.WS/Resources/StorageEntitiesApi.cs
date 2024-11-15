@@ -32,7 +32,7 @@ namespace HassClient.WS
         public async Task<IEnumerable<TStorageEntity>> ListAsync<TStorageEntity>(CancellationToken cancellationToken = default)
             where TStorageEntity : StorageEntityRegistryEntryBase
         {
-            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateListMessage();
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().BuildListMessage();
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -70,7 +70,7 @@ namespace HassClient.WS
         public async Task<bool> CreateAsync<TStorageEntity>(TStorageEntity storageEntity, CancellationToken cancellationToken = default)
             where TStorageEntity : StorageEntityRegistryEntryBase
         {
-            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateCreateMessage(storageEntity);
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().BuildCreateMessage(storageEntity);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -99,7 +99,7 @@ namespace HassClient.WS
         public async Task<bool> UpdateAsync<TStorageEntity>(TStorageEntity storageEntity, bool forceUpdate = false, CancellationToken cancellationToken = default)
             where TStorageEntity : StorageEntityRegistryEntryBase
         {
-            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateUpdateMessage(storageEntity, forceUpdate);
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().BuildUpdateMessage(storageEntity, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -124,7 +124,7 @@ namespace HassClient.WS
         public async Task<bool> DeleteAsync<TStorageEntity>(TStorageEntity storageEntity, CancellationToken cancellationToken = default)
             where TStorageEntity : StorageEntityRegistryEntryBase
         {
-            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().CreateDeleteMessage(storageEntity);
+            var commandMessage = StorageCollectionMessagesFactory<TStorageEntity>.Create().BuildDeleteMessage(storageEntity);
             var success = await this.HassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
             if (success)
             {

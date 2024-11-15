@@ -29,7 +29,7 @@ namespace HassClient.WS
         /// </returns>
         public Task<IEnumerable<User>> ListAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = UserMessagesFactory.Instance.CreateListMessage();
+            var commandMessage = UserMessagesFactory.Instance.BuildListMessage();
             return this.HassClientWebSocket.SendCommandWithResultAsync<IEnumerable<User>>(commandMessage, cancellationToken);
         }
 
@@ -46,7 +46,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
-            var commandMessage = UserMessagesFactory.Instance.CreateCreateMessage(user);
+            var commandMessage = UserMessagesFactory.Instance.BuildCreateMessage(user);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync<UserResponse>(commandMessage, cancellationToken);
             if (result == null)
             {
@@ -73,7 +73,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> UpdateAsync(User user, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = UserMessagesFactory.Instance.CreateUpdateMessage(user, forceUpdate);
+            var commandMessage = UserMessagesFactory.Instance.BuildUpdateMessage(user, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync<UserResponse>(commandMessage, cancellationToken);
             if (result == null)
             {
@@ -97,7 +97,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
         {
-            var commandMessage = UserMessagesFactory.Instance.CreateDeleteMessage(user);
+            var commandMessage = UserMessagesFactory.Instance.BuildDeleteMessage(user);
             var success = await this.HassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
             if (success)
             {

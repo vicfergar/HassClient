@@ -12,19 +12,19 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public new BaseOutgoingMessage CreateCreateMessage(User user)
+        public new BaseOutgoingMessage BuildCreateMessage(User user)
         {
-            return base.CreateCreateMessage(user);
+            return base.BuildCreateMessage(user);
         }
 
-        public new BaseOutgoingMessage CreateUpdateMessage(User user, bool forceUpdate)
+        public new BaseOutgoingMessage BuildUpdateMessage(User user, bool forceUpdate)
         {
-            return base.CreateUpdateMessage(user, forceUpdate);
+            return base.BuildUpdateMessage(user, forceUpdate);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(User user)
+        public BaseOutgoingMessage BuildDeleteMessage(User user)
         {
-            return base.CreateDeleteMessage(user);
+            return base.BuildDeleteMessage(user);
         }
     }
 }

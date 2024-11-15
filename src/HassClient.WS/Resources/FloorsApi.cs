@@ -28,7 +28,7 @@ namespace HassClient.WS
         /// </returns>
         public Task<IEnumerable<Floor>> ListAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateListMessage();
+            var commandMessage = FloorRegistryMessagesFactory.Instance.BuildListMessage();
             return this.HassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Floor>>(commandMessage, cancellationToken);
         }
 
@@ -45,7 +45,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> CreateAsync(Floor floor, CancellationToken cancellationToken = default)
         {
-            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateCreateMessage(floor);
+            var commandMessage = FloorRegistryMessagesFactory.Instance.BuildCreateMessage(floor);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -71,7 +71,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> UpdateAsync(Floor floor, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateUpdateMessage(floor, forceUpdate);
+            var commandMessage = FloorRegistryMessagesFactory.Instance.BuildUpdateMessage(floor, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {
@@ -94,7 +94,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> DeleteAsync(Floor floor, CancellationToken cancellationToken = default)
         {
-            var commandMessage = FloorRegistryMessagesFactory.Instance.CreateDeleteMessage(floor);
+            var commandMessage = FloorRegistryMessagesFactory.Instance.BuildDeleteMessage(floor);
             var success = await this.HassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
             if (success)
             {

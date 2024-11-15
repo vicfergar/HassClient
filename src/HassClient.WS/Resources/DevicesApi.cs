@@ -28,7 +28,7 @@ namespace HassClient.WS
         /// </returns>
         public Task<IEnumerable<Device>> ListAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateListMessage();
+            var commandMessage = DeviceRegistryMessagesFactory.Instance.BuildListMessage();
             return this.HassClientWebSocket.SendCommandWithResultAsync<IEnumerable<Device>>(commandMessage, cancellationToken);
         }
 
@@ -49,7 +49,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> UpdateAsync(Device device, bool? disable = null, bool forceUpdate = false, CancellationToken cancellationToken = default)
         {
-            var commandMessage = DeviceRegistryMessagesFactory.Instance.CreateUpdateMessage(device, disable, forceUpdate);
+            var commandMessage = DeviceRegistryMessagesFactory.Instance.BuildUpdateMessage(device, disable, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (result.Success)
             {

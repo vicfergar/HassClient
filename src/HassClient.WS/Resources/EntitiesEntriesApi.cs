@@ -30,7 +30,7 @@ namespace HassClient.WS
         /// </returns>
         public Task<IEnumerable<EntityRegistryEntry>> ListAsync(CancellationToken cancellationToken = default)
         {
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateListMessage();
+            var commandMessage = EntityRegistryMessagesFactory.Instance.BuildListMessage();
             return this.HassClientWebSocket.SendCommandWithResultAsync<IEnumerable<EntityRegistryEntry>>(commandMessage, cancellationToken);
         }
 
@@ -51,7 +51,7 @@ namespace HassClient.WS
                 throw new ArgumentException($"'{nameof(entityId)}' cannot be null or empty", nameof(entityId));
             }
 
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateGetMessage(entityId);
+            var commandMessage = EntityRegistryMessagesFactory.Instance.BuildGetMessage(entityId);
             return this.HassClientWebSocket.SendCommandWithResultAsync<EntityRegistryEntry>(commandMessage, cancellationToken);
         }
 
@@ -70,7 +70,7 @@ namespace HassClient.WS
         public async Task<bool> RefreshAsync(EntityRegistryEntry entityRegistryEntry, string newEntityId = null, CancellationToken cancellationToken = default)
         {
             var entityId = newEntityId ?? entityRegistryEntry.EntityId;
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateGetMessage(entityId);
+            var commandMessage = EntityRegistryMessagesFactory.Instance.BuildGetMessage(entityId);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync(commandMessage, cancellationToken);
             if (!result.Success)
             {
@@ -109,7 +109,7 @@ namespace HassClient.WS
                 throw new ArgumentException($"{nameof(newEntityId)} cannot be the same as {nameof(entity.EntityId)}");
             }
 
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateUpdateMessage(entity, newEntityId, disable, forceUpdate);
+            var commandMessage = EntityRegistryMessagesFactory.Instance.BuildUpdateMessage(entity, newEntityId, disable, forceUpdate);
             var result = await this.HassClientWebSocket.SendCommandWithResultAsync<EntityEntryResponse>(commandMessage, cancellationToken);
             if (result == null)
             {
@@ -133,7 +133,7 @@ namespace HassClient.WS
         /// </returns>
         public async Task<bool> DeleteAsync(EntityRegistryEntry entity, CancellationToken cancellationToken = default)
         {
-            var commandMessage = EntityRegistryMessagesFactory.Instance.CreateDeleteMessage(entity);
+            var commandMessage = EntityRegistryMessagesFactory.Instance.BuildDeleteMessage(entity);
             var success = await this.HassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
             if (success)
             {
