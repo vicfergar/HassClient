@@ -20,7 +20,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            this.panels = await this.hassWSApi.GetPanelsAsync();
+            this.panels = await this.hassWSApi.ListPanelsAsync();
 
             Assert.IsNotNull(this.panels);
             Assert.IsNotEmpty(this.panels);

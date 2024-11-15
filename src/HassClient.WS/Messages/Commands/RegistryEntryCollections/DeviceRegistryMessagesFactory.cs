@@ -13,9 +13,9 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(Device device, bool? disable, bool forceUpdate)
+        public BaseOutgoingMessage BuildUpdateMessage(Device device, bool? disable, bool forceUpdate)
         {
-            var model = this.CreateDefaultUpdateObject(device, forceUpdate);
+            var model = this.BuildDefaultUpdateObject(device, forceUpdate);
 
             if (disable.HasValue)
             {
@@ -23,7 +23,7 @@ namespace HassClient.WS.Messages
                 model.Merge(merged);
             }
 
-            return this.CreateUpdateMessage(device.Id, model);
+            return this.BuildUpdateMessage(device.Id, model);
         }
     }
 }

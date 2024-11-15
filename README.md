@@ -22,7 +22,7 @@ The method `ConnectAsync` with `ConnectionParameters` will be used:
 - Using Instance base URL: Connects using the Home Assistant instance **base address** (e.g. "http://localhost:8123") and a **valid token**. You can obtain a token ("Long-Lived Access Token") by logging into the frontend using a web browser, and going [to your profile](https://www.home-assistant.io/docs/authentication/#your-account-profile) `http://IP_ADDRESS:8123/profile`.
 ```csharp
 var hassWSApi = new HassWSApi();
-var connectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl("http://localhost:8123", HASS_TOKEN);
+var connectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl("http://localhost:8123", "HASS_TOKEN");
 await hassWSApi.ConnectAsync(connectionParameters);
 ```
 
@@ -37,31 +37,32 @@ await hassWSApi.ConnectAsync(connectionParameters);
 The `KnownDomains` and `KnownServices` enums are available to reduce the use of strings.
 ```csharp
 // Fetch all available services in the Home Assistant instance.
-IEnumerable<ServiceDomain> serviceDomains = await hassWSApi.GetServicesAsync();
+IEnumerable<ServiceDomain> serviceDomains = await hassWSApi.Services.ListAsync();
 
 // This will call a service from the Home Assistant instance.
-await hassWSApi.CallServiceAsync("homeassistant", "check_config");
+await hassWSApi.Services.CallAsync("homeassistant", "check_config");
 
 // Optional data can be passed to the call operation.
-await hassWSApi.CallServiceAsync(KnownDomains.Light, KnownServices.TurnOn, data: new { entity_id = "light.my_light", brightness_pct = 20});
+await hassWSApi.Services.CallAsync(KnownDomains.Light, KnownServices.TurnOn, data: new { entity_id = "light.my_light", brightness_pct = 20});
 
 // When only entity_id is needed for the invocation this overload can be used.
-await hassWSApi.CallServiceForEntitiesAsync(KnownDomains.Light, KnownServices.Toggle, "light.my_light1", "light.my_light2");
+await hassWSApi.Services.CallForEntitiesAsync(KnownDomains.Light, KnownServices.Toggle, "light.my_light1", "light.my_light2");
 ```
 
  ### Fetching states
  ```csharp
 # Gets a collection with the state of every registered entity in the Home Assistant instance.
-IEnumerable<StateModel> states = await hassWSApi.GetStatesAsync();
+IEnumerable<StateModel> states = await hassWSApi.ListStatesAsync();
 ```
 
-An event is produced by the Home Assistant instance every time a `change_state` occurs. To simplify the subscription to these events the `StateChagedEventListener` can be used:
+An event is produced by the Home Assistant instance every time a `change_state` occurs. To simplify the subscription to these events the `StateChangedEventListener` can be used:
 
 ```csharp
-// Subscribe to changes of a specific entity.
-hassWSApi.StateChagedEventListener.SubscribeEntityStatusChanged("light.my_light1", this.my_light1_StateChanged);
-
-[...]
+public void Subscribe()
+{
+    // Subscribe to changes of a specific entity.
+    hassWSApi.StateChangedEventListener.SubscribeEntityStatusChanged("light.my_light1", this.my_light1_StateChanged);
+}
 
 private void my_light1_StateChanged(object sender, StateChangedEvent stateChangedArgs)
 {
@@ -70,10 +71,11 @@ private void my_light1_StateChanged(object sender, StateChangedEvent stateChange
 ```
 
  ```csharp
-// Subscribe to changes by domain.
-hassWSApi.StateChagedEventListener.SubscribeDomainStatusChanged("switch", this.Switch_StateChanged);
-
-[...]
+public void Subscribe()
+{   
+    // Subscribe to changes by domain.
+    hassWSApi.StateChangedEventListener.SubscribeDomainStatusChanged("switch", this.Switch_StateChanged);
+}
 
 private void Switch_StateChanged(object sender, StateChangedEvent stateChangedArgs)
 {
@@ -84,10 +86,10 @@ private void Switch_StateChanged(object sender, StateChangedEvent stateChangedAr
 ### Fetching other data
 ```csharp
 // Fetch current Home Assistant instance configuration.
-Configuration config = await hassWSApi.GetConfigurationAsync();
+ConfigurationModel config = await hassWSApi.GetConfigurationAsync();
 
 // Fetch current registered panels in Home Assistant instance.
-IEnumerable<PanelInfo> panels = await hassWSApi.GetPanelsAsync();
+IEnumerable<PanelInfo> panels = await hassWSApi.ListPanelsAsync();
 ```
 
 ### Event subscription
@@ -96,16 +98,17 @@ The WS Client provides some methods to subscribe and unsubscribe to Home Assista
 Even any `eventType` can be specified as a string. The [KnownEventTypes](https://github.com/vicfergar/HassClient/blob/main/src/HassClient.Core/Models/Events/KnownEventTypes.cs) enum is available to reduce the use of strings.
 
  ```csharp
-// Subscribe to every event type
-await hassWSApi.AddEventHandlerSubscriptionAsync(this.WS_OnEvent);
+public async Task MyMethod()
+{
+    // Subscribe to every event type
+    await hassWSApi.AddEventHandlerSubscriptionAsync(this.WS_OnEvent);
 
-// Subscribe to specific event type
-await hassWSApi.AddEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventTypes.PanelsUpdated);
+    // Subscribe to specific event type
+    await hassWSApi.AddEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventTypes.PanelsUpdated);
 
-// Unsubscribe using the same event type from subscription
-await hassWSApi.RemoveEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventTypes.PanelsUpdated);
-
-[...]
+    // Unsubscribe using the same event type from subscription
+    await hassWSApi.RemoveEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventTypes.PanelsUpdated);
+}
 
 private void WS_OnEvent(object sender, EventResultInfo eventResultInfo)
 {
@@ -134,23 +137,23 @@ The following registry entries are supported:
 
 ```csharp
 // List
-IEnumerable<Area> areas = await hassWSApi.GetAreasAsync();
+IEnumerable<Area> areas = await hassWSApi.Areas.ListAsync();
 
 // Create
 var hallArea = new Area("Hall");
-bool createResult = await this.hassWSApi.CreateAreaAsync(hallArea);
+bool createResult = await hassWSApi.Areas.CreateAsync(hallArea);
 
 // Update
 hallArea.Name = "Hall_1";
 hallArea.Labels.Add("ground_floor");
-bool updateResult = await hassWSApi.UpdateAreaAsync(hallArea);
+bool updateResult = await hassWSApi.Areas.UpdateAsync(hallArea);
 
 // Pending changes
 bool hasChanges = hallArea.HasPendingChanges;
 hallArea.DiscardPendingChanges();
 
 // Delete
-bool deleteResult = await hassWSApi.DeleteAreaAsync(hallArea);
+bool deleteResult = await hassWSApi.Areas.DeleteAsync(hallArea);
 ```
 
 #### Storage Collections
@@ -160,23 +163,23 @@ At the moment only `InputBoolean`, `Person`, and `Zone` entity models are define
 
 ```csharp
 // List
-IEnumerable<InputBoolean> inputBooleans = await hassWSApi.GetStorageEntityRegistryEntriesAsync<InputBoolean>();
+IEnumerable<InputBoolean> inputBooleans = await hassWSApi.StorageEntities.ListAsync<InputBoolean>();
 
 // Create
 var alarmInputBoolean = new InputBoolean("Alarm");
-bool createResult = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(alarmInputBoolean);
+bool createResult = await hassWSApi.StorageEntities.CreateAsync(alarmInputBoolean);
 
 // Update
 alarmInputBoolean.Name = "Alarm_1";
 alarmInputBoolean.Icon = "mdi:alarm";
-bool updateResult = await hassWSApi.UpdateStorageEntityRegistryEntryAsync(alarmInputBoolean);
+bool updateResult = await hassWSApi.StorageEntities.UpdateAsync(alarmInputBoolean);
 
 // Pending changes
 bool hasChanges = alarmInputBoolean.HasPendingChanges;
 alarmInputBoolean.DiscardPendingChanges();
 
 // Delete
-bool deleteResult = await hassWSApi.DeleteStorageEntityRegistryEntryAsync(alarmInputBoolean);
+bool deleteResult = await hassWSApi.StorageEntities.DeleteAsync(alarmInputBoolean);
 ```
 
 Key features of registry entries:
@@ -190,7 +193,7 @@ Key features of registry entries:
 ### Search related
 All data stored in Home Assistant is interconnected, making it a graph. The client allows searching related items for a given `ItemTypes` and `itemId`.
 ```csharp
-SearchRelatedResponse result = await hassWSApi.SearchRelated(ItemTypes.Entity, "weather.home");
+SearchRelatedResponse result = await hassWSApi.SearchRelatedAsync(ItemTypes.Entity, "weather.home");
 ```
 
 ### Raw Commands

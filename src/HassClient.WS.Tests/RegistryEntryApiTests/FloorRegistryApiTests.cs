@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests
             if (this.testFloor == null)
             {
                 this.testFloor = new Floor(MockHelpers.GetRandomTestName(), "mdi:lamp", 1, new[] { "alias1", "alias2" });
-                var result = await this.hassWSApi.CreateFloorAsync(this.testFloor);
+                var result = await this.hassWSApi.Floors.CreateAsync(this.testFloor);
                 Assert.IsTrue(result, "SetUp failed");
                 return;
             }
@@ -34,7 +34,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetFloors()
         {
-            var floors = await this.hassWSApi.GetFloorsAsync();
+            var floors = await this.hassWSApi.Floors.ListAsync();
 
             Assert.NotNull(floors);
             Assert.IsNotEmpty(floors);
@@ -49,7 +49,7 @@ namespace HassClient.WS.Tests
             this.testFloor.Level = 2;
             this.testFloor.Aliases.Add("alias3");
             var originalModificationDate = this.testFloor.ModifiedAt;
-            var result = await this.hassWSApi.UpdateFloorAsync(this.testFloor);
+            var result = await this.hassWSApi.Floors.UpdateAsync(this.testFloor);
 
             Assert.IsTrue(result);
             Assert.False(this.testFloor.HasPendingChanges);
@@ -65,7 +65,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteFloorAsync(this.testFloor);
+            var result = await this.hassWSApi.Floors.DeleteAsync(this.testFloor);
             var deletedFloor = this.testFloor;
             this.testFloor = null;
 

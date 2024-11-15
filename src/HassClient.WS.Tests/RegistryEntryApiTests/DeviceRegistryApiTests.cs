@@ -11,7 +11,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task GetDevices()
         {
-            var devices = await this.hassWSApi.GetDevicesAsync();
+            var devices = await this.hassWSApi.Devices.ListAsync();
 
             Assert.NotNull(devices);
             Assert.IsNotEmpty(devices);
@@ -27,14 +27,14 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task UpdateDeviceName()
         {
-            var devices = await this.hassWSApi.GetDevicesAsync();
+            var devices = await this.hassWSApi.Devices.ListAsync();
             var testDevice = devices.FirstOrDefault();
             Assert.NotNull(testDevice, "SetUp failed");
 
             var newName = $"TestDevice_{DateTime.Now.Ticks}";
             testDevice.Name = newName;
             var originalModificationDate = testDevice.ModifiedAt;
-            var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
+            var result = await this.hassWSApi.Devices.UpdateAsync(testDevice);
 
             Assert.IsTrue(result);
             Assert.IsFalse(testDevice.HasPendingChanges);
@@ -45,14 +45,14 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task UpdateDeviceAreaId()
         {
-            var devices = await this.hassWSApi.GetDevicesAsync();
+            var devices = await this.hassWSApi.Devices.ListAsync();
             var testDevice = devices.FirstOrDefault();
             Assert.NotNull(testDevice, "SetUp failed");
 
             var newAreaId = $"{DateTime.Now.Ticks}";
             testDevice.AreaId = newAreaId;
             var originalModificationDate = testDevice.ModifiedAt;
-            var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
+            var result = await this.hassWSApi.Devices.UpdateAsync(testDevice);
 
             Assert.IsTrue(result);
             Assert.IsFalse(testDevice.HasPendingChanges);
@@ -63,14 +63,14 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task UpdateDeviceLabels()
         {
-            var devices = await this.hassWSApi.GetDevicesAsync();
+            var devices = await this.hassWSApi.Devices.ListAsync();
             var testDevice = devices.FirstOrDefault();
             Assert.NotNull(testDevice, "SetUp failed");
 
             var newLabel = $"TestLabel_{DateTime.Now.Ticks}";
             testDevice.Labels.Add(newLabel);
             var originalModificationDate = testDevice.ModifiedAt;
-            var result = await this.hassWSApi.UpdateDeviceAsync(testDevice);
+            var result = await this.hassWSApi.Devices.UpdateAsync(testDevice);
 
             Assert.IsTrue(result);
             Assert.IsFalse(testDevice.HasPendingChanges);

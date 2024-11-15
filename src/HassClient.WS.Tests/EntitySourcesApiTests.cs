@@ -8,7 +8,7 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task GetEntitySources()
         {
-            var entities = await this.hassWSApi.GetEntitySourcesAsync();
+            var entities = await this.hassWSApi.ListEntitySourcesAsync();
 
             Assert.IsNotNull(entities);
             Assert.IsNotEmpty(entities);

@@ -13,15 +13,15 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateGetMessage(string entityId)
+        public BaseOutgoingMessage BuildGetMessage(string entityId)
         {
-            return this.CreateCustomOperationMessage("get", entityId);
+            return this.BuildCustomOperationMessage("get", entityId);
         }
 
-        public BaseOutgoingMessage CreateUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable, bool forceUpdate)
+        public BaseOutgoingMessage BuildUpdateMessage(EntityRegistryEntry entity, string newEntityId, bool? disable, bool forceUpdate)
         {
             var shouldForceUpdate = !entity.SupportsPartialUpdates || forceUpdate;
-            var model = this.CreateDefaultUpdateObject(entity, shouldForceUpdate);
+            var model = this.BuildDefaultUpdateObject(entity, shouldForceUpdate);
 
             if (newEntityId != null)
             {
@@ -35,12 +35,12 @@ namespace HassClient.WS.Messages
                 model.Merge(merged);
             }
 
-            return this.CreateUpdateMessage(entity.EntityId, model);
+            return this.BuildUpdateMessage(entity.EntityId, model);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(EntityRegistryEntry entity)
+        public BaseOutgoingMessage BuildDeleteMessage(EntityRegistryEntry entity)
         {
-            return this.CreateCustomOperationMessage("remove", entity.EntityId);
+            return this.BuildCustomOperationMessage("remove", entity.EntityId);
         }
     }
 }

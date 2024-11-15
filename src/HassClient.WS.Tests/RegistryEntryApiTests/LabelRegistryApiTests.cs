@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests
             if (this.testLabel == null)
             {
                 this.testLabel = new Label(MockHelpers.GetRandomTestName(), "mdi:lamp", "#000000", "Test description");
-                var result = await this.hassWSApi.CreateLabelAsync(this.testLabel);
+                var result = await this.hassWSApi.Labels.CreateAsync(this.testLabel);
                 Assert.IsTrue(result, "SetUp failed");
                 return;
             }
@@ -34,7 +34,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetLabels()
         {
-            var labels = await this.hassWSApi.GetLabelsAsync();
+            var labels = await this.hassWSApi.Labels.ListAsync();
 
             Assert.NotNull(labels);
             Assert.IsNotEmpty(labels);
@@ -48,7 +48,7 @@ namespace HassClient.WS.Tests
             this.testLabel.Color = "#FFFFFF";
             this.testLabel.Description = "Updated description"; 
             var originalModificationDate = this.testLabel.ModifiedAt;
-            var result = await this.hassWSApi.UpdateLabelAsync(this.testLabel);
+            var result = await this.hassWSApi.Labels.UpdateAsync(this.testLabel);
 
             Assert.IsTrue(result);
             Assert.False(this.testLabel.HasPendingChanges);
@@ -64,7 +64,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteLabelAsync(this.testLabel);
+            var result = await this.hassWSApi.Labels.DeleteAsync(this.testLabel);
             var deletedLabel = this.testLabel;
             this.testLabel = null;
 

@@ -18,7 +18,7 @@ namespace HassClient.WS.Tests
             if (this.testInputBoolean == null)
             {
                 this.testInputBoolean = new InputBoolean(MockHelpers.GetRandomTestName(), "mdi:fan", true);
-                var result = await this.hassWSApi.CreateStorageEntityRegistryEntryAsync(this.testInputBoolean);
+                var result = await this.hassWSApi.StorageEntities.CreateAsync(this.testInputBoolean);
 
                 Assert.IsTrue(result, "SetUp failed");
                 return;
@@ -34,7 +34,7 @@ namespace HassClient.WS.Tests
         [Test, Order(2)]
         public async Task GetInputBooleans()
         {
-            var result = await this.hassWSApi.GetStorageEntityRegistryEntriesAsync<InputBoolean>();
+            var result = await this.hassWSApi.StorageEntities.ListAsync<InputBoolean>();
 
             Assert.NotNull(result);
             Assert.IsNotEmpty(result);
@@ -52,7 +52,7 @@ namespace HassClient.WS.Tests
         public async Task UpdateInputBooleanName()
         {
             this.testInputBoolean.Name = $"{nameof(InputBooleanApiTests)}_{DateTime.Now.Ticks}";
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testInputBoolean);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testInputBoolean);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testInputBoolean.HasPendingChanges);
@@ -62,7 +62,7 @@ namespace HassClient.WS.Tests
         public async Task UpdateInputBooleanInitial()
         {
             this.testInputBoolean.Initial = false;
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testInputBoolean);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testInputBoolean);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testInputBoolean.HasPendingChanges);
@@ -72,7 +72,7 @@ namespace HassClient.WS.Tests
         public async Task UpdateInputBooleanIcon()
         {
             this.testInputBoolean.Icon = $"mdi:lightbulb";
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testInputBoolean);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testInputBoolean);
 
             Assert.IsTrue(result);
             Assert.IsFalse(this.testInputBoolean.HasPendingChanges);
@@ -88,11 +88,11 @@ namespace HassClient.WS.Tests
             clonedEntry.Name = $"{initialName}_cloned";
             clonedEntry.Icon = $"{initialIcon}_cloned";
             clonedEntry.Initial = !initialInitial;
-            var result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(clonedEntry);
+            var result = await this.hassWSApi.StorageEntities.UpdateAsync(clonedEntry);
             Assert.IsTrue(result, "SetUp failed");
             Assert.False(this.testInputBoolean.HasPendingChanges, "SetUp failed");
 
-            result = await this.hassWSApi.UpdateStorageEntityRegistryEntryAsync(this.testInputBoolean, forceUpdate: true);
+            result = await this.hassWSApi.StorageEntities.UpdateAsync(this.testInputBoolean, forceUpdate: true);
             Assert.IsTrue(result);
             Assert.AreEqual(initialName, this.testInputBoolean.Name);
             Assert.AreEqual(initialIcon, this.testInputBoolean.Icon);
@@ -109,7 +109,7 @@ namespace HassClient.WS.Tests
                 return;
             }
 
-            var result = await this.hassWSApi.DeleteStorageEntityRegistryEntryAsync(this.testInputBoolean);
+            var result = await this.hassWSApi.StorageEntities.DeleteAsync(this.testInputBoolean);
             var deletedInputBoolean = this.testInputBoolean;
             this.testInputBoolean = null;
 

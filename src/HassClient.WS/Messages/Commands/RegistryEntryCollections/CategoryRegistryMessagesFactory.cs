@@ -12,24 +12,24 @@ namespace HassClient.WS.Messages
         {
         }
 
-        public BaseOutgoingMessage CreateListMessage(string scope)
+        public BaseOutgoingMessage BuildListMessage(string scope)
         {
-            return this.CreateListMessage(mergedObject: new { scope });
+            return this.BuildListMessage(mergedObject: new { scope });
         }
 
-        public new BaseOutgoingMessage CreateCreateMessage(Category category)
+        public new BaseOutgoingMessage BuildCreateMessage(Category category)
         {
-            return base.CreateCreateMessage(category);
+            return base.BuildCreateMessage(category);
         }
 
-        public new BaseOutgoingMessage CreateUpdateMessage(Category category, bool forceUpdate)
+        public new BaseOutgoingMessage BuildUpdateMessage(Category category, bool forceUpdate)
         {
-            return base.CreateUpdateMessage(category, forceUpdate);
+            return base.BuildUpdateMessage(category, forceUpdate);
         }
 
-        public BaseOutgoingMessage CreateDeleteMessage(Category category)
+        public BaseOutgoingMessage BuildDeleteMessage(Category category)
         {
-            return this.CreateDeleteMessage(category, mergedObject: new { category.Scope });
+            return this.BuildDeleteMessage(category, mergedObject: new { category.Scope });
         }
     }
 }
