@@ -780,7 +780,7 @@ namespace HassClient.WS
 
             if (socketEventSubscription.SubscriptionCount == 0)
             {
-                var subscribeMessage = new UnsubscribeEventsMessage() { SubscriptionId = socketEventSubscription.SubscriptionId };
+                var subscribeMessage = new UnsubscribeEventsMessage() { Subscription = socketEventSubscription.SubscriptionId };
                 if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
                 {
                     return false;
