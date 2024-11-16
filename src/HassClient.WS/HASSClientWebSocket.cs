@@ -776,7 +776,10 @@ namespace HassClient.WS
                 return false;
             }
 
-            socketEventSubscription.RemoveSubscription(value);
+            if (!socketEventSubscription.RemoveSubscription(value))
+            {
+                return false;
+            }
 
             if (socketEventSubscription.SubscriptionCount == 0)
             {
