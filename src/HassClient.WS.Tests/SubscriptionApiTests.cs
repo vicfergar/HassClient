@@ -17,14 +17,14 @@ namespace HassClient.WS.Tests
         {
             var domain = testEntityId.GetDomain();
             var update = await this.hassWSApi.Services.CallForEntitiesAsync(domain, "toggle", testEntityId);
-            Assert.NotNull(update, "SetUp failed");
+            Assert.NotNull(update, "SetUp failed. Service call failed");
 
             var eventData = await listener.WaitFirstEventWithTimeoutAsync<EventResultInfo>(
-                                            (x) => HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(x.EventType, out var knownEventType) &&
-                                                   knownEventType == KnownEventTypes.StateChanged,
-                                            500);
+                    (x) => HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(x.EventType, out var knownEventType) &&
+                            knownEventType == KnownEventTypes.StateChanged,
+                    millisecondsTimeout: 500);
 
-            Assert.NotNull(eventData, "SetUp failed");
+            Assert.NotNull(eventData, "SetUp failed. Event not received");
 
             var args = eventData.Args.DeserializeData<StateChangedEvent>();
             return new EventData<StateChangedEvent>(eventData.Sender, args);
