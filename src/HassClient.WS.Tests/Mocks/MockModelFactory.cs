@@ -14,14 +14,13 @@ namespace HassClient.WS.Tests.Mocks
             new Faker<Device>()
             .CustomInstantiator((f) => Device.CreateUnmodified(f.RandomUUID(), f.Commerce.ProductName(), f.RandomUUID(), f.Random.Enum<DisabledByEnum>()))
             .RuleFor(x => x.ConfigurationEntries, f => new[] { f.RandomUUID() })
-            .RuleFor(x => x.Connections, f => new Dictionary<string, string>() { { "zigbee", f.Internet.Mac() } })
+            .RuleFor(x => x.Connections, f => new Dictionary<string, string[]>() { { "mac", new[] { f.Internet.Mac(), f.Internet.Mac() } } })
             .RuleFor(x => x.Manufacturer, f => f.Company.CompanyName())
             .RuleFor(x => x.Model, f => f.Commerce.Product())
             .RuleFor(x => x.Name, f => f.Random.Bool() ? f.Commerce.ProductName() : null)
             .RuleFor(x => x.SWVersion, f => f.Random.Hexadecimal(8))
-            .RuleFor(x => x.Identifiers, f => new Dictionary<string, string>() { { "zha", string.Empty } })
-            .RuleFor(x => x.ViaDeviceId, f => f.RandomUUID())
-            .FinishWith((f, x) => x.Identifiers["zha"] = x.Connections["zigbee"]);
+            .RuleFor(x => x.Identifiers, f => new Dictionary<string, string[]>() { { "zwave", new[] { f.Internet.DomainWord(), f.Internet.DomainWord() } } })
+            .RuleFor(x => x.ViaDeviceId, f => f.RandomUUID());
 
         public static readonly Faker<PanelInfo> PanelInfoFaker =
             new Faker<PanelInfo>()
