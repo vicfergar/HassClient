@@ -32,7 +32,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             {
                 foreach (var item in this.subscribersByEventType.Values)
                 {
-                    if (item.Remove(unsubscribeMessage.SubscriptionId))
+                    if (item.Remove(unsubscribeMessage.Subscription))
                     {
                         //success = true;
                         break;

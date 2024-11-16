@@ -776,11 +776,14 @@ namespace HassClient.WS
                 return false;
             }
 
-            socketEventSubscription.RemoveSubscription(value);
+            if (!socketEventSubscription.RemoveSubscription(value))
+            {
+                return false;
+            }
 
             if (socketEventSubscription.SubscriptionCount == 0)
             {
-                var subscribeMessage = new UnsubscribeEventsMessage() { SubscriptionId = socketEventSubscription.SubscriptionId };
+                var subscribeMessage = new UnsubscribeEventsMessage() { Subscription = socketEventSubscription.SubscriptionId };
                 if (!await this.SendCommandWithSuccessAsync(subscribeMessage, cancellationToken))
                 {
                     return false;

@@ -15,15 +15,17 @@ namespace HassClient.WS
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByEntityId = new Dictionary<string, EventHandler<StateChangedEvent>>();
         private readonly Dictionary<string, EventHandler<StateChangedEvent>> stateChangedSubscriptionsByDomain = new Dictionary<string, EventHandler<StateChangedEvent>>();
 
-        private bool isStateChangedSubscriptionActive;
-
         private readonly SemaphoreSlim refreshSubscriptionsSemaphore = new SemaphoreSlim(0);
+
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        private readonly object subscriptionChangeLock = new object();
 
         private HassClientWebSocket clientWebSocket;
 
-        private Task refreshSubscriptionsTask;
+        private bool isStateChangedSubscriptionActive;
 
-        private CancellationTokenSource cancellationTokenSource;
+        private Task refreshSubscriptionsTask;
 
         /// <summary>
         /// Initialization method of the <see cref="StateChangedEventListener"/>.
@@ -42,15 +44,14 @@ namespace HassClient.WS
             }
 
             this.clientWebSocket = clientWebSocket;
-            this.cancellationTokenSource = new CancellationTokenSource();
 
             this.refreshSubscriptionsTask = Task.Factory.StartNew(
                 async () =>
                 {
-                    while (true)
+                    while (!this.cancellationTokenSource.IsCancellationRequested)
                     {
                         await this.refreshSubscriptionsSemaphore.WaitAsync(this.cancellationTokenSource.Token);
-                        await this.UpdateStateChangeSockedSubscription(this.cancellationTokenSource.Token);
+                        await this.UpdateStateChangeSocketSubscriptionAsync(this.cancellationTokenSource.Token);
                     }
                 }, TaskCreationOptions.LongRunning);
         }
@@ -107,79 +108,143 @@ namespace HassClient.WS
             this.InternalUnsubscribeStatusChanged(this.stateChangedSubscriptionsByDomain, domain, value);
         }
 
-        private void InternalSubscribeStatusChanged(Dictionary<string, EventHandler<StateChangedEvent>> register, string key, EventHandler<StateChangedEvent> value)
+        /// <summary>
+        /// Wait for any pending subscription change to be completed.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A <see cref="Task{Boolean}"/> representing the asynchronous operation.
+        /// Returns <c>true</c> if no subscription change is pending or it has been completed; otherwise, <c>false</c>.
+        /// </returns>
+        public async Task<bool> WaitForSubscriptionCompletedAsync(CancellationToken cancellationToken = default)
         {
-            if (!register.ContainsKey(key))
+            if (!this.IsSubscriptionChangeRequired())
             {
-                register.Add(key, null);
-
-                if (register.Count == 1)
-                {
-                    this.refreshSubscriptionsSemaphore.Release();
-                }
+                return true;
             }
 
-            register[key] += value;
+            try
+            {
+                while (true)
+                {
+                    var result = await this.refreshSubscriptionsSemaphore.WaitAsync(TimeSpan.FromMilliseconds(100), cancellationToken);
+                    if (result)
+                    {
+                        this.refreshSubscriptionsSemaphore.Release();
+                    }
+
+                    if (!this.IsSubscriptionChangeRequired())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        await Task.Delay(100, cancellationToken);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+        }
+
+        private void InternalSubscribeStatusChanged(Dictionary<string, EventHandler<StateChangedEvent>> register, string key, EventHandler<StateChangedEvent> value)
+        {
+            lock (this.subscriptionChangeLock)
+            {
+                if (!register.ContainsKey(key))
+                {
+                    register.Add(key, null);
+
+                    if (register.Count == 1)
+                    {
+                        this.refreshSubscriptionsSemaphore.Release();
+                    }
+                }
+
+                register[key] += value;
+            }
         }
 
         private void InternalUnsubscribeStatusChanged(Dictionary<string, EventHandler<StateChangedEvent>> register, string key, EventHandler<StateChangedEvent> value)
         {
-            if (register.TryGetValue(key, out var subscriptions))
+            lock (this.subscriptionChangeLock)
             {
-                subscriptions -= value;
-                if (subscriptions == null)
+                if (register.ContainsKey(key))
                 {
-                    register.Remove(key);
-
-                    if (register.Count == 0)
+                    register[key] -= value;
+                    if (register[key] == null)
                     {
-                        this.refreshSubscriptionsSemaphore.Release();
+                        register.Remove(key);
+
+                        if (register.Count == 0)
+                        {
+                            this.refreshSubscriptionsSemaphore.Release();
+                        }
                     }
                 }
             }
         }
 
-        private async Task UpdateStateChangeSockedSubscription(CancellationToken cancellationToken)
+        private bool IsSubscriptionChangeRequired()
         {
-            var needsSubscription = this.stateChangedSubscriptionsByEntityId.Count > 0 || this.stateChangedSubscriptionsByDomain.Count > 0;
-            var toggleRequired = this.isStateChangedSubscriptionActive ^ needsSubscription;
-            if (toggleRequired)
+            lock (this.subscriptionChangeLock)
             {
-                var succeed = false;
-                if (!this.isStateChangedSubscriptionActive)
-                {
-                    succeed = await this.clientWebSocket.AddEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
-                }
-                else if (this.isStateChangedSubscriptionActive)
-                {
-                    succeed = await this.clientWebSocket.RemoveEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
-                }
+                var needsSubscription = this.stateChangedSubscriptionsByEntityId.Count > 0 || this.stateChangedSubscriptionsByDomain.Count > 0;
+                return this.isStateChangedSubscriptionActive ^ needsSubscription;
+            }
+        }
 
-                if (succeed)
-                {
-                    this.isStateChangedSubscriptionActive = !this.isStateChangedSubscriptionActive;
-                }
-                else
-                {
-                    // Retry
-                    this.refreshSubscriptionsSemaphore.Release();
-                    await Task.Delay(100);
-                }
+        private async Task UpdateStateChangeSocketSubscriptionAsync(CancellationToken cancellationToken)
+        {
+            if (!this.IsSubscriptionChangeRequired())
+            {
+                return;
+            }
+
+            var succeed = false;
+            if (!this.isStateChangedSubscriptionActive)
+            {
+                succeed = await this.clientWebSocket.AddEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
+            }
+            else if (this.isStateChangedSubscriptionActive)
+            {
+                succeed = await this.clientWebSocket.RemoveEventHandlerSubscriptionAsync(this.OnStateChangeEvent, KnownEventTypes.StateChanged, cancellationToken);
+            }
+
+            if (succeed)
+            {
+                this.isStateChangedSubscriptionActive = !this.isStateChangedSubscriptionActive;
+            }
+            else
+            {
+                // Retry
+                this.refreshSubscriptionsSemaphore.Release();
+                await Task.Delay(100);
             }
         }
 
         private void OnStateChangeEvent(object sender, EventResultInfo obj)
         {
             var stateChanged = obj.DeserializeData<StateChangedEvent>();
-            if (this.stateChangedSubscriptionsByEntityId.TryGetValue(stateChanged.EntityId, out var eventHandler))
+            EventHandler<StateChangedEvent> entityHandler = null;
+            EventHandler<StateChangedEvent> domainHandler = null;
+
+            lock (this.subscriptionChangeLock)
             {
-                eventHandler.Invoke(this, stateChanged);
+                if (this.stateChangedSubscriptionsByEntityId.TryGetValue(stateChanged.EntityId, out var eh))
+                {
+                    entityHandler = eh;
+                }
+
+                if (this.stateChangedSubscriptionsByDomain.TryGetValue(stateChanged.Domain, out var dh))
+                {
+                    domainHandler = dh;
+                }
             }
 
-            if (this.stateChangedSubscriptionsByDomain.TryGetValue(stateChanged.Domain, out eventHandler))
-            {
-                eventHandler.Invoke(this, stateChanged);
-            }
+            entityHandler?.Invoke(this, stateChanged);
+            domainHandler?.Invoke(this, stateChanged);
         }
     }
 }

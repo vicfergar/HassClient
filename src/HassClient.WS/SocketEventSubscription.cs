@@ -25,10 +25,23 @@ namespace HassClient.WS
             this.SubscriptionCount++;
         }
 
-        public void RemoveSubscription(EventHandler<EventResultInfo> eventHandler)
+        public bool RemoveSubscription(EventHandler<EventResultInfo> eventHandler)
         {
+            if (this.internalEventHandler == null)
+            {
+                return false;
+            }
+
+            var beforeCount = this.internalEventHandler.GetInvocationList().Length;
             this.internalEventHandler -= eventHandler;
-            this.SubscriptionCount--;
+            var afterCount = this.internalEventHandler?.GetInvocationList().Length ?? 0;
+            if (beforeCount > afterCount)
+            {
+                this.SubscriptionCount--;
+                return true;
+            }
+
+            return false;
         }
 
         public void Invoke(EventResultInfo eventResultInfo)
