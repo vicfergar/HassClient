@@ -158,6 +158,10 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         protected abstract Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken token);
 
+        /// <summary>
+        /// Simulates a server shutdown by closing all active clients.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task CloseActiveClientsAsync()
         {
             foreach (var client in this.activeClients.ToArray())

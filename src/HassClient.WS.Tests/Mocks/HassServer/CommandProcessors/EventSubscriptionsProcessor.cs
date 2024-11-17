@@ -1,6 +1,7 @@
 ﻿using HassClient.Helpers;
 using HassClient.Models;
 using HassClient.WS.Messages;
+using HassClient.WS.Messages.Commands.Subscriptions;
 using System.Collections.Generic;
 
 namespace HassClient.WS.Tests.Mocks.HassServer
@@ -11,12 +12,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public override bool CanProcess(BaseIdentifiableMessage receivedCommand)
         {
-            return receivedCommand is SubscribeEventsMessage || receivedCommand is UnsubscribeEventsMessage;
+            return receivedCommand is HassEventSubscribeMessage || receivedCommand is UnsubscribeEventsMessage;
         }
 
         public override BaseIdentifiableMessage ProcessCommand(MockHassServerRequestContext context, BaseIdentifiableMessage receivedCommand)
         {
-            if (receivedCommand is SubscribeEventsMessage subscribeMessage)
+            if (receivedCommand is HassEventSubscribeMessage subscribeMessage)
             {
                 var eventType = subscribeMessage.EventType ?? KnownEventTypes.Any.ToEventTypeString();
                 if (!this.subscribersByEventType.TryGetValue(eventType, out var subscribers))

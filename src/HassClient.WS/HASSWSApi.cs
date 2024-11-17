@@ -1,5 +1,6 @@
 ﻿using HassClient.Models;
 using HassClient.WS.Messages;
+using HassClient.WS.Messages.Commands.Subscriptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -154,7 +155,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// subscription was successfully done.
         /// </returns>
-        public Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType = KnownEventTypes.Any, CancellationToken cancellationToken = default)
+        public Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<HassEvent> value, KnownEventTypes eventType = KnownEventTypes.Any, CancellationToken cancellationToken = default)
         {
             return this.hassClientWebSocket.AddEventHandlerSubscriptionAsync(value, eventType, cancellationToken);
         }
@@ -171,7 +172,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// subscription removal was successfully done.
         /// </returns>
-        public Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, KnownEventTypes eventType = KnownEventTypes.Any, CancellationToken cancellationToken = default)
+        public Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<HassEvent> value, KnownEventTypes eventType = KnownEventTypes.Any, CancellationToken cancellationToken = default)
         {
             return this.hassClientWebSocket.RemoveEventHandlerSubscriptionAsync(value, eventType, cancellationToken);
         }
@@ -188,7 +189,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// subscription was successfully done.
         /// </returns>
-        public Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken = default)
+        public Task<bool> AddEventHandlerSubscriptionAsync(EventHandler<HassEvent> value, string eventType, CancellationToken cancellationToken = default)
         {
             return this.hassClientWebSocket.AddEventHandlerSubscriptionAsync(value, eventType, cancellationToken);
         }
@@ -205,7 +206,7 @@ namespace HassClient.WS
         /// A task representing the asynchronous operation. The result of the task is a boolean indicating if the
         /// subscription removal was successfully done.
         /// </returns>
-        public Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<EventResultInfo> value, string eventType, CancellationToken cancellationToken = default)
+        public Task<bool> RemoveEventHandlerSubscriptionAsync(EventHandler<HassEvent> value, string eventType, CancellationToken cancellationToken = default)
         {
             return this.hassClientWebSocket.RemoveEventHandlerSubscriptionAsync(value, eventType, cancellationToken);
         }
@@ -325,12 +326,13 @@ namespace HassClient.WS
         public async Task<string> RenderTemplateAsync(string template, CancellationToken cancellationToken = default)
         {
             var commandMessage = new RenderTemplateMessage() { Template = template };
-            if (!await this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken))
+            var templateRenderEvents = await this.hassClientWebSocket.SendTemporarySubscriptionCommandAsync(commandMessage, cancellationToken);
+            if (templateRenderEvents.Count() == 0)
             {
                 return default;
             }
 
-            return await commandMessage.WaitResponseTask;
+            return templateRenderEvents.First().Result;
         }
 
         /// <summary>

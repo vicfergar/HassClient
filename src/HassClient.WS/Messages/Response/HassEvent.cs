@@ -8,9 +8,9 @@ using System;
 namespace HassClient.WS.Messages
 {
     /// <summary>
-    /// Information of a fired Home Assistant event.
+    /// Represents an event coming from the home assistant event bus.
     /// </summary>
-    public class EventResultInfo
+    public class HassEvent
     {
         /// <summary>
         /// Gets or sets the event type.

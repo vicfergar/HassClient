@@ -1,19 +1,19 @@
 ﻿using HassClient.Models;
 using Newtonsoft.Json;
 
-namespace HassClient.WS.Messages
+namespace HassClient.WS.Messages.Commands.Subscriptions
 {
-    internal class SubscribeEventsMessage : BaseOutgoingMessage
+    internal class HassEventSubscribeMessage : BaseSubscribeMessage<HassEvent>
     {
         [JsonProperty]
         public string EventType { get; set; }
 
-        public SubscribeEventsMessage()
+        public HassEventSubscribeMessage()
             : base("subscribe_events")
         {
         }
 
-        public SubscribeEventsMessage(string eventType)
+        public HassEventSubscribeMessage(string eventType)
             : this()
         {
             this.EventType = eventType;

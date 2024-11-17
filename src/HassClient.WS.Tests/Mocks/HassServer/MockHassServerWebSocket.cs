@@ -23,6 +23,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public TimeSpan ResponseSimulatedDelay { get; set; } = TimeSpan.Zero;
 
+        /// <summary>
+        /// A function that can be used to intercept and modify messages before they are processed.
+        /// If the function returns true, the message is processed normally. If it returns false, the message is ignored.
+        /// </summary>
+        public Func<BaseOutgoingMessage, bool> OnMessageReceived { get; set; } = null;
+
         public MockHassServerWebSocket()
             : base()
         {
@@ -36,7 +42,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             var data = MockHassModelFactory.StateChangedEventFaker
                                            .GenerateWithEntityId(entityId);
 
-            var eventResult = new EventResultInfo()
+            var eventResult = new HassEvent()
             {
                 EventType = KnownEventTypes.StateChanged.ToEventTypeString(),
                 Origin = "mock_server",
@@ -56,7 +62,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             {
                 foreach (var id in subscribers)
                 {
-                    await context.SendMessageAsync(new EventResultMessage() { Event = eventResultObject, Id = id }, default);
+                    await context.SendMessageAsync(new IncomingEventMessage() { Event = eventResultObject, Id = id }, default);
                 }
 
                 return true;
@@ -104,6 +110,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
                         var receivedMessageId = receivedMessage.Id;
 
                         await Task.Delay(this.ResponseSimulatedDelay);
+
+                        var shouldProcess = this.OnMessageReceived?.Invoke(receivedMessage) ?? true;
+                        if (!shouldProcess)
+                        {
+                            continue;
+                        }
 
                         BaseIdentifiableMessage response;
                         if (context.LastReceivedID >= receivedMessageId)

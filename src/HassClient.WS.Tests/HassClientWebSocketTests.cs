@@ -1,8 +1,15 @@
-﻿using HassClient.WS.Messages;
+﻿using HassClient.Helpers;
+using HassClient.Models;
+using HassClient.Serialization;
+using HassClient.WS.Messages;
+using HassClient.WS.Messages.Commands.Subscriptions;
 using HassClient.WS.Tests.Mocks;
 using HassClient.WS.Tests.Mocks.HassServer;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -223,7 +230,7 @@ namespace HassClient.WS.Tests
             var eventSubscriber = new MockEventListener();
             var subscriptionTask = this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, cancellationTokenSource.Token);
 
-            Assert.Zero(this.wsClient.SubscriptionsCount);
+            Assert.Zero(this.wsClient.HassEventSubscriptionsCount);
             Assert.Zero(this.wsClient.PendingRequestsCount);
             Assert.CatchAsync<OperationCanceledException>(() => subscriptionTask);
         }
@@ -240,7 +247,7 @@ namespace HassClient.WS.Tests
 
             cancellationTokenSource.Cancel();
 
-            Assert.Zero(this.wsClient.SubscriptionsCount);
+            Assert.Zero(this.wsClient.HassEventSubscriptionsCount);
             Assert.Zero(this.wsClient.PendingRequestsCount);
             Assert.CatchAsync<OperationCanceledException>(() => subscriptionTask);
         }
@@ -299,11 +306,162 @@ namespace HassClient.WS.Tests
 
             var entityId = "test.mock";
             await this.mockServer.RaiseStateChangedEventAsync(entityId);
-            var eventResult = await eventSubscriber.WaitFirstEventWithTimeoutAsync<EventResultInfo>(500);
+            var eventResult = await eventSubscriber.WaitFirstEventWithTimeoutAsync<HassEvent>(500);
 
             Assert.AreEqual(1, eventSubscriber.HitCount);
             Assert.AreEqual(1, eventSubscriber.ReceivedEventArgs.Count());
             Assert.NotNull(eventResult);
+        }
+
+        [Test]
+        public async Task SendLongRunningSubscriptionCommand_WhenSuccessful_CreatesSubscription()
+        {
+            // Arrange
+            await this.StartMockServerAndConnectClientAsync();
+            var listener = new MockEventListener();
+
+            // Act
+            var subscribeMessage = new HassEventSubscribeMessage(KnownEventTypes.StateChanged.ToEventTypeString());
+            var subscription = await this.wsClient.SendLongRunningSubscriptionCommandAsync(
+                subscribeMessage, 
+                listener.Handle, 
+                CancellationToken.None);
+            
+            // Assert
+            Assert.NotNull(subscription, "Subscription should be created");
+            Assert.AreEqual(1, this.wsClient.RegisteredEventSubscriptions.Count, "Should have one subscription");
+            
+            // Verify the subscription receives events
+            await this.mockServer.RaiseStateChangedEventAsync("light.test");
+            var eventResult = await listener.WaitFirstEventWithTimeoutAsync<object>(500);
+            Assert.IsNotNull(eventResult, "Should receive events");
+        }
+
+        [Test]
+        public async Task UnsubscribeMessage_WhenSuccessful_RemovesSubscription()
+        {
+            // Arrange
+            await this.StartMockServerAndConnectClientAsync();
+            var listener = new MockEventListener();
+            var subscribeMessage = new HassEventSubscribeMessage(KnownEventTypes.StateChanged.ToEventTypeString());
+            var subscription = await this.wsClient.SendLongRunningSubscriptionCommandAsync(
+                subscribeMessage, 
+                listener.Handle, 
+                CancellationToken.None);
+            
+            Assert.NotNull(subscription, "Setup failed - subscription should be created");
+            Assert.AreEqual(1, this.wsClient.RegisteredEventSubscriptions.Count, "Setup failed - should have one subscription");
+            
+            // Act
+            var unsubscribeMessage = new UnsubscribeEventsMessage { Subscription = subscription.Id };
+            var result = await this.wsClient.SendCommandWithSuccessAsync(unsubscribeMessage, CancellationToken.None);
+            
+            // Assert
+            Assert.IsTrue(result, "Unsubscribe command should succeed");
+            Assert.AreEqual(0, this.wsClient.RegisteredEventSubscriptions.Count, "Subscription should be removed");
+            
+            // Verify the subscription no longer receives events
+            await this.mockServer.RaiseStateChangedEventAsync("light.test");
+            var eventResult = await listener.WaitFirstEventWithTimeoutAsync<object>(500);
+            Assert.IsNull(eventResult, "Should not receive events after unsubscribing");
+        }
+
+        [Test]
+        public async Task ConnectionLostDuringSubscriptionRestorationTriggersReconnection()
+        {
+            // Setup initial connection and subscriptions
+            await this.StartMockServerAndConnectClientAsync();
+            var listenersByEventType = new Dictionary<KnownEventTypes, MockEventListener>();
+            foreach(var eventType in Enum.GetValues<KnownEventTypes>().Take(3))
+            {
+                var listener = new MockEventListener();
+                var sub = await this.wsClient.SendLongRunningSubscriptionCommandAsync(
+                new HassEventSubscribeMessage(eventType.ToEventTypeString()), 
+                    listener.Handle, 
+                    default);
+                Assert.NotNull(sub, $"SetUp failed: Creating subscription for {eventType}");
+                listenersByEventType.Add(eventType, listener);
+            }
+            Assert.AreEqual(3, this.wsClient.RegisteredEventSubscriptions.Count, "SetUp failed: 3 subscriptions should be registered");
+
+
+            // Configure server to drop connection during subscription restoration
+            int processedSubscriptions = 0;
+            this.mockServer.OnMessageReceived = (msg) => 
+            {
+                processedSubscriptions++;   
+                if (processedSubscriptions == 2)
+                {
+                    // Close the connection during second subscription restoration
+                    this.mockServer.CloseActiveClientsAsync().Wait();
+                    return false; // Skip normal message handling
+                }
+                return true; // Process normally
+            };
+
+            // Trigger initial reconnection
+            await this.mockServer.CloseActiveClientsAsync();
+            
+            // Wait for final successful reconnection
+            await this.wsClient.WaitForConnectionAsync(TimeSpan.FromMilliseconds(200));
+
+            // Verify connection and subscription are working
+            Assert.AreEqual(ConnectionStates.Connected, this.wsClient.ConnectionState);
+            Assert.AreEqual(3, this.wsClient.RegisteredEventSubscriptions.Count);
+            Assert.AreEqual(5, processedSubscriptions, "2 + 3 subscriptions should be processed");
+            
+            foreach(var listener in listenersByEventType)
+            {
+                var testData = new {EventType=listener.Key};
+                await this.mockServer.RaiseEventAsync(listener.Key, new JRaw(HassSerializer.SerializeObject(testData)));
+                var eventResult = await listener.Value.WaitFirstEventWithTimeoutAsync<object>(500);
+
+                Assert.NotNull(eventResult, "Event subscription should be restored");
+            }
+        }
+
+        [Test]
+        public async Task ConnectionLostDuringMultipleTimesDuringSubscriptionRestorationIsRecovered()
+        {
+            // Setup initial connection and subscription
+            await this.StartMockServerAndConnectClientAsync();
+            var listener = new MockEventListener();
+            var sub = await this.wsClient.SendLongRunningSubscriptionCommandAsync(
+                new HassEventSubscribeMessage(KnownEventTypes.StateChanged.ToEventTypeString()), 
+                listener.Handle, 
+                default);
+            Assert.NotNull(sub, $"SetUp failed: Creating subscription");
+            Assert.AreEqual(1, this.wsClient.RegisteredEventSubscriptions.Count, "SetUp failed: 1 subscription should be registered");
+
+            // Configure server to drop connection during subscription restoration
+            int processedSubscriptions = 0;
+            this.mockServer.OnMessageReceived = (msg) => 
+            {
+                processedSubscriptions++;   
+                if (processedSubscriptions < 4)
+                {
+                    // Close the connection during the first 3 subscription restoration
+                    this.mockServer.CloseActiveClientsAsync().Wait();
+                    return false; // Skip normal message handling
+                }
+                return true; // Process normally
+            };
+
+            // Trigger initial reconnection
+            await this.mockServer.CloseActiveClientsAsync();
+            
+            // Wait for final successful reconnection
+            await this.wsClient.WaitForConnectionAsync(TimeSpan.FromMilliseconds(200));
+
+            // Verify connection and subscription are working
+            Assert.AreEqual(ConnectionStates.Connected, this.wsClient.ConnectionState);
+            Assert.AreEqual(1, this.wsClient.RegisteredEventSubscriptions.Count);
+            Assert.AreEqual(4, processedSubscriptions, "3 retries + 1 success subscriptions attempts");
+            
+            await this.mockServer.RaiseStateChangedEventAsync("light.test");
+            var eventResult = await listener.WaitFirstEventWithTimeoutAsync<object>(500);
+
+            Assert.NotNull(eventResult, "Event subscription should be restored");
         }
     }
 }

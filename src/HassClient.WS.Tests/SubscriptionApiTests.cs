@@ -3,7 +3,13 @@ using HassClient.Models;
 using HassClient.Serialization;
 using HassClient.WS.Messages;
 using HassClient.WS.Tests.Mocks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static HassClient.WS.Tests.Mocks.MockEventListener;
 
@@ -19,7 +25,7 @@ namespace HassClient.WS.Tests
             var update = await this.hassWSApi.Services.CallForEntitiesAsync(domain, "toggle", testEntityId);
             Assert.NotNull(update, "SetUp failed. Service call failed");
 
-            var eventData = await listener.WaitFirstEventWithTimeoutAsync<EventResultInfo>(
+            var eventData = await listener.WaitFirstEventWithTimeoutAsync<HassEvent>(
                     (x) => HassSerializer.TryGetEnumFromSnakeCase<KnownEventTypes>(x.EventType, out var knownEventType) &&
                             knownEventType == KnownEventTypes.StateChanged,
                     millisecondsTimeout: 500);

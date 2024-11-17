@@ -3,29 +3,32 @@ using System;
 
 namespace HassClient.WS
 {
-    internal class SocketEventSubscription
+    /// <summary>
+    /// Represents an active subscription to a Home Assistant event.
+    /// </summary>
+    internal class HassEventSubscription
     {
         private readonly object sender;
 
-        private EventHandler<EventResultInfo> internalEventHandler;
+        private EventHandler<HassEvent> internalEventHandler;
 
         public uint SubscriptionId { get; set; }
 
         public uint SubscriptionCount { get; private set; }
 
-        public SocketEventSubscription(object sender, uint subscriptionId)
+        public HassEventSubscription(object sender, uint subscriptionId)
         {
             this.sender = sender;
             this.SubscriptionId = subscriptionId;
         }
 
-        public void AddSubscription(EventHandler<EventResultInfo> eventHandler)
+        public void AddSubscription(EventHandler<HassEvent> eventHandler)
         {
             this.internalEventHandler += eventHandler;
             this.SubscriptionCount++;
         }
 
-        public bool RemoveSubscription(EventHandler<EventResultInfo> eventHandler)
+        public bool RemoveSubscription(EventHandler<HassEvent> eventHandler)
         {
             if (this.internalEventHandler == null)
             {
@@ -44,7 +47,7 @@ namespace HassClient.WS
             return false;
         }
 
-        public void Invoke(EventResultInfo eventResultInfo)
+        public void Invoke(HassEvent eventResultInfo)
         {
             this.internalEventHandler?.Invoke(this.sender, eventResultInfo);
         }

@@ -36,6 +36,12 @@ namespace HassClient.WS.Tests.Mocks
             this.HitCount++;
         }
 
+        public void Handle<TArgs>(TArgs args)
+        {
+            this.receivedEvents.Enqueue(new EventData(null, args));
+            this.Handle();
+        }
+
         public void Handle<TSender, TArgs>(TSender sender, TArgs args)
         {
             this.receivedEvents.Enqueue(new EventData(sender, args));

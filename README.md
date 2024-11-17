@@ -110,9 +110,9 @@ public async Task MyMethod()
     await hassWSApi.RemoveEventHandlerSubscriptionAsync(this.WS_OnEvent, KnownEventTypes.PanelsUpdated);
 }
 
-private void WS_OnEvent(object sender, EventResultInfo eventResultInfo)
+private void WS_OnEvent(object sender, HassEvent hassEvent)
 {
-    Debug.WriteLine($"WS_OnEvent {eventResultInfo} => {eventResultInfo.Data}");
+    Debug.WriteLine($"WS_OnEvent {hassEvent.EventType} => {hassEvent.Data}");
 }
 ```
 

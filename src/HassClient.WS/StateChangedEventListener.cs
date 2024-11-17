@@ -224,7 +224,7 @@ namespace HassClient.WS
             }
         }
 
-        private void OnStateChangeEvent(object sender, EventResultInfo obj)
+        private void OnStateChangeEvent(object sender, HassEvent obj)
         {
             var stateChanged = obj.DeserializeData<StateChangedEvent>();
             EventHandler<StateChangedEvent> entityHandler = null;

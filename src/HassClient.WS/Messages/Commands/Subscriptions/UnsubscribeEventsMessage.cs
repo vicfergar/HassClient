@@ -1,12 +1,7 @@
-﻿using Newtonsoft.Json;
-
-namespace HassClient.WS.Messages
+﻿namespace HassClient.WS.Messages.Commands.Subscriptions
 {
-    internal class UnsubscribeEventsMessage : BaseOutgoingMessage
+    internal class UnsubscribeEventsMessage : BaseUnsubscribeMessage
     {
-        [JsonProperty(Required = Required.Always)]
-        public uint Subscription { get; set; }
-
         public UnsubscribeEventsMessage()
             : base("unsubscribe_events")
         {
