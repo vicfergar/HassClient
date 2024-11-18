@@ -296,9 +296,9 @@ namespace HassClient.WS.Tests
         [Test]
         public async Task AddedEventHandlerSubscriptionsAreRestoredAfterReconnection()
         {
-            var eventSubscriber = new MockEventListener();
+            var listener = new MockEventListener();
             await this.StartMockServerAndConnectClientAsync();
-            var result = await this.wsClient.AddEventHandlerSubscriptionAsync(eventSubscriber.Handle, default);
+            var result = await this.wsClient.AddEventHandlerSubscriptionAsync(listener.Handle, default);
             Assert.IsTrue(result, "SetUp failed");
 
             await this.mockServer.CloseActiveClientsAsync();
@@ -306,10 +306,10 @@ namespace HassClient.WS.Tests
 
             var entityId = "test.mock";
             await this.mockServer.RaiseStateChangedEventAsync(entityId);
-            var eventResult = await eventSubscriber.WaitFirstEventWithTimeoutAsync<HassEvent>(500);
+            var eventResult = await listener.WaitFirstEventWithTimeoutAsync<HassEvent>(500);
 
-            Assert.AreEqual(1, eventSubscriber.HitCount);
-            Assert.AreEqual(1, eventSubscriber.ReceivedEventArgs.Count());
+            Assert.AreEqual(1, listener.HitCount);
+            Assert.AreEqual(1, listener.ReceivedEventArgs.Count());
             Assert.NotNull(eventResult);
         }
 
@@ -335,6 +335,48 @@ namespace HassClient.WS.Tests
             await this.mockServer.RaiseStateChangedEventAsync("light.test");
             var eventResult = await listener.WaitFirstEventWithTimeoutAsync<object>(500);
             Assert.IsNotNull(eventResult, "Should receive events");
+        }
+
+        [Test]
+        public async Task SendTemporarySubscriptionCommand_WhenSuccessful_CreatesSubscription()
+        {
+            // Arrange
+            await this.StartMockServerAndConnectClientAsync();
+
+            var waitEventTCS = new TaskCompletionSource<IncomingEventMessage>();
+            var sendEventTCS = new TaskCompletionSource<bool>();
+            this.mockServer.RequestContext.OutgoingMessageInterceptor = async (msg) =>
+            {
+                if (msg is IncomingEventMessage incomingEventMsg)
+                {
+                    waitEventTCS.SetResult(incomingEventMsg);
+                    await sendEventTCS.Task;
+                }
+
+                return msg;
+            };
+
+            // Act
+            var subscribeMessage = new RenderTemplateMessage() { Template = "{{ states('light.test') }}" };
+            var sendSubscribeTask = this.wsClient.SendTemporarySubscriptionCommandAsync(
+                subscribeMessage, 
+                CancellationToken.None);
+
+            var incomingEventMsg = await waitEventTCS.Task;
+            
+            // Assert
+            Assert.AreEqual(TaskStatus.WaitingForActivation, sendSubscribeTask.Status, "Send subscribe task should be running until the event is received");
+            var temporarySubscription = this.wsClient.RegisteredEventSubscriptions.SingleOrDefault();
+            Assert.IsNotNull(temporarySubscription, "Should have one subscription");
+            Assert.IsFalse(temporarySubscription.IsLongRunning, "Subscription should be temporary");
+
+
+            // Verify the subscription receives events
+            sendEventTCS.SetResult(true);
+            var result = await sendSubscribeTask;
+            Assert.AreEqual(1, result.Count(), "Send subscribe task should return one event");
+            Assert.AreEqual(incomingEventMsg.Event.ToString(), HassSerializer.SerializeObject(result.First()), "Event content should match");
+            Assert.IsEmpty(this.wsClient.RegisteredEventSubscriptions, "Subscription should be automatically removed");
         }
 
         [Test]
@@ -387,15 +429,21 @@ namespace HassClient.WS.Tests
 
             // Configure server to drop connection during subscription restoration
             int processedSubscriptions = 0;
-            this.mockServer.OnMessageReceived = (msg) => 
+            this.mockServer.RequestContext.IncomingMessageInterceptor = async (msg) => 
             {
+                if (msg is not ISubscribeMessage)
+                {
+                    return true;
+                }
+
                 processedSubscriptions++;   
                 if (processedSubscriptions == 2)
                 {
                     // Close the connection during second subscription restoration
-                    this.mockServer.CloseActiveClientsAsync().Wait();
+                    await this.mockServer.CloseActiveClientsAsync();
                     return false; // Skip normal message handling
                 }
+
                 return true; // Process normally
             };
 
@@ -435,15 +483,21 @@ namespace HassClient.WS.Tests
 
             // Configure server to drop connection during subscription restoration
             int processedSubscriptions = 0;
-            this.mockServer.OnMessageReceived = (msg) => 
+            this.mockServer.RequestContext.IncomingMessageInterceptor = async (msg) => 
             {
+                if (msg is not ISubscribeMessage)
+                {
+                    return true;
+                }
+
                 processedSubscriptions++;   
                 if (processedSubscriptions < 4)
                 {
                     // Close the connection during the first 3 subscription restoration
-                    this.mockServer.CloseActiveClientsAsync().Wait();
+                    await this.mockServer.CloseActiveClientsAsync();
                     return false; // Skip normal message handling
                 }
+
                 return true; // Process normally
             };
 

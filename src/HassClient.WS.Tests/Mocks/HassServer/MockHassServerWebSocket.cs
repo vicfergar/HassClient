@@ -13,7 +13,7 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 {
     public class MockHassServerWebSocket : MockServerWebSocket
     {
-        private MockHassServerRequestContext activeRequestContext;
+        public MockHassServerRequestContext RequestContext { get; }
 
         public CalVer HAVersion => CalVer.Create("2022.1.0");
 
@@ -23,18 +23,13 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public TimeSpan ResponseSimulatedDelay { get; set; } = TimeSpan.Zero;
 
-        /// <summary>
-        /// A function that can be used to intercept and modify messages before they are processed.
-        /// If the function returns true, the message is processed normally. If it returns false, the message is ignored.
-        /// </summary>
-        public Func<BaseOutgoingMessage, bool> OnMessageReceived { get; set; } = null;
-
         public MockHassServerWebSocket()
             : base()
         {
             this.ConnectionParameters = ConnectionParameters.CreateFromInstanceBaseUrl(
                 $"http://{this.ServerUri.Host}:{this.ServerUri.Port}",
                 this.GenerateRandomToken());
+            this.RequestContext = new MockHassServerRequestContext();
         }
 
         public Task<bool> RaiseStateChangedEventAsync(string entityId)
@@ -57,12 +52,12 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         public async Task<bool> RaiseEventAsync(KnownEventTypes eventType, JRaw eventResultObject)
         {
-            var context = this.activeRequestContext;
-            if (context.EventSubscriptionsProcessor.TryGetSubscribers(eventType, out var subscribers))
+            var eventSubscriptionsProcessor = this.RequestContext.GetCommandProcessor<EventSubscriptionsProcessor>();
+            if (eventSubscriptionsProcessor.TryGetSubscribers(eventType, out var subscribers))
             {
                 foreach (var id in subscribers)
                 {
-                    await context.SendMessageAsync(new IncomingEventMessage() { Event = eventResultObject, Id = id }, default);
+                    await this.RequestContext.SendMessageAsync(new IncomingEventMessage() { Event = eventResultObject, Id = id }, default);
                 }
 
                 return true;
@@ -75,69 +70,74 @@ namespace HassClient.WS.Tests.Mocks.HassServer
 
         protected override async Task RespondToWebSocketRequestAsync(WebSocket webSocket, CancellationToken cancellationToken)
         {
-            var context = new MockHassServerRequestContext(webSocket);
-
-            await context.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
+            this.RequestContext.Initialize(webSocket);
+            await this.RequestContext.SendMessageAsync(new AuthenticationRequiredMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
 
             try
             {
                 while (true)
                 {
-                    if (context.IsAuthenticating)
+                    if (this.RequestContext.IsAuthenticating)
                     {
-                        var incomingMessage = await context.ReceiveMessageAsync<BaseMessage>(cancellationToken);
+                        var receivedMessage = await this.RequestContext.ReceiveMessageAsync<BaseMessage>(cancellationToken);
+                        var shouldProcess = receivedMessage != null;
+                        if (!shouldProcess)
+                        {
+                            continue;
+                        }
+
                         await Task.Delay(this.ResponseSimulatedDelay);
 
                         if (!this.IgnoreAuthenticationMessages &&
-                            incomingMessage is AuthenticationMessage authMessage)
+                            receivedMessage is AuthenticationMessage authMessage)
                         {
                             if (authMessage.AccessToken == this.ConnectionParameters.AccessToken)
                             {
-                                await context.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
-                                context.IsAuthenticating = false;
-                                this.activeRequestContext = context;
+                                await this.RequestContext.SendMessageAsync(new AuthenticationOkMessage() { HAVersion = this.HAVersion.ToString() }, cancellationToken);
+                                this.RequestContext.IsAuthenticating = false;
                             }
                             else
                             {
-                                await context.SendMessageAsync(new AuthenticationInvalidMessage(), cancellationToken);
+                                await this.RequestContext.SendMessageAsync(new AuthenticationInvalidMessage(), cancellationToken);
                                 break;
                             }
                         }
                     }
                     else
                     {
-                        var receivedMessage = await context.ReceiveMessageAsync<BaseOutgoingMessage>(cancellationToken);
-                        var receivedMessageId = receivedMessage.Id;
-
-                        await Task.Delay(this.ResponseSimulatedDelay);
-
-                        var shouldProcess = this.OnMessageReceived?.Invoke(receivedMessage) ?? true;
+                        var receivedMessage = await this.RequestContext.ReceiveMessageAsync<BaseOutgoingMessage>(cancellationToken);
+                        var shouldProcess = receivedMessage != null;
                         if (!shouldProcess)
                         {
                             continue;
                         }
 
+                        var receivedMessageId = receivedMessage.Id;
+
+                        await Task.Delay(this.ResponseSimulatedDelay);
+
+
                         BaseIdentifiableMessage response;
-                        if (context.LastReceivedID >= receivedMessageId)
+                        if (this.RequestContext.LastReceivedID >= receivedMessageId)
                         {
                             response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.IdReuse) };
                         }
                         else
                         {
-                            context.LastReceivedID = receivedMessageId;
+                            this.RequestContext.LastReceivedID = receivedMessageId;
 
                             if (receivedMessage is PingMessage)
                             {
                                 response = new PongMessage();
                             }
-                            else if (!context.TryProcessMessage(receivedMessage, out response))
+                            else if (!this.RequestContext.TryProcessMessage(receivedMessage, out response))
                             {
                                 response = new ResultMessage() { Error = new ErrorInfo(ErrorCodes.UnknownCommand) };
                             }
                         }
 
                         response.Id = receivedMessageId;
-                        await context.SendMessageAsync(response, cancellationToken);
+                        await this.RequestContext.SendMessageAsync(response, cancellationToken);
                     }
                 }
             }
