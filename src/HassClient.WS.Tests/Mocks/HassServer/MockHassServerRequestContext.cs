@@ -53,6 +53,8 @@ namespace HassClient.WS.Tests.Mocks.HassServer
             this.webSocket = webSocket;
             this.IsAuthenticating = true;
             this.LastReceivedID = 0;
+
+            this.GetCommandProcessor<EventSubscriptionsProcessor>().ClearSubscriptions();
         }
 
         public TProcessor GetCommandProcessor<TProcessor>()

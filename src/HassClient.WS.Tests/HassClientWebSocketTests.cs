@@ -11,6 +11,7 @@ using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -313,6 +314,7 @@ namespace HassClient.WS.Tests
             Assert.NotNull(eventResult);
         }
 
+
         [Test]
         public async Task SendLongRunningSubscriptionCommand_WhenSuccessful_CreatesSubscription()
         {
@@ -406,6 +408,75 @@ namespace HassClient.WS.Tests
             await this.mockServer.RaiseStateChangedEventAsync("light.test");
             var eventResult = await listener.WaitFirstEventWithTimeoutAsync<object>(500);
             Assert.IsNull(eventResult, "Should not receive events after unsubscribing");
+        }
+
+        [Test]
+        public async Task SendLongRunningSubscriptionCommand_WhenConnectionLost_Throws()
+        {
+            await this.StartMockServerAndConnectClientAsync();
+            this.mockServer.ResponseSimulatedDelay = TimeSpan.MaxValue;
+
+            var subscribeMessage = new HassEventSubscribeMessage(KnownEventTypes.StateChanged.ToEventTypeString());
+            var sendSubscribeTask = this.wsClient.SendLongRunningSubscriptionCommandAsync(subscribeMessage, (msg) => {}, CancellationToken.None);
+
+            await this.mockServer.CloseActiveClientsAsync();
+
+            Assert.CatchAsync<WebSocketException>(() => sendSubscribeTask);
+            Assert.AreEqual(0, this.wsClient.RegisteredEventSubscriptions.Count);
+        }
+
+        [Test]
+        public async Task SendTemporarySubscriptionCommand_WhenConnectionLost_Throws()
+        {
+            await this.StartMockServerAndConnectClientAsync();
+            this.mockServer.ResponseSimulatedDelay = TimeSpan.MaxValue;
+
+            var subscribeMessage = new RenderTemplateMessage() { Template = "{{ states('light.test') }}" };
+            var sendSubscribeTask = this.wsClient.SendTemporarySubscriptionCommandAsync(subscribeMessage, CancellationToken.None);
+
+            await this.mockServer.CloseActiveClientsAsync();
+
+            Assert.CatchAsync<WebSocketException>(() => sendSubscribeTask);
+            Assert.AreEqual(0, this.wsClient.RegisteredEventSubscriptions.Count);
+        }
+
+        [Test]
+        public async Task SendTemporarySubscriptionCommand_WhenConnectionLostDuringEventWait_Throws()
+        {
+            await this.StartMockServerAndConnectClientAsync();
+
+            this.mockServer.RequestContext.OutgoingMessageInterceptor = async (msg) =>
+            {
+                if (msg is IncomingEventMessage)
+                {
+                    await this.mockServer.CloseActiveClientsAsync();
+                    return null;
+                }
+
+                return msg;
+            };
+
+            var subscribeMessage = new RenderTemplateMessage() { Template = "{{ states('light.test') }}" };
+            var sendSubscribeTask = this.wsClient.SendTemporarySubscriptionCommandAsync(subscribeMessage, CancellationToken.None);
+
+            Assert.CatchAsync<WebSocketException>(() => sendSubscribeTask);
+            Assert.AreEqual(0, this.wsClient.RegisteredEventSubscriptions.Count);
+        }
+
+        [Test]
+        public async Task LongRunningSubscription_AreNotRestoredOnConnectionLoss_IfNotAutomaticReconnection()
+        {
+            this.wsClient.AutomaticReconnection = false;
+            await this.StartMockServerAndConnectClientAsync();
+
+            var subscribeMessage = new HassEventSubscribeMessage(KnownEventTypes.StateChanged.ToEventTypeString());
+            await this.wsClient.SendLongRunningSubscriptionCommandAsync(subscribeMessage, (msg) => {}, CancellationToken.None);
+            Assert.AreEqual(1, this.wsClient.RegisteredEventSubscriptions.Count);
+
+            await this.mockServer.CloseActiveClientsAsync();
+
+            Assert.AreEqual(ConnectionStates.Disconnected, this.wsClient.ConnectionState);
+            Assert.AreEqual(0, this.wsClient.RegisteredEventSubscriptions.Count);
         }
 
         [Test]
