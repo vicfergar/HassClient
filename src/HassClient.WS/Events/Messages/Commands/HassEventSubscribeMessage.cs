@@ -3,8 +3,11 @@ using Newtonsoft.Json;
 
 namespace HassClient.WS.Messages.Commands.Subscriptions
 {
-    internal class HassEventSubscribeMessage : BaseSubscribeMessage<HassEvent>
+    internal class HassEventSubscribeMessage : BaseSubscribeMessage
     {
+        /// <inheritdoc/>
+        public override bool IsExclusive => false;
+
         [JsonProperty]
         public string EventType { get; set; }
 

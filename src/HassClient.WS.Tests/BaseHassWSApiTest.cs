@@ -18,6 +18,10 @@ namespace HassClient.WS.Tests
 
         protected CancellationToken CancellationToken => this.cts.Token;
 
+        protected string InstanceBaseUrl => Environment.GetEnvironmentVariable(TestsInstanceBaseUrlVar);
+
+        protected string AccessToken => Environment.GetEnvironmentVariable(TestsAccessTokenVar);
+
         public BaseHassWSApiTest()
         {
             var instanceBaseUrl = Environment.GetEnvironmentVariable(TestsInstanceBaseUrlVar);

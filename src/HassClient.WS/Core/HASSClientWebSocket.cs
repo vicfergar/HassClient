@@ -829,12 +829,11 @@ namespace HassClient.WS
         /// <summary>
         /// Sends a long-running subscription command and returns a value indicating whether the subscription was successful.
         /// </summary>
-        /// <typeparam name="TEventData">The type used to deserialize the event data.</typeparam>
         /// <param name="subscribeMessage">The subscription command message to be sent.</param>
         /// <param name="eventCallback">The callback to handle incoming event messages.</param>
         /// <param name="cancellationToken">The cancellation token for the asynchronous operation.</param>
         /// <returns>A task representing the asynchronous operation. The result of the task is a value indicating whether the subscription was successful.</returns>
-        public async Task<WSEventSubscription> SendLongRunningSubscriptionCommandAsync<TEventData>(BaseSubscribeMessage<TEventData> subscribeMessage, Action<IncomingEventMessage> eventCallback, CancellationToken cancellationToken)
+        public async Task<WSEventSubscription> SendLongRunningSubscriptionCommandAsync(BaseSubscribeMessage subscribeMessage, Action<IncomingEventMessage> eventCallback, CancellationToken cancellationToken)
         {
             var subscription = new CallbackEventSubscription(subscribeMessage, eventCallback);
             await this.RegisterSubscriptionAsync(subscription, cancellationToken);

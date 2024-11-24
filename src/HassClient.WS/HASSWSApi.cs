@@ -410,6 +410,38 @@ namespace HassClient.WS
         }
 
         /// <summary>
+        /// Registers a push notification channel.
+        /// </summary>
+        /// <param name="webhookId">The webhook ID.</param>
+        /// <param name="supportConfirm">Indicates if the push notification channel supports confirmation.</param>
+        /// <param name="callback">The callback to handle incoming event messages.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public async Task<bool> RegisterPushNotificationChannelAsync(string webhookId, bool supportConfirm, Action<IncomingEventMessage> callback, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new RegisterPushNotificationChannelMessage() { WebhookId = webhookId, SupportConfirm = supportConfirm };
+            var subscription = await this.hassClientWebSocket.SendLongRunningSubscriptionCommandAsync(commandMessage, callback, cancellationToken);
+            return subscription.IsRegistered;
+        }
+
+        /// <summary>
+        /// Confirms a push notification.
+        /// </summary>
+        /// <param name="webhookId">The webhook ID.</param>
+        /// <param name="confirmId">The confirm ID.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token used to propagate notification that this operation should be canceled.
+        /// </param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public Task<bool> ConfirmPushNotificationAsync(string webhookId, string confirmId, CancellationToken cancellationToken = default)
+        {
+            var commandMessage = new ConfirmPushNotificationMessage() { WebhookId = webhookId, ConfirmId = confirmId };
+            return this.hassClientWebSocket.SendCommandWithSuccessAsync(commandMessage, cancellationToken);
+        }
+
+        /// <summary>
         /// Sends a customized command to the Home Assistant instance. This is useful when a command is not defined by the <see cref="HassWSApi"/>.
         /// </summary>
         /// <param name="rawCommandMessage">The raw command message to send.</param>

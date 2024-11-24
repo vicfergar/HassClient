@@ -1,4 +1,4 @@
-"""Script to create LLAT for ludeeus/setup-homeassistant action."""
+"""Script to create and expose a long lived access token."""
 import asyncio
 from datetime import timedelta
 import logging
