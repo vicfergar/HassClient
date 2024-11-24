@@ -13,6 +13,9 @@ namespace HassClient.WS.Messages
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public object ServiceData { get; set; }
 
+        [JsonProperty]
+        public bool ReturnResponse { get; set; }
+
         public CallServiceMessage()
             : base("call_service")
         {

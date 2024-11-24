@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace HassClient.Models
@@ -49,5 +50,24 @@ namespace HassClient.Models
         /// </summary>
         [JsonProperty]
         public JRaw Selector { get; private set; }
+
+        /// <summary>
+        /// Gets the nested fields/parameters that this field contains.
+        /// </summary>
+        [JsonProperty]
+        public Dictionary<string, ServiceField> Fields { get; private set; }
+
+        /// <summary>
+        /// Gets the filter conditions for this field.
+        /// </summary>
+        [JsonProperty]
+        public ServiceFieldFilter Filter { get; private set; }
+
+        /// <summary>
+        /// Gets whether this field group is collapsed by default in the UI.
+        /// Only applicable for fields that contain nested fields.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool Collapsed { get; private set; }
     }
 }

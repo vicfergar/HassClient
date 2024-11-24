@@ -1,5 +1,6 @@
 ﻿using HassClient.Models;
 using NUnit.Framework;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HassClient.WS.Tests
@@ -13,6 +14,7 @@ namespace HassClient.WS.Tests
 
             Assert.NotNull(services);
             Assert.IsNotEmpty(services);
+            Assert.IsTrue(services.All(x => !string.IsNullOrEmpty(x.Domain)));
         }
 
         [Test]
